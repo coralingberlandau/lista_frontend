@@ -1,3 +1,34 @@
+# Welcome to application LISTA - frontend 👋
+
+
+ - React Native
+האפליקציה הזו כתובה באקסו טייפסקיפט,   
+הבאק כתוב בפייתון גאנגו. 
+
+יש לוגר - ניתן לעקוב אחר הפעולות
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
