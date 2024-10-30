@@ -2,32 +2,28 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; 
-import { RootStackParamList } from '../type';
+import { ListItem, RootStackParamList } from '../type';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'AddListItem'>;
+type HomeRouteProp = RouteProp<RootStackParamList, 'Home'>;
 
-interface ListItem {
-  id: number;
-  title: string;
-  description: string;
-  date_created: string;
-  is_active: boolean;
-}
 
 const Home: React.FC = () => {
   const [listItems, setListItems] = useState<ListItem[]>([]);
   const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<HomeRouteProp>(); // הוספת useRoute עם טיפוס
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [route.params?.refresh]);
 
-  const fetchData = async () => {
+
+  const fetchData = useCallback(async () => {
     console.log('fetching');
     const storedUsername = await AsyncStorage.getItem('userName');
     const storedUserId = await AsyncStorage.getItem('userId');
@@ -44,7 +40,10 @@ const Home: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setListItems(response.data);
+        // סינון הרשימה להציג רק פריטים פעילים
+        const activeItems = response.data.filter((item: ListItem) => item.is_active);
+        setListItems(activeItems);
+        // setListItems(response.data);
       } catch (error) {
         console.error('Error fetching user list items:', error);
         Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
@@ -52,12 +51,19 @@ const Home: React.FC = () => {
     }
     
     setLoading(false);
-  };
+  }, []); // התלויות ריקות כדי שהפונקציה לא תשתנה בכל רינדור
 
+
+    // פונקציה עבור ניווט ליצירת פריט חדש
   const handleAddListItem = () => {
     navigation.navigate('AddListItem', {
       onGoBack: fetchData, // העברת פונקציה לעדכון הרשימה
     });
+  };
+
+  // פונקציה עבור ניווט להצגת פרטי האייטם שנבחר
+  const handlePressItem = (item: ListItem) => {
+    navigation.navigate('ListItemDetails', { item }); // ניווט עם פרטי האייטם
   };
 
   return (
@@ -73,19 +79,21 @@ const Home: React.FC = () => {
             data={listItems}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handlePressItem(item)}>
               <View style={styles.listItem}>
                 <Text>Title: {item.title}</Text>
                 <Text>Description: {item.description}</Text>
                 <Text>Date Created: {item.date_created}</Text>
                 <Text>Status: {item.is_active ? 'Active' : 'Inactive'}</Text>
               </View>
+              </TouchableOpacity>
             )}
           />
 
           <TouchableOpacity
             style={styles.addButton}
             onPress={handleAddListItem} // עדכון ניווט
-          >
+>
             <AntDesign name="pluscircleo" size={45} color="black" />
           </TouchableOpacity>
         </>

@@ -2,11 +2,11 @@
 
 export type RootStackParamList = {
     Login: undefined;          // מסך הלוגין, אין לו פרמטרים
-    Home: undefined;          // דף הבית, גם אין לו פרמטרים
+    Home: { refresh?: boolean }; // הוספת פרמטר אפשרי בשם refresh
     Register: undefined;
-    AddListItem: { onGoBack: () => Promise<void> }; // Update this line to accept parameters
+    AddListItem: { onGoBack: () => Promise<void> }; // נוסיף את הפרמטרים כאן
     Settings: undefined;
-    // דף ההרשמה
+    ListItemDetails: { item: ListItem }; // פרמטר חדש עבור פרטי האייטם
     // הוסף כאן מסכים נוספים לפי הצורך
   };
   
@@ -26,4 +26,13 @@ export interface ListItemProps {
   user_id: string;
   is_active: boolean; // שדה המייצג אם הפריט פעיל
   images: string[]; // מערך של קישורים לתמונות
+}
+
+// הגדרת הממשק ListItem
+export interface ListItem {
+  id: number;
+  title: string;
+  description: string;
+  date_created: string;
+  is_active: boolean;
 }

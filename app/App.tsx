@@ -11,18 +11,13 @@ import Home from './(tabs)/Home';
 import Login from './Login';
 import Register from './Register';
 import AddListItem from './(tabs)/AddListItem';
+import ListItemDetails from './(tabs)/ListItemDetails';
 import Settings from './(tabs)/Settings';
-
-type RootStackParamList = {
-  Home: undefined;
-  Login: undefined;
-  Register: undefined;
-  AddListItem: undefined;
-  Settings: undefined;
-};
+import { RootStackParamList } from './type';
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
+
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // using boolean | null for loading state
@@ -58,16 +53,21 @@ const App: React.FC = () => {
           options={{
             title: 'Add List',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color}  />
+              <TabBarIcon name={focused ? 'menu' : 'menu-outline'} color={color}  />
             ),
           }} />
+          {/* <Stack.Screen name="AddListItem" component={AddListItem} /> */}
+
+          <Stack.Screen name="ListItemDetails" component={ListItemDetails} />
+
           <Tab.Screen name="Settings" component={Settings} 
            options={{
             title: 'Settings',
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color}  />
             ),
-          }}/>
+          }}
+          />
 
           {/* ניתן להוסיף מסכים נוספים כאן */}
         </Tab.Navigator>
@@ -82,73 +82,4 @@ const App: React.FC = () => {
     </NavigationContainer>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // (
-//     <NavigationContainer>
-//       {isLoggedIn ? (
-//         <Tab.Navigator>
-//           {/* <Tab.Screen name="Home" component={Home} /> */}
-//           <Tab.Screen name="Home" component={HomeStack} /> {/* שימוש ב-Stack בתוך Tab */}
-
-//           {/* Add other tab screens here */}
-//         </Tab.Navigator>
-//       ) : (
-//         <Stack.Navigator>
-//           {/* <Stack.Screen name="Login">
-//               {() => <Login setIsLoggedIn={setIsLoggedIn} />}
-//             </Stack.Screen> */}
-//           <Stack.Screen name="Login" component={() => <Login setIsLoggedIn={setIsLoggedIn} />} />
-//           <Stack.Screen name="Register" component={Register} />
-//         </Stack.Navigator>
-//       )}
-//     </NavigationContainer>
-//   );
-// };
-// (
-// <NavigationContainer>
-//   {isLoggedIn ? (
-//     <Tab.Navigator>
-//       {/* שימוש ב-Stack בתוך Tab */}
-//       <Tab.Screen name="Home" component={HomeStack} />
-//       {/* מסכים נוספים */}
-//     </Tab.Navigator>
-//   ) : (
-//     <Stack.Navigator>
-//       {/* העבר את הפונקציה בצורה נכונה */}
-//       <Stack.Screen name="Login">
-//         {(props) => <Login {...props} setIsLoggedIn={setIsLoggedIn} />}
-//       </Stack.Screen>
-//       <Stack.Screen name="Register" component={Register} />
-//     </Stack.Navigator>
-//   )}
-// </NavigationContainer>
-
-
-
-
-
-
-
-
-// function HomeStack() {
-//   return (
-//     <Stack.Navigator>
-//       <Stack.Screen name="Home" component={Home} />
-//       <Stack.Screen name="AddListItem" component={AddListItem} /> {/* מסך הוספת רשימה */}
-//     </Stack.Navigator>
-//   );
-// }
-// )
 registerRootComponent(App);
