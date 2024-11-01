@@ -32,7 +32,20 @@ export interface ListItemProps {
 export interface ListItem {
   id: number;
   title: string;
-  description: string;
+  description: string[];
   date_created: string;
   is_active: boolean;
+}
+
+
+declare module 'react-color'{
+
+  export interface HsvColor {
+    h: number; // Hue
+    s: number; // Saturation
+    v: number; // Value
+  }
+
+  export function hsvToHex(h: number, s: number, v: number): string;
+  
 }

@@ -72,8 +72,11 @@ const Home: React.FC = () => {
         <Text>Loading...</Text>
       ) : (
         <>
-          <Text style={styles.title}>Your List:</Text>
           <Text style={styles.greeting}>Hello, {username || 'Guest'}!</Text>
+          <Text style={styles.title}>
+            {/* Your List: */}
+          Your List: {listItems.length} items
+          </Text>
 
           <FlatList
             data={listItems}
@@ -81,10 +84,17 @@ const Home: React.FC = () => {
             renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handlePressItem(item)}>
               <View style={styles.listItem}>
-                <Text>Title: {item.title}</Text>
-                <Text>Description: {item.description}</Text>
-                <Text>Date Created: {item.date_created}</Text>
-                <Text>Status: {item.is_active ? 'Active' : 'Inactive'}</Text>
+                {/* <Text>Title: {item.title}</Text> */}
+                {/* <Text style={{ fontWeight: 'bold' }}>{item.title}</Text> */}
+                <Text style={styles.boldText}>{item.title}</Text>
+                {/* <Text>{item.description}</Text> */}
+                <Text numberOfLines={3} ellipsizeMode="tail" style={styles.descriptionText}>
+                {item.description}</Text>
+
+                {/* <Text style={{ fontWeight: 'bold' }}>Title: {item.title}</Text>
+                <Text>Description: {item.description}</Text> */}
+                {/* <Text>Date Created: {item.date_created}</Text>
+                <Text>Status: {item.is_active ? 'Active' : 'Inactive'}</Text> */}
               </View>
               </TouchableOpacity>
             )}
@@ -133,6 +143,13 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  boldText: {
+    fontWeight: 'bold',
+    fontSize: 18, // הגדר את גודל הכתב כאן
+  },
+  descriptionText: {
+    fontSize: 16, // גודל טקסט עבור התיאור
   },
 });
 

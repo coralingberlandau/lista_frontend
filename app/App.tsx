@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerRootComponent } from 'expo';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import Toast from 'react-native-toast-message';
 
 // Import your screens
 import Home from './(tabs)/Home';
@@ -21,6 +22,8 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // using boolean | null for loading state
+  const toastRef = useRef<any>(null);
+
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -79,6 +82,8 @@ const App: React.FC = () => {
           <Stack.Screen name="Register" component={Register} />
         </Stack.Navigator>
       )}
+      <Toast />
+
     </NavigationContainer>
   );
 }

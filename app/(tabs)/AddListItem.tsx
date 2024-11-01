@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -12,7 +12,10 @@ import { AntDesign } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { ListItem, RootStackParamList } from '../type';
 import { StackNavigationProp } from '@react-navigation/stack';
-
+import { HsvColor, hsvToHex } from 'react-color'; // או מהספרייה המתאימה
+import Slider from '@react-native-community/slider';
+import Toast from 'react-native-toast-message';
+// import { show as showToast } from 'react-native-toast-message';
 
 const AddListItem: React.FC<{ route: any }> = ({ route }) => {
 
@@ -31,10 +34,26 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
   const { item }: { item: ListItem } = route.params;
   const [listItems, setListItems] = useState<ListItem[]>([]);
 
+  // State for success message
+  const [successMessageVisible, setSuccessMessageVisible] = useState(false);
 
+  // טוען את הצבעים השמורים מאחסון מקומי בעת טעינת הקומפוננטה
 
+  useEffect(() => {
+    const loadColors = async () => {
+      const savedBackgroundColor = await AsyncStorage.getItem('backgroundColor');
+      const savedTextColor = await AsyncStorage.getItem('textColor');
 
+      if (savedBackgroundColor) {
+        setBackgroundColor(savedBackgroundColor);
+      }
+      if (savedTextColor) {
+        setTextColor(savedTextColor);
+      }
+    };
 
+    loadColors();
+  }, []);
 
   const handleAddItem = async () => {
     console.log('====================================');
@@ -58,34 +77,58 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
         });
 
         console.log('List item added:', response.data);
-        if (onGoBack) {
-          onGoBack();
-        }
+
+        // צריך לבדוק למה זה<??????!!!
+        // if (onGoBack) {
+        //   onGoBack();
+        // }
+
+        // Show success message
+        // setSuccessMessageVisible(true);
+        Toast.show({
+          type: 'success',
+          text1: 'The list has been saved successfully!',
+        });
+
+        // Clear the text fields
+        setTitle('');
+        setDescription(['']);
+
+        navigation.navigate('Home', { refresh: true });
+
+        // מעבר לדף הבית לאחר הצגת הטוסטי פייל במשך 2 שניות
+        // setTimeout(() => {
+        //   navigation.navigate('Home', { refresh: true });
+        // }, 2000); // התאם את הזמן לפי הצורך
+
+
+        // Hide success message after 2 seconds
+        // setTimeout(() => {
+        //   setSuccessMessageVisible(false);
+        //   navigation.navigate('Home', { refresh: true });
+        // }, 3000);
+
       } catch (error) {
         console.error('Error adding list item:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error adding the item',
+          text2: 'Please try again later',
+        });
       }
-    }
+    };
   };
+
 
   const handleAddDescriptionItem = () => {
     setDescription([...description, '']);
   };
-
 
   const handleDescriptionChange = (text: string, index: number) => {
     const newDescription = [...description];
     newDescription[index] = text;
     setDescription(newDescription);
   };
-
-  // const handleToggleItem = (index: number) => {
-  //   const newDescription = [...description];
-  //   newDescription[index] = newDescription[index].includes('✔️')
-  //     ? newDescription[index].replace('✔️', '')
-  //     : `✔️ ${newDescription[index]}`;
-  //   setDescription(newDescription);
-  // };
-
 
   const handleToggleItem = (index: number) => {
     const newDescription = [...description];
@@ -95,48 +138,36 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
   };
 
 
-
-
-  // const handleDeleteItem = async () => {
-  //   const storedUserId = await AsyncStorage.getItem('userId');
-  //   const token = await AsyncStorage.getItem('token');
-
-  //   if (storedUserId && token) {
+  //   const handleDeleteItem = async (itemId: number) => {
   //     try {
-  //       await axios.put(`http://127.0.0.1:8000/listitem/`, {
-  //         title,
-  //         user_id: storedUserId,
+  //       await axios.patch(`http://127.0.0.1:8000/listitem/${itemId}/`, {
   //         is_active: false,
-  //       }, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
   //       });
-  //       navigation.goBack();
+  //        // הצגת טוסט מוצלח
+  //        Toast.show({
+  //         type: 'success',
+  //         text1: 'The item has been deleted successfully!',
+  //       });
+  //       console.log('====================================');
+  //       console.log('thisss isssss deletteeeeeeeee');
+  //       console.log('====================================');
+  //       // עדכון הרשימה בדף הבית על ידי סינון הפריט שהוסר
+  //       setListItems((prevItemm) => prevItemm.filter(item => item.id !== itemId));
+  //       // סגירת המודל וחזרה לדף הבית
+  //       setIsMenuVisible(false);
+  //       // חזרה לדף הבית
+  //       navigation.navigate('Home', { refresh: true });
   //     } catch (error) {
-  //       console.error('Error deleting list item:', error);
-  //     }
-  //   }
-  // };
+  //        // טוסט לשגיאה
+  //        Toast.show({
+  //         type: 'error',
+  //         text1:'Error deleting the item',
+  //         text2: 'Please try again later',
 
-  const handleDeleteItem = async (itemId: number) => {
-    try {
-      await axios.patch(`http://127.0.0.1:8000/listitem/${itemId}/`, {
-        is_active: false,
-      });
-      console.log('====================================');
-      console.log('thisss isssss deletteeeeeeeee');
-      console.log('====================================');
-      // עדכון הרשימה בדף הבית על ידי סינון הפריט שהוסר
-      setListItems((prevItemm) => prevItemm.filter(item => item.id !== itemId));
-      // סגירת המודל וחזרה לדף הבית
-      setIsMenuVisible(false);
-      // חזרה לדף הבית
-      navigation.navigate('Home', { refresh: true });
-    } catch (error) {
-      console.error('Error updating item:', error, 'Item ID:', itemId);
-    }
-  };
+  //       });
+  //       console.error('Error updating item:', error, 'Item ID:', itemId);
+  //     }
+  // };
 
   const handleShare = async () => {
     try {
@@ -148,42 +179,35 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
     }
   };
 
-  // const handlePickImage = async () => { ---- צריך לתקן את הפונקציה הזו!!!!!!
-  //   const result = await DocumentPicker.getDocumentAsync({ type: 'image/*' });
-  //   if (result.type === 'success') {
-  //     setImages([...images, result.uri]); // הוספת התמונה שנבחרה
-  //   }
-  // };
-
-  // const handlePickImage = async () => {
-  //   try {
-  //     const result = await DocumentPicker.getDocumentAsync({
-  //       type: 'image/*', // Specify the types of documents you want to pick
-  //     });
-
-  //     // Check if the result is of type DocumentPickerSuccessResult
-  //     if (result && result.type === DocumentPicker.DocumentPickerResultType.Success) {
-  //       setImages([...images, result.uri]); // Add the selected image URI to the state
-  //     } else {
-  //       console.log('User canceled the picker or an error occurred.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error picking an image:', error);
-  //   }
-  // };
-
-  const handleBackgroundColorChange = (color: string) => {
-    setBackgroundColor(color);
-    setIsBackgroundPickerVisible(false);
-  };
-
-  const handleTextColorChange = (color: string) => {
-    setTextColor(color);
+  const handleTextColorChange = async (color: HsvColor | string) => {
+    const colorHex = typeof color === 'string' ? color : hsvToHex(color.h, color.s, color.v);
+    setTextColor(colorHex);
+    await AsyncStorage.setItem('textColor', colorHex); // שמירה באמצעות AsyncStorage
     setIsTextColorPickerVisible(false);
   };
 
+  const handleBackgroundColorChange = async (color: HsvColor | string) => {
+    const colorHex = typeof color === 'string' ? color : hsvToHex(color.h, color.s, color.v);
+    setBackgroundColor(colorHex);
+    await AsyncStorage.setItem('backgroundColor', colorHex); // שמירה באמצעות AsyncStorage
+    setIsBackgroundPickerVisible(false);
+  };
+
+  const handleAddImage = (itemId: number) => {
+    // כאן אתה יכול לכתוב את הלוגיקה להוספת תמונה
+    console.log(`Add image to item with ID: ${itemId}`);
+    // לדוגמה, תוכל לפתוח דיאלוג לבחור קובץ או מצלמה
+};
+
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
+      {successMessageVisible && (
+        <View style={styles.successMessage}>
+          <Text style={styles.successMessageText}>The list has been saved successfully!</Text>
+        </View> // Closing the View here
+      )}
+
       <View style={styles.header}>
         <Text style={[styles.title, { color: textColor }]}>New List</Text>
         <TouchableOpacity
@@ -193,6 +217,8 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
           <Entypo name="dots-three-horizontal" size={35} color="black" />
         </TouchableOpacity>
       </View>
+
+
       <TextInput
         style={[styles.input, { color: textColor }]}
         placeholder="Title"
@@ -247,16 +273,6 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
             // מאפיינים נוספים כך שתיבת הטקסט תהיה גמישה ותמלא את כל המסך
             />
 
-
-
-
-
-
-
-
-
-
-
             <TouchableOpacity onPress={() => handleToggleItem(index)}>
               <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={24} color={textColor} />
             </TouchableOpacity>
@@ -276,6 +292,10 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
             <Ionicons name="list-circle-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Add List</Text>
           </TouchableOpacity>
+
+
+
+
           <TouchableOpacity onPress={() => setIsBackgroundPickerVisible(true)} style={styles.iconContainer}>
             <Ionicons name="color-palette-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Background</Text>
@@ -284,15 +304,53 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
             <Ionicons name="text-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Text Color</Text>
           </TouchableOpacity>
+
+          {/* כאן יש להוסיף ColorPicker לבחירת צבע */}
+          {/* {isBackgroundPickerVisible && (
+            <ColorPicker onColorChange={handleBackgroundColorChange} />
+          )}
+          {isTextColorPickerVisible && (
+            <ColorPicker onColorChange={handleTextColorChange} />
+          )} */}
+
+          {/* כאן יש להוסיף ColorPicker לבחירת צבע */}
+          {isBackgroundPickerVisible && (
+            <ColorPicker
+              onColorChange={handleBackgroundColorChange}
+              sliderComponent={Slider as any}
+            />
+          )}
+          {isTextColorPickerVisible && (
+            <ColorPicker
+              onColorChange={handleTextColorChange}
+              sliderComponent={Slider as any}
+            />
+          )}
+
+
+
+
           <TouchableOpacity onPress={handleShare} style={styles.iconContainer}>
             <Ionicons name="share-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Share</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity onPress={handleDeleteItem} style={styles.iconContainer}> */}
+
+
+
+          {/* <TouchableOpacity onPress={handleDeleteItem} style={styles.iconContainer}>
           <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(item.id)}>
             <AntDesign name="delete" size={50} color="white" />
             <Text style={styles.iconLabel}>Delete</Text>
+          </TouchableOpacity> */}
+
+          <TouchableOpacity style={styles.iconContainer} onPress={() => handleAddImage(item.id)}>
+            <AntDesign name="upload"  size={50} color="white" />
+            <Text style={styles.iconLabel}>Add Image</Text>
           </TouchableOpacity>
+
+
+
+
           <TouchableOpacity onPress={() => setIsMenuVisible(false)} style={styles.iconContainer}>
             <Ionicons name="close-circle-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Close</Text>
@@ -329,6 +387,8 @@ const AddListItem: React.FC<{ route: any }> = ({ route }) => {
         <Text style={styles.submitButtonText}>Submit</Text>
       </TouchableOpacity>
     </View>
+
+
   );
 };
 
@@ -364,9 +424,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 8,
     flex: 1, // גם כאן נוודא שהשורה תפוסה
-
-
-
 
   },
   image: {
@@ -428,8 +485,35 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     height: 600, // גודל המאפשר כתיבה נרחבת
   },
-
-
+  // successMessage: {
+  //   position: 'absolute',
+  //   top: '50%',
+  //   left: '50%',
+  //   transform: [{ translateX: -50 }, { translateY: -50 }],
+  //   // backgroundColor: 'rgba(0, 255, 0, 0.8)', // Change this to your desired color
+  //   backgroundColor: 'rgba(173, 216, 230, 0.8)', // Light blue with some transparency
+  //   padding: 10,
+  //   borderRadius: 5,
+  //   zIndex: 1000,
+  // },
+  // successMessageText: {
+  //   color: '#fff',
+  //   fontSize: 16,
+  //   textAlign: 'center',
+  // },
+  successMessage: {
+    position: 'absolute',
+    bottom: 80,
+    left: 20,
+    backgroundColor: 'green',
+    padding: 10,
+    borderRadius: 5,
+    zIndex: 1000, // לוודא שההודעה תופיע מעל כל אלמנט אחר
+  },
+  successMessageText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
 
 });
 

@@ -72,7 +72,7 @@ const Login: React.FC<{setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>}>
       <Input
         value={username}
         onChangeText={setUsername}
-        placeholder="Enter your user name"
+        placeholder="Enter your username"
         autoCapitalize="none"
       />
 
