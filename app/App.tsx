@@ -29,7 +29,7 @@ const App: React.FC = () => {
     const checkLogin = async () => {
       try {
         const token = await AsyncStorage.getItem('userToken');
-        setIsLoggedIn(!!token); // If token exists, set isLoggedIn to true, otherwise false
+        token && setIsLoggedIn(true); // If token exists, set isLoggedIn to true, otherwise false
       } catch (error) {
         console.error('Error checking login status:', error);
         setIsLoggedIn(false); // Set to false if there's an error
