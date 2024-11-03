@@ -16,6 +16,8 @@ const Login: React.FC<{setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>}>
   const [password, setPassword] = useState<string>('');
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
+    // נווט לדף הבית או לדף אחר
+          // navigation.navigate('Home', { refresh: true });
 
 
   const handleLogin = async () => {

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack'; 
+import { StackNavigationProp } from '@react-navigation/stack';
 import { ListItem, RootStackParamList } from '../type';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
@@ -19,45 +19,77 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [route.params?.refresh]);
+}, [route.params?.refresh, username]); // ודא ש-`username` לא משפיע על קריאת הנתונים
 
+  // useEffect(() => {
+  //   fetchData();
+  // }, [route.params?.refresh]);
+
+  // const fetchData = useCallback(async () => {
+  //   console.log('fetching');
+  //   const storedUsername = await AsyncStorage.getItem('userName');
+  //   const storedUserId = await AsyncStorage.getItem('userId');
+  //   const token = await AsyncStorage.getItem('token');
+
+  //   if (storedUsername) {
+  //     setUsername(storedUsername);
+  //   }
+
+  //   if (storedUserId && token) {
+  //     try {
+  //       const response = await axios.get(`http://127.0.0.1:8000/listitem/by-user/${storedUserId}/`, {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+  //       // סינון הרשימה להציג רק פריטים פעילים
+  //       const activeItems = response.data.filter((item: ListItem) => item.is_active);
+  //       setListItems(activeItems);
+  //       // setListItems(response.data);
+  //     } catch (error) {
+  //       console.error('Error fetching user list items:', error);
+  //       Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
+  //     }
+  //   }
+  //   setLoading(false);
+  // }, []); // התלויות ריקות כדי שהפונקציה לא תשתנה בכל רינדור
 
   const fetchData = useCallback(async () => {
     console.log('fetching');
+    setListItems([]); // נקה את הרשימה לפני הטעינה
     const storedUsername = await AsyncStorage.getItem('userName');
     const storedUserId = await AsyncStorage.getItem('userId');
     const token = await AsyncStorage.getItem('token');
 
     if (storedUsername) {
-      setUsername(storedUsername);
+        setUsername(storedUsername);
     }
 
     if (storedUserId && token) {
-      try {
-        const response = await axios.get(`http://127.0.0.1:8000/listitem/by-user/${storedUserId}/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        // סינון הרשימה להציג רק פריטים פעילים
-        const activeItems = response.data.filter((item: ListItem) => item.is_active);
-        setListItems(activeItems);
-        // setListItems(response.data);
-      } catch (error) {
-        console.error('Error fetching user list items:', error);
-        Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
-      }
+        setLoading(true);
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/listitem/by-user/${storedUserId}/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            // סינון הרשימה להציג רק פריטים פעילים
+            const activeItems = response.data.filter((item: ListItem) => item.is_active);
+            setListItems(activeItems);
+        } catch (error) {
+            console.error('Error fetching user list items:', error);
+            Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
     }
-    
-    setLoading(false);
-  }, []); // התלויות ריקות כדי שהפונקציה לא תשתנה בכל רינדור
+}, []); // השאר את התלות ריקה
 
 
-    // פונקציה עבור ניווט ליצירת פריט חדש
+  // פונקציה עבור ניווט ליצירת פריט חדש
   const handleAddListItem = () => {
-    navigation.navigate('ListItemDetails' );
+    navigation.navigate('ListItemDetails');
   };
-
   // פונקציה עבור ניווט להצגת פרטי האייטם שנבחר
   const handlePressItem = (item: ListItem) => {
     navigation.navigate('ListItemDetails', { item }); // ניווט עם פרטי האייטם
@@ -72,35 +104,39 @@ const Home: React.FC = () => {
           <Text style={styles.greeting}>Hello, {username || 'Guest'}!</Text>
           <Text style={styles.title}>
             {/* Your List: */}
-          Your List: {listItems.length} items
+            Your List: {listItems.length} items
           </Text>
 
           <FlatList
             data={listItems}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handlePressItem(item)}>
-              <View style={styles.listItem}>
-                {/* <Text>Title: {item.title}</Text> */}
-                {/* <Text style={{ fontWeight: 'bold' }}>{item.title}</Text> */}
-                <Text style={styles.boldText}>{item.title}</Text>
-                {/* <Text>{item.description}</Text> */}
-                <Text numberOfLines={3} ellipsizeMode="tail" style={styles.descriptionText}>
-                {item.description}</Text>
+              <TouchableOpacity onPress={() => handlePressItem(item)}>
+                <View style={styles.listItem}>
+                  <Text style={styles.boldText}>{item.title}</Text>
 
-                {/* <Text style={{ fontWeight: 'bold' }}>Title: {item.title}</Text>
-                <Text>Description: {item.description}</Text> */}
-                {/* <Text>Date Created: {item.date_created}</Text>
-                <Text>Status: {item.is_active ? 'Active' : 'Inactive'}</Text> */}
-              </View>
+                  <Text numberOfLines={3} ellipsizeMode="tail" style={styles.descriptionText}>
+                    {Array.isArray(item.description)
+                      ? item.description.join('\n') // אם הוא מערך, מאחד אותו למחרוזת
+                      : item.description // אחרת, משתמש במחרוזת כמו שהיא
+                    }
+                  </Text>
+
+
+                  {/* 
+                  <Text numberOfLines={3} ellipsizeMode="tail" style={styles.descriptionText}>
+                    {item.description}</Text> */}
+
+
+
+                </View>
               </TouchableOpacity>
             )}
           />
-
           <TouchableOpacity
             style={styles.addButton}
             onPress={handleAddListItem} // עדכון ניווט
->
+          >
             <AntDesign name="pluscircleo" size={45} color="black" />
           </TouchableOpacity>
         </>
@@ -121,7 +157,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   greeting: {
-    fontSize: 18,
+    fontSize: 20,
     marginBottom: 20,
   },
   listItem: {
@@ -147,6 +183,9 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     fontSize: 16, // גודל טקסט עבור התיאור
+    lineHeight: 24, // ריווח בין שורות להבלטה ואסתטיקה
+    color: '#333',
+    marginTop: 5, // מעט ריווח מעל, כדי להפריד מהכותרת
   },
 });
 

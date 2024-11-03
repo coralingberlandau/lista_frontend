@@ -44,29 +44,29 @@ const App: React.FC = () => {
       {isLoggedIn ? (
         <Tab.Navigator>
           {/* שימוש ב-Stack בתוך Tab */}
-          <Tab.Screen name="Home" component={Home} 
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
-            ),
-          }}/>
-           
+          <Tab.Screen name="Home" component={Home}
+            options={{
+              title: 'Home',
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+              ),
+            }} />
+
           {/* <Tab.Screen name="AddListItem" component={AddListItem}
             options={{ tabBarButton: () => null }}
           /> */}
-          
+
           <Tab.Screen name="ListItemDetails" component={ListItemDetails}
             options={{ tabBarButton: () => null }}
           />
 
-          <Tab.Screen name="Settings" component={Settings} 
-           options={{
-            title: 'Settings',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color}  />
-            ),
-          }}
+          <Tab.Screen name="Settings" component={Settings}
+            options={{
+              title: 'Settings',
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
+              ),
+            }}
           />
 
           {/* ניתן להוסיף מסכים נוספים כאן */}
@@ -76,7 +76,20 @@ const App: React.FC = () => {
           <Stack.Screen name="Login">
             {(props) => <Login {...props} setIsLoggedIn={setIsLoggedIn} />}
           </Stack.Screen>
-          <Stack.Screen name="Register" component={Register} />
+
+
+          {/* <Stack.Screen name="Register" component={Register} /> */}
+
+          <Stack.Screen name="Register">
+            {(props) => <Register {...props} setIsLoggedIn={setIsLoggedIn} />}
+          </Stack.Screen>
+
+
+
+
+
+
+
         </Stack.Navigator>
       )}
       <Toast />
