@@ -11,8 +11,8 @@ import Toast from 'react-native-toast-message';
 import Home from './(tabs)/Home';
 import Login from './Login';
 import Register from './Register';
-import AddListItem from './(tabs)/AddListItem';
-import ListItemDetails from './(tabs)/ListItemDetails';
+// import AddListItem from './AddListItem';
+import ListItemDetails from './ListItemDetails';
 import Settings from './(tabs)/Settings';
 import { RootStackParamList } from './type';
 
@@ -52,16 +52,13 @@ const App: React.FC = () => {
             ),
           }}/>
            
-          <Tab.Screen name="AddListItem" component={AddListItem}
-          options={{
-            title: 'Add List',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'menu' : 'menu-outline'} color={color}  />
-            ),
-          }} />
-          {/* <Stack.Screen name="AddListItem" component={AddListItem} /> */}
-
-          <Stack.Screen name="ListItemDetails" component={ListItemDetails} />
+          {/* <Tab.Screen name="AddListItem" component={AddListItem}
+            options={{ tabBarButton: () => null }}
+          /> */}
+          
+          <Tab.Screen name="ListItemDetails" component={ListItemDetails}
+            options={{ tabBarButton: () => null }}
+          />
 
           <Tab.Screen name="Settings" component={Settings} 
            options={{

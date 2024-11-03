@@ -7,9 +7,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ListItem, RootStackParamList } from '../type';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-type NavigationProp = StackNavigationProp<RootStackParamList, 'AddListItem'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'ListItemDetails'>;
 type HomeRouteProp = RouteProp<RootStackParamList, 'Home'>;
-
 
 const Home: React.FC = () => {
   const [listItems, setListItems] = useState<ListItem[]>([]);
@@ -56,9 +55,7 @@ const Home: React.FC = () => {
 
     // פונקציה עבור ניווט ליצירת פריט חדש
   const handleAddListItem = () => {
-    navigation.navigate('AddListItem', {
-      onGoBack: fetchData, // העברת פונקציה לעדכון הרשימה
-    });
+    navigation.navigate('ListItemDetails' );
   };
 
   // פונקציה עבור ניווט להצגת פרטי האייטם שנבחר
