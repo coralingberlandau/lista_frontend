@@ -19,39 +19,6 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   const [password, setPassword] = useState<string>('');
   const navigation = useNavigation<RegisterScreenNavigationProp>();
 
-  // const handleRegister = async () => {
-  //   if (username && firstName && lastName && email && password) {
-  //     try {
-  //       const response = await axios.post('http://127.0.0.1:8000/register', {
-  //         username,
-  //         first_name: firstName,
-  //         last_name: lastName,
-  //         email,
-  //         password,
-  //       });
-
-  //       console.log('====================================');
-  //       console.log(response);
-  //       console.log('====================================');
-
-  //       if (response.status === 201) {
-  //         Alert.alert('Registration Successful', 'You can now log in.');
-
-  //         // נווט לדף הבית, עם פרמטר refresh
-  //         // navigation.navigate('Home', { refresh: true })
-
-  //         navigation.navigate('Login'); 
-  //         // Navigate to Login screen.
-  //       }
-  //     } catch (error) {
-  //       Alert.alert('Registration Error', 'Unable to register. Please try again.');
-  //     }
-  //   } else {
-  //     Alert.alert('Missing Information', 'Please fill out all fields.');
-  //   }
-  // };
-
-
   const handleRegister = async () => {
     if (username && firstName && lastName && email && password) {
       try {
@@ -100,10 +67,10 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
-              routes: [{ name: 'Home', params: { refresh: true } }], // העברת פרמטרים אם יש צורך
+              routes: [{ name: 'Home' }], // העברת פרמטרים אם יש צורך
             })
           );
-          
+  
 
           // navigation.navigate('Home');
       

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList } from 'react-native';
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { ListItem, RootStackParamList } from './type';
 import { Ionicons, AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
@@ -24,44 +24,36 @@ const ListItemDetails: React.FC = () => {
   const isUpdateMode = !!item
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [title, setTitle] = useState(item ? item.title : '');
-  // console.log(title, item?.title)
   const [description, setDescription] = useState<string[]>(item ? item.description : ['']);
-  const [listItems, setListItems] = useState<ListItem[]>([]);
-
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+  console.log(title, item, description)
   const [images, setImages] = useState<string[]>([]);
   const [backgroundColor, setBackgroundColor] = useState<string>('#fff');
   const [textColor, setTextColor] = useState<string>('#000');
   const [isBackgroundPickerVisible, setIsBackgroundPickerVisible] = useState(false);
   const [isTextColorPickerVisible, setIsTextColorPickerVisible] = useState(false);
 
+  useFocusEffect(
+    useCallback(() => {
+      console.log('render')
+      setTitle(item?.title || '');
+      setDescription(item?.description || ['']);
+      loadColors();
+    }, [item])
+  );
 
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  useEffect(() => {
-    setTitle(item?.title || '');
-    setDescription(item?.description || ['']);
-  }, [item?.description]);
+  const loadColors = async () => {
+    const savedBackgroundColor = await AsyncStorage.getItem('backgroundColor');
+    const savedTextColor = await AsyncStorage.getItem('textColor');
 
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-  useEffect(() => {
-    const loadColors = async () => {
-      const savedBackgroundColor = await AsyncStorage.getItem('backgroundColor');
-      const savedTextColor = await AsyncStorage.getItem('textColor');
-
-      if (savedBackgroundColor) {
-        setBackgroundColor(savedBackgroundColor);
-      }
-      if (savedTextColor) {
-        setTextColor(savedTextColor);
-      }
-    };
-    loadColors();
-  }, []);
-
+    if (savedBackgroundColor) {
+      setBackgroundColor(savedBackgroundColor);
+    }
+    if (savedTextColor) {
+      setTextColor(savedTextColor);
+    }
+  };
 
   const handleAddItem = async () => {
     console.log('====================================');
@@ -92,10 +84,10 @@ const ListItemDetails: React.FC = () => {
         });
 
         // Clear the text fields
-        setTitle('');
-        setDescription(['']);
+        // setTitle('');
+        // setDescription(['']);
 
-        navigation.navigate('Home', { refresh: true });
+        navigation.navigate('Home');
 
       } catch (error) {
         console.error('Error adding list item:', error);
@@ -107,8 +99,6 @@ const ListItemDetails: React.FC = () => {
       }
     };
   };
-
-
 
   const AddItemToList = () => {
     setDescription(prev => [...prev, '']);
@@ -176,9 +166,8 @@ const ListItemDetails: React.FC = () => {
         type: 'success',
         text1: 'The item has been deleted successfully!',
       });
-      setListItems((prevItems) => prevItems.filter(item => item.id !== itemId));
       setIsMenuVisible(false);
-      navigation.navigate('Home', { refresh: true });
+      navigation.navigate('Home');
     } catch (error) {
       Toast.show({
         type:'error',
@@ -188,7 +177,6 @@ const ListItemDetails: React.FC = () => {
       console.error('Error updating item:', error, 'Item ID:', itemId);
     }
   };
-
 
   const handleUpdateList = async () => {
     try {
@@ -200,8 +188,7 @@ const ListItemDetails: React.FC = () => {
         type: 'success',
         text1: 'The list has been updated successfully!',
       });
-
-      navigation.navigate('Home', { refresh: true });
+      navigation.navigate('Home');
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -211,9 +198,6 @@ const ListItemDetails: React.FC = () => {
       console.error('Error updating list:', error);
     }
   };
-
-
-
 
   const handleAddImage = async (itemId: number) => {
     console.log('====================================');
@@ -285,8 +269,6 @@ const ListItemDetails: React.FC = () => {
         )}
         keyExtractor={(_, index) => index.toString()}
       />
-
-
       <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
         <Text style={styles.addItemButtonText}>Add Item</Text>
       </TouchableOpacity>
@@ -326,14 +308,6 @@ const ListItemDetails: React.FC = () => {
               sliderComponent={Slider as any}
             />
           )}
-
-
-
-
-
-
-
-
           <TouchableOpacity style={styles.iconContainer} onPress={() => handleShare()}>
             <Ionicons name="share-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Share</Text>
@@ -353,10 +327,6 @@ const ListItemDetails: React.FC = () => {
             ))}
           </View>
                 {/* iff i need thiss ??????????????????/ */}
-
-
-
-
           {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(item.id)}>
             <AntDesign name="delete" size={50} color="white" />
             <Text style={styles.iconLabel}>Delete</Text>

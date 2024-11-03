@@ -1,14 +1,14 @@
 # Welcome to application LISTA - frontend 👋
 
 
- - React Native
+ - React Native - typescript
 האפליקציה הזו כתובה באקסו טייפסקיפט,   
 הבאק כתוב בפייתון גאנגו. 
 
 יש לוגר - ניתן לעקוב אחר הפעולות
 
 
-
+npm run web
 
 
 

@@ -1,58 +1,25 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ListItem, RootStackParamList } from '../type';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'ListItemDetails'>;
-type HomeRouteProp = RouteProp<RootStackParamList, 'Home'>;
 
 const Home: React.FC = () => {
   const [listItems, setListItems] = useState<ListItem[]>([]);
   const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation<NavigationProp>();
-  const route = useRoute<HomeRouteProp>(); // הוספת useRoute עם טיפוס
-
-  useEffect(() => {
-    fetchData();
-}, [route.params?.refresh, username]); // ודא ש-`username` לא משפיע על קריאת הנתונים
-
-  // useEffect(() => {
-  //   fetchData();
-  // }, [route.params?.refresh]);
-
-  // const fetchData = useCallback(async () => {
-  //   console.log('fetching');
-  //   const storedUsername = await AsyncStorage.getItem('userName');
-  //   const storedUserId = await AsyncStorage.getItem('userId');
-  //   const token = await AsyncStorage.getItem('token');
-
-  //   if (storedUsername) {
-  //     setUsername(storedUsername);
-  //   }
-
-  //   if (storedUserId && token) {
-  //     try {
-  //       const response = await axios.get(`http://127.0.0.1:8000/listitem/by-user/${storedUserId}/`, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-  //       // סינון הרשימה להציג רק פריטים פעילים
-  //       const activeItems = response.data.filter((item: ListItem) => item.is_active);
-  //       setListItems(activeItems);
-  //       // setListItems(response.data);
-  //     } catch (error) {
-  //       console.error('Error fetching user list items:', error);
-  //       Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
-  //     }
-  //   }
-  //   setLoading(false);
-  // }, []); // התלויות ריקות כדי שהפונקציה לא תשתנה בכל רינדור
+  
+  useFocusEffect(
+    useCallback(() => {
+      fetchData()
+    }, [])
+  );
 
   const fetchData = useCallback(async () => {
     console.log('fetching');
@@ -62,29 +29,29 @@ const Home: React.FC = () => {
     const token = await AsyncStorage.getItem('token');
 
     if (storedUsername) {
-        setUsername(storedUsername);
+      setUsername(storedUsername);
     }
 
     if (storedUserId && token) {
-        setLoading(true);
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/listitem/by-user/${storedUserId}/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            // סינון הרשימה להציג רק פריטים פעילים
-            const activeItems = response.data.filter((item: ListItem) => item.is_active);
-            setListItems(activeItems);
-        } catch (error) {
-            console.error('Error fetching user list items:', error);
-            Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
-        } finally {
-            setLoading(false);
-        }
+      setLoading(true);
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/listitem/by-user/${storedUserId}/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // סינון הרשימה להציג רק פריטים פעילים
+        const activeItems = response.data.filter((item: ListItem) => item.is_active);
+        setListItems(activeItems);
+        // setListItems(response.data);
+      } catch (error) {
+        console.error('Error fetching user list items:', error);
+        Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
     }
-}, []); // השאר את התלות ריקה
-
+  }, []);
 
   // פונקציה עבור ניווט ליצירת פריט חדש
   const handleAddListItem = () => {
@@ -121,14 +88,6 @@ const Home: React.FC = () => {
                       : item.description // אחרת, משתמש במחרוזת כמו שהיא
                     }
                   </Text>
-
-
-                  {/* 
-                  <Text numberOfLines={3} ellipsizeMode="tail" style={styles.descriptionText}>
-                    {item.description}</Text> */}
-
-
-
                 </View>
               </TouchableOpacity>
             )}
