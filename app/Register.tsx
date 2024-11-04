@@ -18,8 +18,25 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const [error, setError] = useState<string | null>(null);
+
+  // משתנה לבדיקת מילוי כל השדות
+  const allFieldsFilled: boolean =
+    username.trim() !== '' &&
+    firstName.trim() !== '' &&
+    lastName.trim() !== '' &&
+    email.trim() !== '' &&
+    password.trim() !== '';
 
   const handleRegister = async () => {
+    console.log('Register button pressed'); // הוספת לוג כאן
+    if (!allFieldsFilled) {
+      setError('All fields must be filled in to complete the registration.');
+      console.log('All fields not filled'); // לוג נוסף
+
+      return;
+    }
+
     if (username && firstName && lastName && email && password) {
       try {
         const response = await axios.post('http://127.0.0.1:8000/register', {
@@ -70,95 +87,129 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
               routes: [{ name: 'Home' }], // העברת פרמטרים אם יש צורך
             })
           );
-  
+        }
+      } catch (error) {
+        console.log('Error caught:', error);
+        // לוג של השגיאה
 
-          // navigation.navigate('Home');
-      
+        // נוודא שהשגיאה מתעדכנת כמו שצריך
+        if (axios.isAxiosError(error)) {
+          console.log('Error caught:', error); // לוג של השגיאה
+          console.log('Response data:', error.response?.data); // לוג של נתוני השגיאה
+
+          if (axios.isAxiosError(error)) {
+            if (error.response) {
+              // בדוק אם הסטטוס הוא 400
+              if (error.response.status === 400) {
+                setError(error.response.data.error); // הגדרת השגיאה מהשרת
+              } else {
+                setError('Error 500 - Something went wrong. Please try again.');
+              }
+            } else {
+              setError('Unexpected error occurred. Please try again later.');
+            }
+          } else {
+            setError('Unexpected error occurred. Please try again later.');
+          }
         }
-        } catch (error) {
-          Alert.alert('Registration Error', 'Unable to register. Please try again.');
-        }
-      } else {
-        Alert.alert('Missing Information', 'Please fill out all fields.');
       }
     };
+  }
 
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Register</Text>
+        // {/* {/*  */}
+        // {error === 'Username already exists' ? (
+        //   <Text style={{ color: 'red', textAlign: 'center' }}>This username is already taken. Please choose another one.</Text>
+        // ) :
+        //   (!allFieldsFilled ? (
+        //     <Text style={{ color: 'red', textAlign: 'center' }}>All fields must be filled in to complete the registration.</Text>
+        //   ) : (
+        //     <Text style={{ color: 'red', textAlign: 'center' }}>Error 500 - Something went wrong. Please try again.</Text>
+        //   ))} 
 
-        <Input
-          value={username}
-          onChangeText={setUsername}
-          placeholder="Username"
-          autoCapitalize="none"
-        />
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Register</Text>
+      <Input
+        value={username}
+        onChangeText={setUsername}
+        placeholder="Username"
+        autoCapitalize="none"
+      />
 
-        <Input
-          value={firstName}
-          onChangeText={setFirstName}
-          placeholder="First Name"
-        />
+      <Input
+        value={firstName}
+        onChangeText={setFirstName}
+        placeholder="First Name"
+      />
 
-        <Input
-          value={lastName}
-          onChangeText={setLastName}
-          placeholder="Last Name"
-        />
+      <Input
+        value={lastName}
+        onChangeText={setLastName}
+        placeholder="Last Name"
+      />
 
-        <Input
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+      <Input
+        value={email}
+        onChangeText={setEmail}
+        placeholder="Email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
 
-        <Input
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureTextEntry
-          autoCapitalize="none"
-        />
+      <Input
+        value={password}
+        onChangeText={setPassword}
+        placeholder="Password"
+        secureTextEntry
+        autoCapitalize="none"
+      />
 
-        <Button title="Register" onPress={handleRegister} />
+      <Button title="Register" onPress={handleRegister} />
 
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Already have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginLink}>Click here to log in</Text>
-          </TouchableOpacity>
-        </View>
+      {error && <Text style={styles.erroText}>{error}</Text>}
+
+      <View style={styles.loginContainer}>
+        <Text style={styles.loginText}>Already have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.loginLink}>Click here to log in</Text>
+        </TouchableOpacity>
       </View>
-    );
-  };
+    </View>
+  );
+};
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      paddingHorizontal: 20,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 20,
-      textAlign: 'center',
-    },
-    loginContainer: {
-      marginTop: 20,
-      alignItems: 'center',
-    },
-    loginText: {
-      fontSize: 14,
-      color: '#555',
-    },
-    loginLink: {
-      fontSize: 14,
-      color: '#1E90FF',
-      marginTop: 5,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  loginContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  loginText: {
+    fontSize: 14,
+    color: '#555',
+  },
+  loginLink: {
+    fontSize: 14,
+    color: '#1E90FF',
+    marginTop: 5,
+  },
+  erroText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
+    height: 0, // המרווח הרצוי (תוכל לשנות לפי הצורך)
 
-  export default Register;
+  },
+});
+
+export default Register;

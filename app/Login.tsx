@@ -11,16 +11,27 @@ import { JwtPayload, RootStackParamList } from './type';
 // הגדרת סוג הניווט למסך הלוגין
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
-const Login: React.FC<{setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>}> = ({setIsLoggedIn}) => {
+const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> }> = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState<string>(''); // שדה שם משתמש
   const [password, setPassword] = useState<string>('');
+  const [errorText, setErrorText] = useState('');
+
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
-    // נווט לדף הבית או לדף אחר
-          // navigation.navigate('Home', { refresh: true });
+  // נווט לדף הבית או לדף אחר
+  // navigation.navigate('Home', { refresh: true });
 
 
   const handleLogin = async () => {
+    // איפוס הודעת השגיאה
+    setErrorText('');
+
+    // בדוק אם יש שדות חסרים
+    if (!username || !password) {
+      setErrorText('Please enter both username and password.');
+      return;
+    }
+
     if (username && password) {
       try {
         // קריאה ל-API לבדוק את פרטי ההתחברות
@@ -54,14 +65,17 @@ const Login: React.FC<{setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>}>
 
         console.log('Logged in successfully');
         setIsLoggedIn(true);
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
-        Alert.alert('Login Error', 'Unable to login. Please check your credentials and try again.');
+        // נבדוק אם יש שגיאה ספציפית
+        if (error.response && error.response.status === 401) {
+          setErrorText('Incorrect username or password. Please try again.');
+        } else {
+          setErrorText('Something went wrong. Please try again.');
+        }
       }
-    } else {
-      Alert.alert('Invalid Credentials', 'Please enter both username and password.');
-    }
-  };
+    };
+  }
 
   const navigateToRegister = () => {
     navigation.navigate('Register'); // נווט למסך ה-Register
@@ -87,6 +101,8 @@ const Login: React.FC<{setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>}>
       />
 
       <Button title="Login" onPress={handleLogin} />
+
+      <Text style={styles.errorText}>{errorText}</Text>
 
       <View style={styles.registerContainer}>
         <Text style={styles.registerText}>Not registered?</Text>
@@ -122,6 +138,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1E90FF',
     marginTop: 5,
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
+    height: 40, // המרווח הרצוי
   },
 });
 

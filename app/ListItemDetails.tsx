@@ -199,6 +199,7 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
+
   const handleAddImage = async (itemId: number) => {
     console.log('====================================');
     console.log({itemId}, "teessttt for imaggeeeeeee");

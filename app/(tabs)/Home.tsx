@@ -71,7 +71,7 @@ const Home: React.FC = () => {
           <Text style={styles.greeting}>Hello, {username || 'Guest'}!</Text>
           <Text style={styles.title}>
             {/* Your List: */}
-            Your List: {listItems.length} items
+            {listItems.length === 0 ? "Write your dreams here!": `Your List: ${listItems.length} items` } 
           </Text>
 
           <FlatList

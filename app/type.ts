@@ -48,3 +48,8 @@ declare module 'react-color'{
   export function hsvToHex(h: number, s: number, v: number): string;
   
 }
+
+
+// interface RegisterProps {
+//   setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>;
+// }
