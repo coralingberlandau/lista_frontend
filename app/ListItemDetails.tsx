@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, Button } from 'react-native';
 import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { ListItem, RootStackParamList } from './type';
 import { Ionicons, AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
@@ -31,7 +31,8 @@ const ListItemDetails: React.FC = () => {
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   console.log(title, item, description)
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<{ uri: string; text: string; size: number }[]>([]);
+
   const [backgroundColor, setBackgroundColor] = useState<string>('#fff');
   const [textColor, setTextColor] = useState<string>('#000');
   const [isBackgroundPickerVisible, setIsBackgroundPickerVisible] = useState(false);
@@ -42,15 +43,12 @@ const ListItemDetails: React.FC = () => {
   const [isReadOnlySelected, setIsReadOnlySelected] = useState(false);
   const [isFullAccessSelected, setIsFullAccessSelected] = useState(false);
 
-
-
-
-
   useFocusEffect(
     useCallback(() => {
       console.log('render', item?.id)
       setTitle(item?.title || '');
       setDescription(item?.description || ['']);
+      // setImages([]); // Resetting the image on item change
       loadColors();
     }, [item])
   );
@@ -67,6 +65,7 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
+
   const handleAddItem = async () => {
     console.log('====================================');
     console.log('testttt loooggggg');
@@ -79,7 +78,7 @@ const ListItemDetails: React.FC = () => {
         const response = await axios.post(`http://127.0.0.1:8000/listitem/`, {
           title,
           description,
-          user_id: storedUserId,
+          user: storedUserId,
           is_active: true,
           images,
         }, {
@@ -90,14 +89,25 @@ const ListItemDetails: React.FC = () => {
 
         console.log('List item added:', response.data);
 
+          // לאחר הוספת הפריט, שמור את התמונות אם יש
+
+        if (images.length > 0) {
+          const itemId = response.data.id; // הנחה שהשרת מחזיר את ה-ID של הפריט החדש
+          await axios.patch(`http://127.0.0.1:8000/listitem/${itemId}/`, {
+            images: images, // כאן יש להניח שהשדה בשרת נקרא 'images'
+          }, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        }
+
         Toast.show({
           type: 'success',
           text1: 'The list has been saved successfully!',
         });
 
-        // Clear the text fields
-        // setTitle('');
-        // setDescription(['']);
+        setImages([]);  // לאפס את התמונות
 
         navigation.navigate('Home');
 
@@ -164,17 +174,17 @@ const ListItemDetails: React.FC = () => {
   };
 
   // משתף את הקישור עם הרשאה מתאימה
-  const handleShare = async () => {
-    console.log('שיתוף ברשימה עם הרשאה:', permissionType);
-    try {
-      const link = `http://example.com/list/${item?.id}?permission=${permissionType}`;
-      await Share.share({
-        message: `Title: ${title}\nDescription: ${description.join('\n')}\nLink: ${link}`,
-      });
-    } catch (error) {
-      console.error('שגיאה בשיתוף הפריט:', error);
-    }
-  };
+  // const handleShare = async () => {
+  //   console.log('שיתוף ברשימה עם הרשאה:', permissionType);
+  //   try {
+  //     const link = `http://example.com/list/${item?.id}?permission=${permissionType}`;
+  //     await Share.share({
+  //       message: `Title: ${title}\nDescription: ${description.join('\n')}\nLink: ${link}`,
+  //     });
+  //   } catch (error) {
+  //     console.error('שגיאה בשיתוף הפריט:', error);
+  //   }
+  // };
 
   const handlePermissionSelect = (type: any) => {
     if (type === 'read_only') {
@@ -188,91 +198,89 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
-
   // / מבצע את השיתוף בפועל ושומר את הפרטים בבסיס הנתונים/
-
   const handleConfirmShare = async () => {
     const storedUserId = await AsyncStorage.getItem('userId');
     const token = await AsyncStorage.getItem('token');
 
-
-    // מוודאים שה-storedUserId הוא לא null או undefined
     if (storedUserId && token) {
       const data = {
-          user: { id: storedUserId }, // שליחה כאובייקט אם זה נדרש
-          list_item: item?.id,
-          role: 'member', // ברירת מחדל
-          permission_type: permissionType, // אם יש צורך בזה
+        user: { id: storedUserId, username: 'your_username', password: 'your_password' }, // כאן יש לספק את שם המשתמש והסיסמה
+        list_item: item?.id,
+        role: 'member', // ברירת מחדל
+        permission_type: permissionType,
       };
 
       try {
-          const response = await axios.post(
-              'http://127.0.0.1:8000/grouplists/',
-              data, // שולחים את המידע הנכון
-              {
-                  headers: {
-                      Authorization: `Bearer ${token}`,
-                      'Content-Type': 'application/json',
-                  },
-              }
-          );
-
-          console.log('Sending data:', data); // לוג של הנתונים שנשלחו
-          console.log('Response from server:', response.data); // לוג של התגובה מהשרת
-
-          // משתף את הקישור לאחר שמירת הנתונים בשרת
-          await Share.share({
-              message: `Title: ${title}\nDescription: ${description.join('\n')}`,
-          });
-
-          // מציג הודעה על הצלחה
-          Toast.show({
-              type: 'success',
-              text1: 'List shared successfully!',
-          });
-      } catch (error: any) {
-          console.error('Error sharing list item:', error);
-          if (error.response) {
-              console.error('Response data:', error.response.data); // להציג את הודעת השגיאה מהשרת
+        const response = await axios.post(
+          'http://127.0.0.1:8000/grouplists/',
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
           }
-          Toast.show({
-              type: 'error',
-              text1: 'Error sharing the list. Please try again later.',
-          });
-      } finally {
-          setIsModalVisible(false); // סוגר את המודל
-      }
-  } else {
-      // במקרה שה-userId או token לא קיימים
-      Toast.show({
+        );
+
+        console.log('Sending data:', data);
+        console.log('Response from server:', response.data);
+
+        // שיתוף הקישור לאחר שמירת הנתונים
+        await Share.share({
+          message: `Title: ${title}\nDescription: ${description.join('\n')}`,
+        });
+
+        // הודעת הצלחה
+        Toast.show({
+          type: 'success',
+          text1: 'List shared successfully!',
+        });
+      } catch (error: any) {
+        console.error('Error sharing list item:', error);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+        }
+        Toast.show({
           type: 'error',
-          text1: 'User ID or token not found. Please log in again.',
+          text1: 'Error sharing the list. Please try again later.',
+        });
+      } finally {
+        setIsModalVisible(false);
+      }
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: 'User ID or token not found. Please log in again.',
       });
-  }
-};
+    }
+  };
 
 
-// needddddddd -- shhhhaarreeeeeeeeeeeeeeeee
-
-// colorrrrr************* -- colooooooorrrrrrrrrrrrrrr ********************
-
-
-const handleTextColorChange = async (color: HsvColor | string) => {
-  const colorHex = typeof color === 'string' ? color : hsvToHex(color.h, color.s, color.v);
-  setTextColor(colorHex);
-  await AsyncStorage.setItem('textColor', colorHex); // שמירה באמצעות AsyncStorage
-  setIsTextColorPickerVisible(false);
-};
-
-const handleBackgroundColorChange = async (color: HsvColor | string) => {
-  const colorHex = typeof color === 'string' ? color : hsvToHex(color.h, color.s, color.v);
-  setBackgroundColor(colorHex);
-  await AsyncStorage.setItem('backgroundColor', colorHex); // שמירה באמצעות AsyncStorage
-  setIsBackgroundPickerVisible(false);
-};
+  // needddddddd -- shhhhaarreeeeeeeeeeeeeeeee
 
   // colorrrrr************* -- colooooooorrrrrrrrrrrrrrr ********************
+
+
+  const handleTextColorChange = async (color: HsvColor | string) => {
+    const colorHex = typeof color === 'string' ? color : hsvToHex(color.h, color.s, color.v);
+    setTextColor(colorHex);
+    await AsyncStorage.setItem('textColor', colorHex); // שמירה באמצעות AsyncStorage
+    setIsTextColorPickerVisible(false);
+  };
+
+  const handleBackgroundColorChange = async (color: HsvColor | string) => {
+    const colorHex = typeof color === 'string' ? color : hsvToHex(color.h, color.s, color.v);
+    setBackgroundColor(colorHex);
+    await AsyncStorage.setItem('backgroundColor', colorHex); // שמירה באמצעות AsyncStorage
+    setIsBackgroundPickerVisible(false);
+  };
+
+  // colorrrrr************* -- colooooooorrrrrrrrrrrrrrr ********************
+
   //imaaggeeeeeeeeeeeee -- imaaggeeeeeeeeeeeee ******************** $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+  // itemId: number)
 
   const handleAddImage = async (itemId: number) => {
     console.log('====================================');
@@ -280,223 +288,338 @@ const handleBackgroundColorChange = async (color: HsvColor | string) => {
     console.log('====================================');
     // בקשת הרשאה לגלריה
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
+
     if (!permissionResult.granted) {
       alert("נדרשת הרשאה לגשת לגלריה!");
       return;
     }
-  
+
     // פתיחת גלריה לבחירת תמונה
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true, // אופציה לבחירה מרובה (אם נתמך)
       quality: 1,
     });
-  
+
     if (!result.canceled && result.assets) {
-      // הגדרה מפורשת של סוג התמונות במערך
-      const selectedImages = result.assets.map((image: ImagePicker.ImageInfo) => image.uri);
-  
-      // הוספת התמונות שנבחרו למערך התמונות
-      // setImages((prevImages) => [...prevImages, ...selectedImages]);
-  
+      const selectedImages = result.assets.map((image: ImagePicker.ImageInfo) => ({
+        uri: image.uri,
+        text: '', // טקסט התחלתי ריק
+        size: 100, // גובה התמונה ברירת מחדל
+      }));
+      setImages((prevImages) => [...prevImages, ...selectedImages]);
+
+
       console.log(`נבחרו ${selectedImages.length} תמונות עבור פריט ID: ${itemId}`);
+
+      // כאן הוסף את הקוד להוספת התמונות לשרת
+      try {
+        await axios.patch(`http://127.0.0.1:8000/listitem/${itemId}/`, {
+          images: selectedImages // כאן יש להניח שהשדה בשרת נקרא 'images'
+        });
+        Toast.show({
+          type: 'success',
+          text1: 'התמונות נוספו בהצלחה!',
+        });
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'שגיאה בהוספת התמונות',
+          text2: 'נא לנסות שוב מאוחר יותר',
+        });
+        console.error('Error adding images:', error);
+      }
     }
   };
+
   
-
-
-
-
-
-
-
 
 
 
 
   //imaaggeeeeeeeeeeeee -- imaaggeeeeeeeeeeeee ******************** $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-// *********************************************************** 
+  // *********************************************************** 
 
-const handleDeleteItem = async (itemId: number) => {
-  try {
-    await axios.patch(`http://127.0.0.1:8000/listitem/${itemId}/`, {
-      is_active: false,
-    });
-    Toast.show({
-      type: 'success',
-      text1: 'The item has been deleted successfully!',
-    });
-    setIsMenuVisible(false);
-    navigation.navigate('Home');
-  } catch (error) {
-    Toast.show({
-      type: 'error',
-      text1: 'Error deleting the item',
-      text2: 'Please try again later',
-    });
-    console.error('Error updating item:', error, 'Item ID:', itemId);
-  }
-};
+  const handleDeleteItem = async (itemId: number) => {
+    try {
+      await axios.patch(`http://127.0.0.1:8000/listitem/${itemId}/`, {
+        is_active: false,
+      });
+      Toast.show({
+        type: 'success',
+        text1: 'The item has been deleted successfully!',
+      });
+      setIsMenuVisible(false);
+      navigation.navigate('Home');
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error deleting the item',
+        text2: 'Please try again later',
+      });
+      console.error('Error updating item:', error, 'Item ID:', itemId);
+    }
+  };
 
-const handleUpdateList = async () => {
-  try {
-    await axios.patch(`http://127.0.0.1:8000/listitem/${item.id}/`, {
-      title,
-      description,
-    });
-    Toast.show({
-      type: 'success',
-      text1: 'The list has been updated successfully!',
-    });
-    navigation.navigate('Home');
-  } catch (error) {
-    Toast.show({
-      type: 'error',
-      text1: 'Error updating the item',
-      text2: 'Please try again later',
-    });
-    console.error('Error updating list:', error);
-  }
-};
+  const handleUpdateList = async () => {
+    try {
+      await axios.patch(`http://127.0.0.1:8000/listitem/${item.id}/`, {
+        title,
+        description,
+        image: images, // השתנה ל-'image' כי זה השם במסד הנתונים שלך
+      });
+      Toast.show({
+        type: 'success',
+        text1: 'The list has been updated successfully!',
+      });
+      navigation.navigate('Home');
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error updating the item',
+        text2: 'Please try again later',
+      });
+      console.error('Error updating list:', error);
+    }
+  };
 
 
 
-return (
-  <View style={styles.container}>
-    <View style={styles.header}>
-      <TextInput
-        style={[styles.titleInput, { outline: 'none' }]}
-        value={title}
-        onChangeText={setTitle}
-        placeholder="Edit Title"
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TextInput
+          style={[styles.titleInput, { outline: 'none' }]}
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Edit Title"
+        />
+        <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.menuButton}>
+          <Entypo name="dots-three-horizontal" size={35} color="black" />
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={description}
+        renderItem={({ item, index }) => (
+          <View style={styles.descriptionItem}>
+            <TouchableOpacity onPress={() => handleToggleItem(index)}>
+              <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={24} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginLeft: 15 }}>
+              <AntDesign name="delete" size={20} color="red" />
+            </TouchableOpacity>
+            <TextInput
+              style={[
+                styles.textArea,
+                {
+                  outline: 'none',
+                  textDecorationLine: item.includes('✔️') ? 'line-through' : 'none',
+                },
+              ]}
+              placeholder="Write here..."
+              multiline={false}  // Set to false for a single line
+              value={item}
+              onChangeText={(text) => handleDescriptionChange(text, index)}
+            />
+          </View>
+        )}
+        keyExtractor={(_, index) => index.toString()}
       />
-      <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.menuButton}>
-        <Entypo name="dots-three-horizontal" size={35} color="black" />
-      </TouchableOpacity>
-    </View>
-    <FlatList
-      data={description}
-      renderItem={({ item, index }) => (
-        <View style={styles.descriptionItem}>
-          <TouchableOpacity onPress={() => handleToggleItem(index)}>
-            <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={24} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginLeft: 15 }}>
-            <AntDesign name="delete" size={20} color="red" />
-          </TouchableOpacity>
-          <TextInput
-            style={[
-              styles.textArea,
-              {
-                outline: 'none',
-                textDecorationLine: item.includes('✔️') ? 'line-through' : 'none',
-              },
-            ]}
-            placeholder="Write here..."
-            multiline={false}  // Set to false for a single line
-            value={item}
-            onChangeText={(text) => handleDescriptionChange(text, index)}
-          />
-        </View>
-      )}
-      keyExtractor={(_, index) => index.toString()}
-    />
-    <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
-      <Text style={styles.addItemButtonText}>Add Item</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
-      <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
-    </TouchableOpacity>
 
-    {/* iff i need thiss ???????????????/ */}
-    <Modal visible={isMenuVisible} transparent={true} animationType="slide">
-      <View style={styles.modalBackground}>
-        <TouchableOpacity style={styles.iconContainer}>
+
+
+
+      <FlatList
+        data={images}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View style={{ marginBottom: 10 }}>
+            <Image
+              source={{ uri: item.uri }}
+              style={{ width: item.size, height: item.size }} // כאן תשתמש בגודל של התמונה
+            />
+            <TextInput
+              value={item.text}
+              onChangeText={(text) => {
+                const newImages = [...images];
+                newImages[index].text = text; // עדכון הטקסט
+                setImages(newImages);
+              }}
+              placeholder="כתוב משהו על התמונה"
+              style={{ borderWidth: 1, marginVertical: 5 }}
+            />
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity
+                onPress={() => {
+                  const newImages = [...images];
+                  newImages[index].size = Math.max(newImages[index].size - 10, 20); // הקטנת הגובה ב-10
+                  setImages(newImages);
+                }}
+              >
+                <Ionicons name="remove" size={24} color="black" /> {/* אייקון מינוס */}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  const newImages = [...images];
+                  newImages[index].size += 10; // הגדלת הגובה ב-10
+                  setImages(newImages);
+                }}
+              >
+                <Ionicons name="add" size={24} color="black" /> {/* אייקון פלוס */}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  const newImages = images.filter((_, imgIndex) => imgIndex !== index); // מחיקת התמונה
+                  setImages(newImages);
+                }}
+                style={{ marginLeft: 10 }}
+              >
+                <Ionicons name="trash" size={24} color="red" /> {/* אייקון פח */}
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+        numColumns={3} // כדי ליצור תצוגה רשתית
+      />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
+        <Text style={styles.addItemButtonText}>Add Item</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
+        <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
+      </TouchableOpacity>
+
+      <Modal visible={isMenuVisible} transparent={true} animationType="slide">
+        <View style={styles.modalBackground}>
+
+          {/* iff i need thiss ???????????????/ */}
+
+
+          {/* <TouchableOpacity style={styles.iconContainer}>
           <Ionicons name="list-circle-outline" size={50} color="white" />
           <Text style={styles.iconLabel}>Add List</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        {/* iff i need thiss ??????????????????/ */}
+          {/* iff i need thiss ??????????????????/ */}
 
-        <TouchableOpacity onPress={() => setIsBackgroundPickerVisible(true)} style={styles.iconContainer}>
-          <Ionicons name="color-palette-outline" size={50} color="white" />
-          <Text style={styles.iconLabel}>Background</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsTextColorPickerVisible(true)} style={styles.iconContainer}>
-          <Ionicons name="text-outline" size={50} color="white" />
-          <Text style={styles.iconLabel}>Text Color</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => setIsBackgroundPickerVisible(true)} style={styles.iconContainer}>
+            <Ionicons name="color-palette-outline" size={50} color="white" />
+            <Text style={styles.iconLabel}>Background</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setIsTextColorPickerVisible(true)} style={styles.iconContainer}>
+            <Ionicons name="text-outline" size={50} color="white" />
+            <Text style={styles.iconLabel}>Text Color</Text>
+          </TouchableOpacity>
 
-        {/* כאן יש להוסיף ColorPicker לבחירת צבע */}
-        {isBackgroundPickerVisible && (
-          <ColorPicker
-            onColorChange={handleBackgroundColorChange}
-            sliderComponent={Slider as any}
-          />
-        )}
-        {isTextColorPickerVisible && (
-          <ColorPicker
-            onColorChange={handleTextColorChange}
-            sliderComponent={Slider as any}
-          />
-        )}
-        {/* <TouchableOpacity style={styles.iconContainer} onPress={() => handleShare()}>
+          {/* כאן יש להוסיף ColorPicker לבחירת צבע */}
+          {isBackgroundPickerVisible && (
+            <ColorPicker
+              onColorChange={handleBackgroundColorChange}
+              sliderComponent={Slider as any}
+            />
+          )}
+          {isTextColorPickerVisible && (
+            <ColorPicker
+              onColorChange={handleTextColorChange}
+              sliderComponent={Slider as any}
+            />
+          )}
+          {/* <TouchableOpacity style={styles.iconContainer} onPress={() => handleShare()}>
             <Ionicons name="share-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Share</Text>
           </TouchableOpacity> */}
 
-        <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
-          <Ionicons name="share-outline" size={50} color="white" />
-          <Text style={styles.iconLabel}>Share</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
+            <Ionicons name="share-outline" size={50} color="white" />
+            <Text style={styles.iconLabel}>Share</Text>
+          </TouchableOpacity>
 
 
-        {isModalVisible && (
-          <View style={styles.modalContainer}>
-            <Text>Select Permission:</Text>
-            <TouchableOpacity onPress={() => handlePermissionSelect('read_only')}>
-              <Text style={{ color: isReadOnlySelected ? 'blue' : 'black' }}>Read Only</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handlePermissionSelect('full_access')}>
-              <Text style={{ color: isFullAccessSelected ? 'blue' : 'black' }}>Full Access</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleConfirmShare}>
-              <Text>Confirm Share</Text>
-            </TouchableOpacity>
-          </View>
-        )}
 
 
-        {/* immaaaggeeeeeeeeee ??????????????????/ */}
+          {/* תפריטט של השיתוףף */}
+
+          {isModalVisible && (
+            <View style={styles.modalContainer}>
+              <Text>Select Permission:</Text>
+              <TouchableOpacity onPress={() => handlePermissionSelect('read_only')}>
+                <Text style={{ color: isReadOnlySelected ? 'blue' : 'black' }}>Read Only</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handlePermissionSelect('full_access')}>
+                <Text style={{ color: isFullAccessSelected ? 'blue' : 'black' }}>Full Access</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleConfirmShare}>
+                <Text>Confirm Share</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                <Text style={{ color: 'red' }}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
 
-        <TouchableOpacity style={styles.iconContainer} onPress={() => handleAddImage(item.id)}>
-          <AntDesign name="upload" size={50} color="white" />
-          <Text style={styles.iconLabel}>Add Image</Text>
-        </TouchableOpacity>
 
-        {/* iff i need thiss ??????????????????/ */}
+          {/* immaaaggeeeeeeeeee ??????????????????/ */}
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {images.map((uri, index) => (
-            <Image key={index} source={{ uri }} style={{ width: 100, height: 100, margin: 5 }} />
-          ))}
+
+          <TouchableOpacity style={styles.iconContainer} onPress={() => handleAddImage(item?.id)}>
+            <AntDesign name="upload" size={50} color="white" />
+            <Text style={styles.iconLabel}>Add Image</Text>
+          </TouchableOpacity>
+
+          {/* iff i need thiss ??????????????????/ */}
+          {/* 
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {images.map((uri, index) => (
+              <Image key={index} source={{ uri }} style={{ width: 100, height: 100, margin: 5 }} />
+            ))}
+          </View> */}
+          {/* iff i need thiss ??????????????????/ */}
+          {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(item.id)}>
+            <AntDesign name="delete" size={50} color="white" />
+            <Text style={styles.iconLabel}>Delete</Text>
+          </TouchableOpacity>}
+          <TouchableOpacity onPress={() => setIsMenuVisible(false)} style={styles.iconContainer}>
+            <Ionicons name="close-circle-outline" size={50} color="white" />
+            <Text style={styles.iconLabel}>Close</Text>
+          </TouchableOpacity>
         </View>
-        {/* iff i need thiss ??????????????????/ */}
-        {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(item.id)}>
-          <AntDesign name="delete" size={50} color="white" />
-          <Text style={styles.iconLabel}>Delete</Text>
-        </TouchableOpacity>}
-        <TouchableOpacity onPress={() => setIsMenuVisible(false)} style={styles.iconContainer}>
-          <Ionicons name="close-circle-outline" size={50} color="white" />
-          <Text style={styles.iconLabel}>Close</Text>
-        </TouchableOpacity>
-      </View>
-    </Modal>
-  </View>
-);
+      </Modal>
+    </View>
+  );
 };
 
 
