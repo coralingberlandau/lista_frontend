@@ -1,14 +1,14 @@
 // types.ts
 export type RootStackParamList = {
-    Login: undefined;          // מסך הלוגין, אין לו פרמטרים
-    Home: undefined // הוספת פרמטר אפשרי בשם refresh
-    Register: undefined;
-    // AddListItem: { onGoBack: () => Promise<void> }; // נוסיף את הפרמטרים כאן
-    Settings: undefined;
-    ListItemDetails?: { item: ListItem }; // פרמטר חדש עבור פרטי האייטם
-    // הוסף כאן מסכים נוספים לפי הצורך
-  };
-  
+  Login: undefined;          // מסך הלוגין, אין לו פרמטרים
+  Home: undefined // הוספת פרמטר אפשרי בשם refresh
+  Register: undefined;
+  // AddListItem: { onGoBack: () => Promise<void> }; // נוסיף את הפרמטרים כאן
+  Settings: undefined;
+  ListItemDetails?: { item: ListItem }; // פרמטר חדש עבור פרטי האייטם
+  // הוסף כאן מסכים נוספים לפי הצורך
+};
+
 export type JwtPayload = {
   exp: number;
   iat: number;
@@ -36,8 +36,20 @@ export interface ListItem {
   is_active: boolean;
 }
 
+export interface GroupListResponse {
+  message: string;
+  data: {
+    id: number;
+    user: number;
+    list_item: number;
+    date_joined: string;
+    role: string;
+    permission_type: string;
+  };
+}
 
-declare module 'react-color'{
+
+declare module 'react-color' {
 
   export interface HsvColor {
     h: number; // Hue
@@ -46,7 +58,7 @@ declare module 'react-color'{
   }
 
   export function hsvToHex(h: number, s: number, v: number): string;
-  
+
 }
 
 

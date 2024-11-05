@@ -9,10 +9,14 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-      }}>
+      // screenOptions={{
+      //   tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      //   headerShown: false,
+
+      // }}
+      >
+
+      
       <Tabs.Screen
         name="Home"
         options={{
@@ -21,7 +25,9 @@ export default function TabLayout() {
             <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
           ),
         }}
-      />
+      /> 
+
+{/*       
       <Tabs.Screen
         name="explore"
         options={{
@@ -30,8 +36,10 @@ export default function TabLayout() {
             <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
           ),
         }}
-      />
-      <Tabs.Screen
+      /> */}
+
+
+      {/* <Tabs.Screen
         name="coral"
         options={{
           title: 'Coral',
@@ -39,7 +47,10 @@ export default function TabLayout() {
             <TabBarIcon name="wifi" color={color} />
           ),
         }}
-      />
+      /> */}
+
+
+
     </Tabs>
   );
 }

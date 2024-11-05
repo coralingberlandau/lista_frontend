@@ -4,23 +4,18 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Input from '@/components/Input';
 import { StackNavigationProp } from '@react-navigation/stack';
-import axios from 'axios'; // הוספת Axios
-import { jwtDecode } from 'jwt-decode'; // זה הייבוא הנכון של jwt-decode
+import axios from 'axios'; 
+import { jwtDecode } from 'jwt-decode'; 
 import { JwtPayload, RootStackParamList } from './type';
 
 // הגדרת סוג הניווט למסך הלוגין
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> }> = ({ setIsLoggedIn }) => {
-  const [username, setUsername] = useState<string>(''); // שדה שם משתמש
+  const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [errorText, setErrorText] = useState('');
-
   const navigation = useNavigation<LoginScreenNavigationProp>();
-
-  // נווט לדף הבית או לדף אחר
-  // navigation.navigate('Home', { refresh: true });
-
 
   const handleLogin = async () => {
     // איפוס הודעת השגיאה
@@ -103,8 +98,8 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
       <Button title="Login" onPress={handleLogin} />
 
       <Text style={styles.errorText}>{errorText}</Text>
-
       <View style={styles.registerContainer}>
+
         <Text style={styles.registerText}>Not registered?</Text>
         <TouchableOpacity onPress={navigateToRegister}>
           <Text style={styles.registerLink}>Click here to sign up</Text>
@@ -143,7 +138,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'red',
     textAlign: 'center',
-    height: 40, // המרווח הרצוי
+    marginTop: 20, 
   },
 });
 

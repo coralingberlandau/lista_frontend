@@ -50,6 +50,7 @@ const App: React.FC = () => {
               tabBarIcon: ({ color, focused }) => (
                 <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
               ),
+              headerShown: false, // הסרת הכותרת
             }} />
 
           {/* <Tab.Screen name="AddListItem" component={AddListItem}
@@ -57,7 +58,7 @@ const App: React.FC = () => {
           /> */}
 
           <Tab.Screen name="ListItemDetails" component={ListItemDetails}
-            options={{ tabBarButton: () => null }}
+            options={{ tabBarButton: () => null , headerShown: false }}
           />
 
           <Tab.Screen name="Settings" component={Settings}
@@ -66,6 +67,7 @@ const App: React.FC = () => {
               tabBarIcon: ({ color, focused }) => (
                 <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
               ),
+              headerShown: false, // הסרת הכותרת
             }}
           />
 
@@ -73,22 +75,13 @@ const App: React.FC = () => {
         </Tab.Navigator>
       ) : (
         <Stack.Navigator>
-          <Stack.Screen name="Login">
+          <Stack.Screen name="Login" options={{ headerShown: false }}>
             {(props) => <Login {...props} setIsLoggedIn={setIsLoggedIn} />}
           </Stack.Screen>
 
-
-          {/* <Stack.Screen name="Register" component={Register} /> */}
-
-          <Stack.Screen name="Register">
+          <Stack.Screen name="Register" options={{ headerShown: false }}>
             {(props) => <Register {...props} setIsLoggedIn={setIsLoggedIn} />}
           </Stack.Screen>
-
-
-
-
-
-
 
         </Stack.Navigator>
       )}

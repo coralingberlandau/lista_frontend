@@ -19,6 +19,7 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   const [password, setPassword] = useState<string>('');
   const navigation = useNavigation<RegisterScreenNavigationProp>();
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null); // מצב חדש עבור שגיאות מייל
 
   // משתנה לבדיקת מילוי כל השדות
   const allFieldsFilled: boolean =
@@ -28,13 +29,26 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
     email.trim() !== '' &&
     password.trim() !== '';
 
+  // פונקציית בדיקת מייל
+  const isValidEmail = (email: string): boolean => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  };
+
   const handleRegister = async () => {
     console.log('Register button pressed'); // הוספת לוג כאן
+
+    setError(null);
+    setEmailError(null); // איפוס שגיאת המייל לפני הבדיקה
+
     if (!allFieldsFilled) {
       setError('All fields must be filled in to complete the registration.');
       console.log('All fields not filled'); // לוג נוסף
-
       return;
+    }
+    if (!isValidEmail(email)) {
+      setEmailError('The email is invalid. Please enter a valid email address.'); // הגדרת שגיאת מייל אם הוא לא תקין
+      return; // הפסקת התהליך אם המייל לא תקין
     }
 
     if (username && firstName && lastName && email && password) {
@@ -116,16 +130,6 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
     };
   }
 
-        // {/* {/*  */}
-        // {error === 'Username already exists' ? (
-        //   <Text style={{ color: 'red', textAlign: 'center' }}>This username is already taken. Please choose another one.</Text>
-        // ) :
-        //   (!allFieldsFilled ? (
-        //     <Text style={{ color: 'red', textAlign: 'center' }}>All fields must be filled in to complete the registration.</Text>
-        //   ) : (
-        //     <Text style={{ color: 'red', textAlign: 'center' }}>Error 500 - Something went wrong. Please try again.</Text>
-        //   ))} 
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register</Text>
@@ -166,8 +170,12 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
 
       <Button title="Register" onPress={handleRegister} />
 
-      {error && <Text style={styles.erroText}>{error}</Text>}
-
+      {/* הצגת הודעות השגיאה */}
+      {(error || emailError) && (
+        <Text style={styles.erroText}>
+          {error || emailError} {/* הצגת אחת מהשגיאות */}
+        </Text>
+      )}
       <View style={styles.loginContainer}>
         <Text style={styles.loginText}>Already have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -207,8 +215,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'red',
     textAlign: 'center',
-    height: 0, // המרווח הרצוי (תוכל לשנות לפי הצורך)
-
+    marginTop: 20,
   },
 });
 

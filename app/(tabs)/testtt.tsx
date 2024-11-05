@@ -1,3 +1,94 @@
+
+
+
+          {/* 
+          <Modal visible={isModalVisible} animationType="slide">
+            <View style={styles.modalContainer}>
+              <Text>Select Permission Type:</Text>
+              <TouchableOpacity onPress={() => setPermissionType('read_only')}>
+                <Text>Read Only</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setPermissionType('read_write')}>
+                <Text>Read and Write</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleConfirmShare}>
+                <Text>Share</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                <Text>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal> */}
+
+
+          
+//   {/* מודל השיתוף */}
+//   <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+//   <View style={styles.modalOverlay}>
+//     <View style={styles.modalContainer}>
+//       <Text style={styles.modalTitle}>Select Permission Type:</Text>
+
+//       <View style={styles.optionContainer}>
+//         <CheckBox
+//           value={isReadOnlySelected}
+//           onValueChange={() => handlePermissionSelect('read_only')}
+//           style={styles.checkbox}
+//         />
+//         <Text style={styles.optionText}>Read Only</Text>
+//       </View>
+
+//       <View style={styles.optionContainer}>
+//         <CheckBox
+//           value={isFullAccessSelected}
+//           onValueChange={() => handlePermissionSelect('full_access')}
+//           style={styles.checkbox}
+//         />
+//         <Text style={styles.optionText}>Full Access</Text>
+//       </View>
+
+//       <TouchableOpacity onPress={handleConfirmShare} style={styles.confirmButton}>
+//         <Text style={styles.confirmButtonText}>Share</Text>
+//       </TouchableOpacity>
+
+//       <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeButton}>
+//         <Ionicons name="close-circle" size={24} color="gray" />
+//       </TouchableOpacity>
+//     </View>
+//   </View>
+// </Modal>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import React, { useState } from 'react';
 // import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 // import { RouteProp, useRoute } from '@react-navigation/native';

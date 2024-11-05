@@ -2,25 +2,23 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 
 const Settings: React.FC = () => {
-  // הגדרת הפרמטרים ישירות בקומפוננטה
   const appName = "Lista Application";
   const version = "1.0.0";
-  const supportContact = "Coral Landau: lista@support.com";
-
+  const supportContact = "lista support: listaassistance@gmail.com"
+  
   const handleEmailPress = () => {
-    Linking.openURL(`mailto:${supportContact.split(': ')[1]}`); // שולח דוא"ל לכתובת בלבד
-  };
+    Linking.openURL(`mailto:${supportContact.split(': ')[1]}`)};
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{appName}</Text>
       <Text style={styles.version}>Version: {version}</Text>
-      
+
       <Text style={styles.sectionTitle}>General Settings</Text>
-      <TouchableOpacity style={styles.settingOption} onPress={() => {}}>
+      <TouchableOpacity style={styles.settingOption} onPress={() => { }}>
         <Text style={styles.settingText}>Notifications</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.settingOption} onPress={() => {}}>
+      <TouchableOpacity style={styles.settingOption} onPress={() => { }}>
         <Text style={styles.settingText}>Theme</Text>
       </TouchableOpacity>
 
@@ -30,8 +28,13 @@ const Settings: React.FC = () => {
         <Text style={styles.supportContact}>{supportContact}</Text>
       </TouchableOpacity>
 
-      {/* הודעה במקום ה-alert */}
       <Text style={styles.notification}>If you need any assistance, feel free to reach out!</Text>
+      <Text style={styles.inspirationText}>
+        Keep achieving great things with Lista!
+      </Text>
+      <Text style={styles.footerText}>
+        © All rights reserved to Coral Landau, Founder of Lista.
+      </Text>
     </View>
   );
 };
@@ -80,6 +83,19 @@ const styles = StyleSheet.create({
   notification: {
     fontSize: 16,
     color: 'green',
+    marginVertical: 15,
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#777',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  inspirationText: {
+    fontSize: 15,
+    color: '#555',
+    textAlign: 'center',
+    fontStyle: 'italic',
     marginVertical: 15,
   },
 });
