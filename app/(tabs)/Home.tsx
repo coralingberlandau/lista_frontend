@@ -14,7 +14,7 @@ const Home: React.FC = () => {
   const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation<NavigationProp>();
-  
+
   useFocusEffect(
     useCallback(() => {
       fetchData()
@@ -24,38 +24,85 @@ const Home: React.FC = () => {
 
   // http://127.0.0.1:8000/grouplists/ ------ get
 
+  // http://127.0.0.1:8000/grouplists/by-user/1/ --- getby id
+
+
+  // const fetchData = useCallback(async () רק מהליסטטאייטטםם=> {
+  //   console.log('fetching');
+  //   setListItems([]); // נקה את הרשימה לפני הטעינה
+  //   const storedUsername = await AsyncStorage.getItem('userName');
+  //   const storedUserId = await AsyncStorage.getItem('userId');
+  //   const token = await AsyncStorage.getItem('token');
+
+  //   if (storedUsername) {
+  //     setUsername(storedUsername);
+  //   }
+
+  //   if (storedUserId && token) {
+  //     setLoading(true);
+
+  //     try {
+  //       const response = await axios.get(`http://127.0.0.1:8000/listitem/by-user/${storedUserId}/`, {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+  //       // סינון הרשימה להציג רק פריטים פעילים
+  //       const activeItems = response.data.filter((item: ListItem) => item.is_active);
+  //       setListItems(activeItems);
+  //       // setListItems(response.data);
+  //     } catch (error) {
+  //       console.error('Error fetching user list items:', error);
+  //       Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+  // }, []);
 
   const fetchData = useCallback(async () => {
-    console.log('fetching');
-    setListItems([]); // נקה את הרשימה לפני הטעינה
-    const storedUsername = await AsyncStorage.getItem('userName');
-    const storedUserId = await AsyncStorage.getItem('userId');
-    const token = await AsyncStorage.getItem('token');
+    // נקה את הרשימה לפני טעינה חדשה
+    setListItems([]);
+    setLoading(true); // הצג את מצב הטעינה
 
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
+    try {
+      // שליפת המידע מ-AsyncStorage
+      const storedUsername = await AsyncStorage.getItem('userName');
+      const storedUserId = await AsyncStorage.getItem('userId');
+      const token = await AsyncStorage.getItem('token');
 
-    if (storedUserId && token) {
-      setLoading(true);
-      try {
-        const response = await axios.get(`http://127.0.0.1:8000/listitem/by-user/${storedUserId}/`, {
+      console.log(token);
+
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      // אם יש שם משתמש, הגדר אותו
+      if (storedUsername) {
+        setUsername(storedUsername);
+      }
+
+      // אם יש userId ו-token, בצע את הבקשה
+      if (storedUserId && token) {
+        const response = await axios.get(`http://127.0.0.1:8000/grouplists/by-user/${storedUserId}/`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // הוסף את הטוקן בבקשה
           },
         });
+      
         // סינון הרשימה להציג רק פריטים פעילים
         const activeItems = response.data.filter((item: ListItem) => item.is_active);
-        setListItems(activeItems);
-        // setListItems(response.data);
-      } catch (error) {
-        console.error('Error fetching user list items:', error);
-        Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
-      } finally {
-        setLoading(false);
+        console.log('response', response)
+        setListItems(activeItems); // עדכון הרשימה
       }
+    } catch (error) {
+      console.error('Error fetching user list items:', error);
+      Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
+    } finally {
+      setLoading(false); // סיים את מצב הטעינה
     }
-  }, []);
+  }, []); // הפונקציה תתעדכן רק פעם אחת
+
 
   // פונקציה עבור ניווט ליצירת פריט חדש
   const handleAddListItem = () => {
@@ -75,7 +122,7 @@ const Home: React.FC = () => {
           <Text style={styles.greeting}>Hello, {username || 'Guest'}!</Text>
           <Text style={styles.title}>
             {/* Your List: */}
-            {listItems.length === 0 ? "Write your dreams here!": `Your List: ${listItems.length} items` } 
+            {listItems.length === 0 ? "Write your dreams here!" : `Your List: ${listItems.length} items`}
           </Text>
 
           <FlatList
