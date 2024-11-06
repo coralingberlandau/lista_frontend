@@ -65,6 +65,8 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
+// post griopulist - http://127.0.0.1:8000/grouplists/
+
 
   const handleAddItem = async () => {
     console.log('====================================');
@@ -87,7 +89,17 @@ const ListItemDetails: React.FC = () => {
           },
         });
 
+        console.log("printttt", storedUserId)
+
         console.log('List item added:', response.data);
+
+
+        // קבלת ה-ID של הפריט שנוצר
+        const itemId = response.data.id;
+
+        console.log('====================================');
+        console.log("printttt", storedUserId, "idddddddddd", itemId);
+        console.log('====================================');
 
           // לאחר הוספת הפריט, שמור את התמונות אם יש
 
@@ -102,12 +114,24 @@ const ListItemDetails: React.FC = () => {
           });
         }
 
+         // יצירת רשומה חדשה ב-GroupList
+         await axios.post(`http://127.0.0.1:8000/grouplists/`, {
+          user: storedUserId,
+          list_item: itemId,
+          role: 'admin', // הגדר תפקיד התחלתי, למשל "admin" ליוצר הרשימה
+          permission_type: 'full_access', // הרשאות גישה מלאות ליוצר הרשימה
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         Toast.show({
           type: 'success',
           text1: 'The list has been saved successfully!',
         });
 
-        setImages([]);  // לאפס את התמונות
+        setImages([]);  // ל
 
         navigation.navigate('Home');
 

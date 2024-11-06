@@ -21,6 +21,10 @@ const Home: React.FC = () => {
     }, [])
   );
 
+
+  // http://127.0.0.1:8000/grouplists/ ------ get
+
+
   const fetchData = useCallback(async () => {
     console.log('fetching');
     setListItems([]); // נקה את הרשימה לפני הטעינה

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -7,11 +7,9 @@ import { registerRootComponent } from 'expo';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import Toast from 'react-native-toast-message';
 
-// Import your screens
 import Home from './(tabs)/Home';
 import Login from './Login';
 import Register from './Register';
-// import AddListItem from './AddListItem';
 import ListItemDetails from './ListItemDetails';
 import Settings from './(tabs)/Settings';
 import { RootStackParamList } from './type';
@@ -21,18 +19,16 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // using boolean | null for loading state
-  const toastRef = useRef<any>(null);
-
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkLogin = async () => {
       try {
         const token = await AsyncStorage.getItem('userToken');
-        token && setIsLoggedIn(true); // If token exists, set isLoggedIn to true, otherwise false
+        token && setIsLoggedIn(true);
       } catch (error) {
         console.error('Error checking login status:', error);
-        setIsLoggedIn(false); // Set to false if there's an error
+        setIsLoggedIn(false);
       }
     };
 
@@ -43,35 +39,26 @@ const App: React.FC = () => {
     <NavigationContainer>
       {isLoggedIn ? (
         <Tab.Navigator>
-          {/* שימוש ב-Stack בתוך Tab */}
           <Tab.Screen name="Home" component={Home}
             options={{
               title: 'Home',
               tabBarIcon: ({ color, focused }) => (
                 <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
               ),
-              headerShown: false, // הסרת הכותרת
+              headerShown: false,
             }} />
-
-          {/* <Tab.Screen name="AddListItem" component={AddListItem}
-            options={{ tabBarButton: () => null }}
-          /> */}
-
           <Tab.Screen name="ListItemDetails" component={ListItemDetails}
             options={{ tabBarButton: () => null , headerShown: false }}
           />
-
           <Tab.Screen name="Settings" component={Settings}
             options={{
               title: 'Settings',
               tabBarIcon: ({ color, focused }) => (
                 <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
               ),
-              headerShown: false, // הסרת הכותרת
+              headerShown: false,
             }}
           />
-
-          {/* ניתן להוסיף מסכים נוספים כאן */}
         </Tab.Navigator>
       ) : (
         <Stack.Navigator>
@@ -86,7 +73,6 @@ const App: React.FC = () => {
         </Stack.Navigator>
       )}
       <Toast />
-
     </NavigationContainer>
   );
 }
