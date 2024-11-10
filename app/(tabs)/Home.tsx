@@ -28,7 +28,7 @@ const Home: React.FC = () => {
     try {
       const storedUsername = await AsyncStorage.getItem('userName');
       const storedUserId = await AsyncStorage.getItem('userId');
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('token');      
 
       console.log(token);
 

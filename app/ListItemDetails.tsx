@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, Button } from 'react-native';
 import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
-import { ListItem, RootStackParamList } from './type';
+import { ListItem, RootStackParamList, User } from './type';
 import { Ionicons, AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -12,6 +12,7 @@ import { Share } from 'react-native';
 import { HsvColor, hsvToHex } from 'react-color'; // או מהספרייה המתאימה
 import * as ImagePicker from 'expo-image-picker';
 import { ColorPicker } from 'react-native-color-picker';
+import { Picker } from '@react-native-picker/picker'; // Import Picker component
 import Slider from '@react-native-community/slider';
 
 
@@ -27,6 +28,8 @@ const ListItemDetails: React.FC = () => {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [title, setTitle] = useState(listItem ? listItem.title : '');
   const [items, setItems] = useState<string[]>(listItem ? listItem.items.split("|") : ['']);
+  const [permission, setPermission] = useState('read_only');
+  const [shareValue, setShareValue] = useState('');
 
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -39,9 +42,6 @@ const ListItemDetails: React.FC = () => {
   const [isTextColorPickerVisible, setIsTextColorPickerVisible] = useState(false);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [permissionType, setPermissionType] = useState('read_only'); // ברירת מחדל
-  const [isReadOnlySelected, setIsReadOnlySelected] = useState(false);
-  const [isFullAccessSelected, setIsFullAccessSelected] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [largeImage, setLargeImage] = useState(null);
@@ -188,16 +188,8 @@ const ListItemDetails: React.FC = () => {
     setIsModalVisible(true); // פותח את המודל
   };
 
-  const handlePermissionSelect = (type: any) => {
-    if (type === 'read_only') {
-      setIsReadOnlySelected(true);
-      setIsFullAccessSelected(false);
-      setPermissionType('read_only');
-    } else if (type === 'full_access') {
-      setIsReadOnlySelected(false);
-      setIsFullAccessSelected(true);
-      setPermissionType('full_access');
-    }
+  const handlePermissionSelect = (selectedPermission: string) => {
+    setPermission(selectedPermission);
   };
 
 
@@ -206,17 +198,8 @@ const ListItemDetails: React.FC = () => {
     const token = await AsyncStorage.getItem('token');
 
     if (storedUserId && token) {
-      const data = {
-        user: { id: storedUserId, username: 'your_username', password: 'your_password' }, // כאן יש לספק את שם המשתמש והסיסמה
-        list_item: listItem?.id,
-        role: 'member', 
-        permission_type: permissionType,
-      };
-
       try {
-        const response = await axios.post(
-          'http://127.0.0.1:8000/grouplists/',
-          data,
+        const userResponse: {data: User} = await axios.get(`http://127.0.0.1:8000/get_user_info/${shareValue}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -224,14 +207,17 @@ const ListItemDetails: React.FC = () => {
             },
           }
         );
-
-        console.log('Sending data:', data);
-        console.log('Response from server:', response.data);
-
-        await Share.share({
-          message: `Title: ${title}\nItems: ${items.join('\n')}`,
+        console.log(userResponse, userResponse.data.id)
+        await axios.post(`http://127.0.0.1:8000/grouplists/`, {
+          user: userResponse.data.id,
+          list_item: listItem?.id,
+          role: 'member', // הגדר תפקיד התחלתי, למשל "admin" ליוצר הרשימה
+          permission_type: permission, // הרשאות גישה מלאות ליוצר הרשימה
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
-
 
         Toast.show({
           type: 'success',
@@ -242,10 +228,19 @@ const ListItemDetails: React.FC = () => {
         if (error.response) {
           console.error('Response data:', error.response.data);
         }
-        Toast.show({
-          type: 'error',
-          text1: 'Error sharing the list. Please try again later.',
-        });
+        if(error.status === 404) {
+          Toast.show({
+            type: 'error',
+            text1: 'User not found. Please verify the email',
+          });
+        }
+        else {
+          Toast.show({
+            type: 'error',
+            text1: 'Error sharing the list. Please try again later.',
+          });
+        }
+        
       } finally {
         setIsModalVisible(false);
       }
@@ -528,30 +523,46 @@ const handleUpdateList = async () => {
             <Text style={styles.iconLabel}>Share</Text>
           </TouchableOpacity> */}
 
-          <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
+          {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
             <Ionicons name="share-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Share</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>}
 
           {/* תפריטט של השיתוףף */}
 
           {isModalVisible && (
-            <View style={styles.modalContainer}>
-              <Text>Select Permission:</Text>
-              <TouchableOpacity onPress={() => handlePermissionSelect('read_only')}>
-                <Text style={{ color: isReadOnlySelected ? 'blue' : 'black' }}>Read Only</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handlePermissionSelect('full_access')}>
-                <Text style={{ color: isFullAccessSelected ? 'blue' : 'black' }}>Full Access</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleConfirmShare}>
-                <Text>Confirm Share</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                <Text style={{ color: 'red' }}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+        <View style={styles.modalContainer}>
+          <Text>Select Permission:</Text>
+
+          {/* Dropdown for permissions */}
+          <Picker
+            selectedValue={permission}
+            onValueChange={handlePermissionSelect}
+            style={{ height: 50, width: 200 }}
+          >
+            <Picker.Item label="Read Only" value="read_only" />
+            <Picker.Item label="Full Access" value="full_access" />
+          </Picker>
+
+          {/* Text Input for custom value */}
+          <TextInput
+            placeholder="Enter a value"
+            value={shareValue}
+            onChangeText={setShareValue}
+            style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
+          />
+
+          {/* Confirm Share Button */}
+          <TouchableOpacity onPress={handleConfirmShare}>
+            <Text>Confirm Share</Text>
+          </TouchableOpacity>
+
+          {/* Close Button */}
+          <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+            <Text style={{ color: 'red' }}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
           {/* immaaaggeeeeeeeeee ??????????????????/ */}
 

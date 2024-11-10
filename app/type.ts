@@ -66,6 +66,10 @@ export interface Image {
   type: string;
 }
 
+export interface User {
+  id: number
+}
+
 // interface RegisterProps {
 //   setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>;
 // }
