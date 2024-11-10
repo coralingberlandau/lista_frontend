@@ -1,7 +1,9 @@
 // types.ts
 export type RootStackParamList = {
-  Login: undefined;          // מסך הלוגין, אין לו פרמטרים
-  Home: undefined // הוספת פרמטר אפשרי בשם refresh
+  Login: undefined;  
+  Home: { refresh?: boolean };         // מסך הבית, פרמטר אופציונלי בשם refresh
+  // מסך הלוגין, אין לו פרמטרים
+  // Home: undefined // הוספת פרמטר אפשרי בשם refresh
   Register: undefined;
   Settings: undefined;
   ListItemDetails?: { listItem: ListItem }; // פרמטר חדש עבור פרטי האייטם
@@ -68,6 +70,14 @@ export interface Image {
 
 export interface User {
   id: number
+}
+
+
+export interface ListItemImage {
+  id: number; // או כל מזהה אחר של התמונה
+  list_item: ListItem; // המידע על האייטם שאליו שייכת התמונה
+  image: string; // ה-URL של התמונה
+
 }
 
 // interface RegisterProps {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -8,8 +8,9 @@ import { ListItem, RootStackParamList } from '../type';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'ListItemDetails'>;
+type HomeProps = {setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean | null>>;};
 
-const Home: React.FC = () => {
+const Home: React.FC<HomeProps> = ({ setIsLoggedIn }) => {
   const [listItems, setListItems] = useState<ListItem[]>([]);
   const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,7 +29,7 @@ const Home: React.FC = () => {
     try {
       const storedUsername = await AsyncStorage.getItem('userName');
       const storedUserId = await AsyncStorage.getItem('userId');
-      const token = await AsyncStorage.getItem('token');      
+      const token = await AsyncStorage.getItem('token');
 
       console.log(token);
 
@@ -42,21 +43,21 @@ const Home: React.FC = () => {
       if (storedUserId && token) {
         const response = await axios.get(`http://127.0.0.1:8000/grouplists/by-user/${storedUserId}/`, {
           headers: {
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
         });
-      
+
         const activeItems = response.data.filter((item: ListItem) => item.is_active);
         console.log('response', response)
-        setListItems(activeItems); 
+        setListItems(activeItems);
       }
     } catch (error) {
       console.error('Error fetching user list items:', error);
       Alert.alert('Error', 'Failed to fetch your list items. Please try again later.');
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
-  }, []); 
+  }, []);
 
 
   const handleAddListItem = () => {
@@ -64,6 +65,19 @@ const Home: React.FC = () => {
   };
   const handlePressItem = (item: ListItem) => {
     navigation.navigate('ListItemDetails', { listItem: item });
+  };
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('userName');
+      await AsyncStorage.removeItem('userId');
+
+      setIsLoggedIn(false);
+
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Error', 'Something went wrong while logging out.');
+    }
   };
 
   return (
@@ -73,6 +87,13 @@ const Home: React.FC = () => {
       ) : (
         <>
           <Text style={styles.greeting}>Hello, {username || 'Guest'}!</Text>
+
+
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <AntDesign name="logout" size={30} color="black" />
+          </TouchableOpacity>
+
+
           <Text style={styles.title}>
             {listItems.length === 0 ? "Write your dreams here!" : `Your List: ${listItems.length} items`}
           </Text>
@@ -93,6 +114,8 @@ const Home: React.FC = () => {
           <TouchableOpacity style={styles.addButton} onPress={handleAddListItem}>
             <AntDesign name="pluscircleo" size={45} color="black" />
           </TouchableOpacity>
+
+
         </>
       )}
     </View>
@@ -133,14 +156,25 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontWeight: 'bold',
-    fontSize: 18, 
+    fontSize: 18,
   },
   descriptionText: {
-    fontSize: 16, 
-    lineHeight: 24, 
+    fontSize: 16,
+    lineHeight: 24,
     color: '#333',
-    marginTop: 5, 
+    marginTop: 5,
   },
+  logoutButton: {
+    position: 'absolute', // למיקום בעמוד
+    top: 20, // למקם למעלה (בקרבת שם המשתמש)
+    right: 20, // למקם בצד ימין של המסך
+    backgroundColor: 'white',
+    padding: 10, // להוסיף מרווחים
+    borderRadius: 50, // עיגול מלא
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
 });
 
 export default Home;

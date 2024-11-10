@@ -17,9 +17,9 @@ import { RootStackParamList } from './type';
 const Tab = createBottomTabNavigator<RootStackParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
-
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -39,16 +39,20 @@ const App: React.FC = () => {
     <NavigationContainer>
       {isLoggedIn ? (
         <Tab.Navigator>
-          <Tab.Screen name="Home" component={Home}
+
+          <Tab.Screen
+            name="Home"
+            children={(props) => <Home {...props} setIsLoggedIn={setIsLoggedIn} />}
             options={{
               title: 'Home',
               tabBarIcon: ({ color, focused }) => (
                 <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
               ),
               headerShown: false,
-            }} />
+            }}
+          />
           <Tab.Screen name="ListItemDetails" component={ListItemDetails}
-            options={{ tabBarButton: () => null , headerShown: false }}
+            options={{ tabBarButton: () => null, headerShown: false }}
           />
           <Tab.Screen name="Settings" component={Settings}
             options={{
