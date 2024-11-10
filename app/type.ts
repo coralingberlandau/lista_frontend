@@ -3,9 +3,8 @@ export type RootStackParamList = {
   Login: undefined;          // מסך הלוגין, אין לו פרמטרים
   Home: undefined // הוספת פרמטר אפשרי בשם refresh
   Register: undefined;
-  // AddListItem: { onGoBack: () => Promise<void> }; // נוסיף את הפרמטרים כאן
   Settings: undefined;
-  ListItemDetails?: { item: ListItem }; // פרמטר חדש עבור פרטי האייטם
+  ListItemDetails?: { listItem: ListItem }; // פרמטר חדש עבור פרטי האייטם
   // הוסף כאן מסכים נוספים לפי הצורך
 };
 
@@ -21,19 +20,19 @@ export type JwtPayload = {
 // types.ts
 export interface ListItemProps {
   title: string;
-  description: string[]; // מערך של תיאורים עם כל סעיף בנפרד
+  items: string;
   user_id: string;
   is_active: boolean; // שדה המייצג אם הפריט פעיל
-  images: string[]; // מערך של קישורים לתמונות
 }
 
 // הגדרת הממשק ListItem
 export interface ListItem {
   id: number;
   title: string;
-  description: string[];
+  items: string;
   date_created: string;
   is_active: boolean;
+
 }
 
 export interface GroupListResponse {
@@ -61,6 +60,11 @@ declare module 'react-color' {
 
 }
 
+export interface Image {
+  uri: string;
+  name: string;
+  type: string;
+}
 
 // interface RegisterProps {
 //   setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>;
