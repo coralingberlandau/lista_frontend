@@ -41,9 +41,6 @@ const ListItemDetails: React.FC = () => {
   const [backgroundColor, setBackgroundColor] = useState<string>('#fff');
   const [textColor, setTextColor] = useState<string>('#000');
 
-
-
-  
   const [isBackgroundPickerVisible, setIsBackgroundPickerVisible] = useState(false);
   const [isTextColorPickerVisible, setIsTextColorPickerVisible] = useState(false);
 
@@ -456,12 +453,10 @@ const ListItemDetails: React.FC = () => {
 
 
 
-
-
-
       <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
         <Text style={styles.addItemButtonText}>Add Item</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> 
+
       <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
         <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
       </TouchableOpacity>
@@ -594,11 +589,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   addItemButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
+    backgroundColor: "#39B8D4",
+        // backgroundColor: "#A3D9FF",
+    // backgroundColor: "#80D4FF",
+    // backgroundColor: '#4CAF50',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center',
+    alignSelf: 'center',  // מרכז את הכפתור בתוך המיכל
     marginVertical: 20,
+    width: '80%',  // הכפתור יתפוס 80% מהמסך, לא משנה גודלו
+
   },
   addItemButtonText: {
     color: 'white',

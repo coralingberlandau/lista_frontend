@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   erroText: {
-    fontSize: 18,
+    fontSize: 16,
     color: 'red',
     textAlign: 'center',
     marginTop: 20,

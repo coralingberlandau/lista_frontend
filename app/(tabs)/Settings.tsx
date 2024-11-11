@@ -1,13 +1,49 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Button } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
-const Settings: React.FC = () => {
+
+type SettingsProps = {
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean | null>>;
+};
+
+const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
   const appName = "Lista Application";
   const version = "1.0.0";
   const supportContact = "lista support: listaassistance@gmail.com"
-  
+
   const handleEmailPress = () => {
-    Linking.openURL(`mailto:${supportContact.split(': ')[1]}`)};
+    Linking.openURL(`mailto:${supportContact.split(': ')[1]}`)
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userToken');
+      setIsLoggedIn(false); // מנתק את המשתמש על ידי עדכון הסטטוס ל-false
+    } catch (error) {
+      console.error('Error logging out:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error logging out',
+        text2: 'Please try again later',
+      });
+    }
+  };
+
+  // const handleLogout = async () => {
+  //   try {
+  //     await AsyncStorage.removeItem('token');
+  //     await AsyncStorage.removeItem('userName');
+  //     await AsyncStorage.removeItem('userId');
+
+  //     setIsLoggedIn(false);
+
+  //   } catch (error) {
+  //     console.error('Error during logout:', error);
+  //     Alert.alert('Error', 'Something went wrong while logging out.');
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
@@ -35,6 +71,10 @@ const Settings: React.FC = () => {
       <Text style={styles.footerText}>
         © All rights reserved to Coral Landau, Founder of Lista.
       </Text>
+      <Button title="Logout" onPress={handleLogout} />
+      {/* <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <AntDesign name="logout" size={30} color="black" />
+          </TouchableOpacity> */}
     </View>
   );
 };
@@ -98,6 +138,18 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginVertical: 15,
   },
+
+  // logoutButton: {
+  //   position: 'absolute', // למיקום בעמוד
+  //   top: 20, // למקם למעלה (בקרבת שם המשתמש)
+  //   right: 20, // למקם בצד ימין של המסך
+  //   backgroundColor: 'white',
+  //   padding: 10, // להוסיף מרווחים
+  //   borderRadius: 50, // עיגול מלא
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  // },
+
 });
 
 export default Settings;

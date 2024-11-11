@@ -76,6 +76,11 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
     navigation.navigate('Register'); // נווט למסך ה-Register
   };
 
+  const navigateToResetPassword = () => {
+    console.log('שככחחתיייי סיסמהההה');
+    navigation.navigate('ResetPassword');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
@@ -102,7 +107,11 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
 
         <Text style={styles.registerText}>Not registered?</Text>
         <TouchableOpacity onPress={navigateToRegister}>
-          <Text style={styles.registerLink}>Click here to sign up</Text>
+          <Text style={styles.linkTo}>Click here to sign up</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={navigateToResetPassword}>
+          <Text style={styles.linkTo}>Forgot password?</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -129,13 +138,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
-  registerLink: {
+  linkTo: {
     fontSize: 14,
     color: '#1E90FF',
     marginTop: 5,
   },
   errorText: {
-    fontSize: 18,
+    fontSize: 16,
     color: 'red',
     textAlign: 'center',
     marginTop: 20, 

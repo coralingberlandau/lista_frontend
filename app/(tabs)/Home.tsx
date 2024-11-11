@@ -8,9 +8,8 @@ import { ListItem, RootStackParamList } from '../type';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'ListItemDetails'>;
-type HomeProps = {setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean | null>>;};
 
-const Home: React.FC<HomeProps> = ({ setIsLoggedIn }) => {
+const Home: React.FC = () => {
   const [listItems, setListItems] = useState<ListItem[]>([]);
   const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -59,27 +58,13 @@ const Home: React.FC<HomeProps> = ({ setIsLoggedIn }) => {
     }
   }, []);
 
-
   const handleAddListItem = () => {
     navigation.navigate('ListItemDetails');
   };
   const handlePressItem = (item: ListItem) => {
     navigation.navigate('ListItemDetails', { listItem: item });
   };
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('userName');
-      await AsyncStorage.removeItem('userId');
-
-      setIsLoggedIn(false);
-
-    } catch (error) {
-      console.error('Error during logout:', error);
-      Alert.alert('Error', 'Something went wrong while logging out.');
-    }
-  };
-
+  
   return (
     <View style={styles.container}>
       {loading ? (
@@ -87,13 +72,6 @@ const Home: React.FC<HomeProps> = ({ setIsLoggedIn }) => {
       ) : (
         <>
           <Text style={styles.greeting}>Hello, {username || 'Guest'}!</Text>
-
-
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <AntDesign name="logout" size={30} color="black" />
-          </TouchableOpacity>
-
-
           <Text style={styles.title}>
             {listItems.length === 0 ? "Write your dreams here!" : `Your List: ${listItems.length} items`}
           </Text>
@@ -114,8 +92,6 @@ const Home: React.FC<HomeProps> = ({ setIsLoggedIn }) => {
           <TouchableOpacity style={styles.addButton} onPress={handleAddListItem}>
             <AntDesign name="pluscircleo" size={45} color="black" />
           </TouchableOpacity>
-
-
         </>
       )}
     </View>
@@ -164,17 +140,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 5,
   },
-  logoutButton: {
-    position: 'absolute', // למיקום בעמוד
-    top: 20, // למקם למעלה (בקרבת שם המשתמש)
-    right: 20, // למקם בצד ימין של המסך
-    backgroundColor: 'white',
-    padding: 10, // להוסיף מרווחים
-    borderRadius: 50, // עיגול מלא
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
 });
 
 export default Home;

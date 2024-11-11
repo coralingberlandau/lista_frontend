@@ -1,16 +1,22 @@
 // types.ts
 export type RootStackParamList = {
   Login: undefined;  
-  Home: { refresh?: boolean };         // מסך הבית, פרמטר אופציונלי בשם refresh
+  // Home: { refresh?: boolean };         // מסך הבית, פרמטר אופציונלי בשם refresh
   // מסך הלוגין, אין לו פרמטרים
-  // Home: undefined // הוספת פרמטר אפשרי בשם refresh
+  Home: undefined // הוספת פרמטר אפשרי בשם refresh
   Register: undefined;
   Settings: undefined;
   ListItemDetails?: { listItem: ListItem }; // פרמטר חדש עבור פרטי האייטם
+  ResetPassword: undefined; // מסך חדש עבור איפוס סיסמה
+
   // הוסף כאן מסכים נוספים לפי הצורך
 };
 
-export type JwtPayload = {
+export interface RouteParams {
+  email?: string;
+};
+
+export interface JwtPayload {
   exp: number;
   iat: number;
   jti: string;
