@@ -51,6 +51,7 @@ const ListItemDetails: React.FC = () => {
 
   const [selectedImage, setSelectedImage] = useState(null);
 
+
   useFocusEffect(
     useCallback(() => {
       console.log('render', listItem?.id)
@@ -416,14 +417,11 @@ const ListItemDetails: React.FC = () => {
               </TouchableOpacity>
             )}
 
-            
+
             {/* כפתור מחיקה */}
             <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
               <AntDesign name="delete" size={20} color="red" />
             </TouchableOpacity>
-
-
-
             <TextInput
               style={[
                 styles.textArea,
@@ -455,7 +453,7 @@ const ListItemDetails: React.FC = () => {
 
       <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
         <Text style={styles.addItemButtonText}>Add Item</Text>
-      </TouchableOpacity> 
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
         <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
@@ -497,12 +495,10 @@ const ListItemDetails: React.FC = () => {
             />
           )}
 
-
           {/* <TouchableOpacity style={styles.iconContainer} onPress={() => handleShare()}>
             <Ionicons name="share-outline" size={50} color="white" />
             <Text style={styles.iconLabel}>Share</Text>
           </TouchableOpacity> */}
-
 
           {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
             <Ionicons name="share-outline" size={50} color="white" />
@@ -590,7 +586,7 @@ const styles = StyleSheet.create({
   },
   addItemButton: {
     backgroundColor: "#39B8D4",
-        // backgroundColor: "#A3D9FF",
+    // backgroundColor: "#A3D9FF",
     // backgroundColor: "#80D4FF",
     // backgroundColor: '#4CAF50',
     paddingHorizontal: 10,

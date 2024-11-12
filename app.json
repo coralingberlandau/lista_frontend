@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/lista.png",
-    "scheme": "myapp",
+    "scheme": "http://localhost:8081/",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/lista.png",

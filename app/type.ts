@@ -8,6 +8,9 @@ export type RootStackParamList = {
   Settings: undefined;
   ListItemDetails?: { listItem: ListItem }; // פרמטר חדש עבור פרטי האייטם
   ResetPassword: undefined; // מסך חדש עבור איפוס סיסמה
+  EditProfile: { userId: string } | undefined;  // אפשרות להעביר userId כפרמטר
+  ChangePassword: { email: string };
+
 
   // הוסף כאן מסכים נוספים לפי הצורך
 };

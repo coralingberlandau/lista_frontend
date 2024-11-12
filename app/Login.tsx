@@ -15,6 +15,8 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [errorText, setErrorText] = useState('');
+
+  
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const handleLogin = async () => {
@@ -30,7 +32,7 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
     if (username && password) {
       try {
         // קריאה ל-API לבדוק את פרטי ההתחברות
-        const response = await axios.post('http://127.0.0.1:8000/login', {
+        const response = await axios.post('http://127.0.0.1:8000/login/', {
           username, // שליחה של שם משתמש
           password,
         });

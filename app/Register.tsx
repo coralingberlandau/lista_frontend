@@ -53,7 +53,7 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
 
     if (username && firstName && lastName && email && password) {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/register', {
+        const response = await axios.post('http://127.0.0.1:8000/register/', {
           username,
           first_name: firstName,
           last_name: lastName,
