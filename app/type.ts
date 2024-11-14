@@ -106,4 +106,11 @@ export interface ListItemImage {
   index: number;
 }
 
+export interface ImageData {
+  uri: string;
+  fileName: string;
+  mimeType: string;
+  index: number;
+}
+
 

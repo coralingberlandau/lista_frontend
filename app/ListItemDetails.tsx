@@ -33,7 +33,6 @@ const ListItemDetails: React.FC = () => {
 
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  console.log(title, listItem, items)
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -42,26 +41,31 @@ const ListItemDetails: React.FC = () => {
 
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const [images, setImages] = useState<ListItemImage[]>([]);
+  const [images, setImages] = useState<ImageData[]>([]);
+
+  console.log(title, listItem, items, images)
 
 
+
+  const getImages = async () => {
+    if(listItem?.id) {
+      const response = await axios.get(`http://127.0.0.1:8000/listitemimages/${listItem.id}/get_images_for_list_item/`);
+      setImages(response.data.images)
+    }
+    else {
+      setImages([])
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
       console.log('render', listItem?.id)
       setTitle(listItem?.title || '');
       setItems(listItem?.items.split("|") || ['']);
-      setImages([]);
+      getImages()
       // loadColors();
     }, [listItem])
   );
-
-  useEffect(() => {
-    // קריאה לפונקציה שמביאה את התמונות
-    fetchListItemImages(1);
-  }, []);
-
-
 
 
   // post griopulist - http://127.0.0.1:8000/grouplists/
@@ -125,37 +129,6 @@ const ListItemDetails: React.FC = () => {
       }
     };
   };
-
-  //   if (response1.status === 200 && response2 && response2.status === 200) {
-  //     Toast.show({
-  //       type: 'success',
-  //       text1: 'The list has been saved successfully!',
-  //     });
-
-  //     navigation.navigate('Home');
-  //   } else {
-  //     // אם לא הכל הצליח, הודעת שגיאה
-  //     Toast.show({
-  //       type: 'error',
-  //       text1: 'Error adding the item',
-  //       text2: 'Please try again later',
-  //     });
-  //   }
-  // } catch (error) {
-  //   // טיפול בשגיאות
-  //   console.error('Error adding list item:', error);
-  //   Toast.show({
-  //     type: 'error',
-  //     text1: 'Error adding the item',
-  //     text2: 'Please try again later',
-  //   });
-  // }
-  // }
-  // };
-
-
-
-
 
   const AddItemToList = () => {
     setItems(prev => [...prev, '']);
@@ -368,7 +341,7 @@ const ListItemDetails: React.FC = () => {
     console.log('result images', result);
 
     if (!result.canceled && result.assets) {
-      const newImage: ListItemImage = {
+      const newImage: ImageData = {
         uri: result.assets[0].uri,
         fileName: result.assets[0].fileName || `image_${index}.jpeg`,
         mimeType: result.assets[0].type || 'image/jpeg',
@@ -415,73 +388,6 @@ const ListItemDetails: React.FC = () => {
 
 
 
-
-
-  // const handleSaveImages = async (listItemId: number) => {
-  //   console.log('images', images);
-
-  //   // אם אין תמונות להעלות
-  //   if (images.length === 0) {
-  //     console.log("No images to upload.");
-  //     return true;  // אם אין תמונות, נחשב את ההעלאה כהצלחה (לא משנה אם התמונות לא עודכנו)
-  //   }
-
-  //   const formData = new FormData();
-  //   formData.append('list_item', listItemId.toString());
-
-  //   for (const image of images) {
-  //     const base64Image = image.uri.split(',')[1];  // הסרת המידע המיותר מ-URI של base64
-
-  //     // הוספת המידע המפוקסל כ-Base64
-  //     formData.append('images', JSON.stringify({
-  //       uri: base64Image,  // הוספת התמונה ב-Base64
-  //       fileName: image.fileName,
-  //       mimeType: image.mimeType,
-  //       index: image.index
-  //     }));
-  //   }
-
-  //   try {
-  //     const response = await axios.post('http://127.0.0.1:8000/listitemimages/upload_images/', formData, {
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //     });
-  //     console.log('response', response);
-
-
-
-
-  //     // אם התגובה מוצלחת (200 OK), נחשב שהעלאת התמונות הצליחה
-  //     if (response.status === 200) {
-  //       console.log("Images uploaded successfully");
-  //       return true;  // התמונות הועלו בהצלחה
-  //     } else {
-  //       console.error("Error: images not uploaded correctly.");
-  //       return false;  // במקרה שהתמונות לא הועלו כמו שצריך
-  //     }
-  //   } catch (error) {
-  //     console.error('Error uploading images', error);
-  //     return false;  // במקרה של שגיאה בהעלאה
-  //   }
-  // };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   //imaaggeeeeeeeeeeeee -- imaaggeeeeeeeeeeeee ******************** $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 
@@ -522,8 +428,6 @@ const ListItemDetails: React.FC = () => {
 
 
 
-
-
   const renderItem = ({ item, index }: { item: ListItemImage, index: number }) => (
     <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
       <Image source={{ uri: item.uri }} style={{ width: 40, height: 40, borderRadius: 5 }} />
@@ -536,8 +440,6 @@ const ListItemDetails: React.FC = () => {
       <FontAwesome name="image" size={20} color="blue" />
     </TouchableOpacity>
   );
-
-
 
 
 
@@ -571,164 +473,53 @@ const ListItemDetails: React.FC = () => {
       </View>
       <FlatList
         data={items}
-        renderItem={({ item, index }) => (
-          <View style={styles.item}>
-            <TouchableOpacity onPress={() => handleToggleItem(index)} style={{ marginRight: 10 }}>
-              <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={24} />
-            </TouchableOpacity>
-
-
-            {/* תמונווווווווותתתתתתתתתת !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
-
-
-            {/* אם יש תמונה, נציג אותה בקטן */}
-
-            {/* {listItem && listItem.image ? (
-              <TouchableOpacity onPress={() => handleShowLargeImage(listItem.image)} style={{ marginRight: 10 }}>
-                <Image source={{ uri: listItem.image }} style={{ width: 40, height: 40, borderRadius: 5 }} />
+        renderItem={({ item, index }) => {
+          const filterImage = images && images.filter((img) => img.index === index)
+          return (
+            <View style={styles.item}>
+              <TouchableOpacity onPress={() => handleToggleItem(index)} style={{ marginRight: 10 }}>
+                <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={24} />
               </TouchableOpacity>
-            ) : (
-              // אם אין תמונה, נציג את האייקון של "העלאה"
-
-              <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
-                <FontAwesome name="image" size={20} color="blue" />
-              </TouchableOpacity>
-            )}  */}
-
-
-            {/* <FlatList
-                data={images}                                 // מערך התמונות להצגה
-                renderItem={renderItem}                       // פונקציה להצגת כל פריט
-                keyExtractor={(item, index) => index.toString()} // מפתח ייחודי לכל פריט
-                numColumns={4}                                // מספר עמודות
-                ListEmptyComponent={ListEmptyComponent}       // רכיב שיוצג כאשר אין תמונות
-              /> */}
-
-
-            {/* <FlatList
-              data={images} // מערך התמונות להצגה
-              renderItem={({ item, index }) => (
-                <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
+              {filterImage.length > 0 ? 
+                <TouchableOpacity onPress={() => fetchListItemImages(index)} style={{ marginRight: 10 }}>
                   <Image
-                    source={{ uri: item.uri }}
-                    style={{ width: 40, height: 40, borderRadius: 5 }}
-                  />
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item, index) => index.toString()} // מפתח ייחודי לכל פריט
-              numColumns={4} // מספר עמודות
-              ListEmptyComponent={ListEmptyComponent} // רכיב שיוצג כאשר אין תמונות
-            /> */}
-
-            {/* <FlatList
-              data={images} // מערך התמונות להצגה
-              renderItem={renderItem} // שימוש בפונקציה renderItem
-              keyExtractor={(item, index) => index.toString()} // מפתח ייחודי לכל פריט
-              numColumns={1} // מספר עמודות
-              ListEmptyComponent={ListEmptyComponent} // רכיב שיוצג כאשר אין תמונות
-            /> */}
-
-            {/* 
-            <FlatList
-              data={images}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
-                  <Image
-                    source={{ uri: item.uri }}
-                    style={{ width: 40, height: 40, borderRadius: 5 }}
-                  />
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              numColumns={1}
-              ListEmptyComponent={ListEmptyComponent}
-            /> */}
-
-            <FlatList
-              data={images}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity
-                  onPress={() => fetchListItemImages(listItemId, index)} // קריאה לפונקציה כאן עם index
-                  style={{ marginRight: 10 }}
-                >
-                  {item.uri ? (
-                    <Image
-                      source={{ uri: item.uri }}
+                      source={{ uri: filterImage[0].uri }}
                       style={{ width: 40, height: 40, borderRadius: 5 }}
                     />
-                  ) : (
-                    <FontAwesome name="image" size={40} color="blue" />
-                  )}
                 </TouchableOpacity>
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              numColumns={1} // אם אתה רוצה להציג עמודה אחת
-              ListEmptyComponent={ListEmptyComponent} // הצגת תוסף כשאין פריטים ברשימה
-            />
-
-
-
-            <Modal visible={modalVisible} transparent={true}>
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
-                <TouchableOpacity onPress={handleCloseLargeImage} style={{ position: 'absolute', top: 20, right: 20 }}>
-                  <FontAwesome name="close" size={30} color="white" />
+              : 
+                <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
+                  <FontAwesome name="image" size={40} color="blue" />
                 </TouchableOpacity>
-                <Image source={{ uri: largeImage }} style={{ width: '80%', height: '80%', resizeMode: 'contain' }} />
-              </View>
-            </Modal>
-
-
-
-
-
-
-
-
-
-
-            {/* {images.length > 0 ? (
-              images.map((image: ImageData, index: number) => (
-                <TouchableOpacity key={index} onPress={() => handleShowLargeImage(image.uri)} style={{ marginRight: 10 }}>
-                  <Image
-                    source={{ uri: image.uri }}
-                    style={{ width: 40, height: 40, borderRadius: 5 }}
-                  />
-                </TouchableOpacity>
-              ))
-            ) : (
-              // אם אין תמונות, נציג את האייקון של "העלאה"
-              <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
-                <FontAwesome name="image" size={20} color="blue" />
+              }
+              <Modal visible={modalVisible} transparent={true}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
+                  <TouchableOpacity onPress={handleCloseLargeImage} style={{ position: 'absolute', top: 20, right: 20 }}>
+                    <FontAwesome name="close" size={30} color="white" />
+                  </TouchableOpacity>
+                  <Image source={{ uri: largeImage }} style={{ width: '80%', height: '80%', resizeMode: 'contain' }} />
+                </View>
+              </Modal>
+              <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
+                <AntDesign name="delete" size={20} color="red" />
               </TouchableOpacity>
-            )}  */}
-
-
-
-            {/* תמונווווווווותתתתתתתתתת !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
-
-
-
-
-
-            {/* כפתור מחיקה */}
-            <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
-              <AntDesign name="delete" size={20} color="red" />
-            </TouchableOpacity>
-            <TextInput
-              style={[
-                styles.textArea,
-                {
-                  outline: 'none',
-                  textDecorationLine: item.includes('✔️') ? 'line-through' : 'none',
-                },
-              ]}
-              placeholder="Write here..."
-              multiline={false}  // Set to false for a single line
-              value={item}
-              onChangeText={(text) => handleItemChange(text, index)}
-            />
-          </View>
-        )}
+              <TextInput
+                style={[
+                  styles.textArea,
+                  {
+                    outline: 'none',
+                    textDecorationLine: item.includes('✔️') ? 'line-through' : 'none',
+                  },
+                ]}
+                placeholder="Write here..."
+                multiline={false}  // Set to false for a single line
+                value={item}
+                onChangeText={(text) => handleItemChange(text, index)}
+              />
+            </View>
+          )
+          
+        }}
         keyExtractor={(_, index) => index.toString()} />
 
 
