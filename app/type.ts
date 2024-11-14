@@ -43,7 +43,6 @@ export interface ListItem {
   items: string;
   date_created: string;
   is_active: boolean;
-
 }
 
 export interface GroupListResponse {
@@ -82,13 +81,29 @@ export interface User {
 }
 
 
-export interface ListItemImage {
-  id: number; // או כל מזהה אחר של התמונה
-  list_item: ListItem; // המידע על האייטם שאליו שייכת התמונה
-  image: string; // ה-URL של התמונה
+// export interface ListItemImage {
+//   id: number; // או כל מזהה אחר של התמונה
+//   list_item: ListItem; // המידע על האייטם שאליו שייכת התמונה
+//   image: string; // ה-URL של התמונה
 
+// }
+
+// export interface ListItemImage {
+//   listItemId: number;
+//   uri: string;
+//   fileName: string;
+//   mimeType: string;
+//   index: number;
+// }
+
+export interface ListItemImage {
+  id: number;
+  list_item: number; // או טיפוס אחר שמתאים
+  image: string; // או טיפוס אחר שמתאים
+  uri: string;
+  fileName: string;
+  mimeType: string;
+  index: number;
 }
 
-// interface RegisterProps {
-//   setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>;
-// }
+

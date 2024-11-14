@@ -5,10 +5,12 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useRoute } from '@react-navigation/native'; // Import useRoute hook
+import { Ionicons } from '@expo/vector-icons';
+
 
 type NavigationProps = StackNavigationProp<RootStackParamList>;
 type RootStackParamList = {
-    ChangePassword: { email: string }; // Define the 'email' parameter for this screen
+  ChangePassword: { email: string }; // Define the 'email' parameter for this screen
 };
 
 type ChangePasswordRouteProp = RouteProp<RootStackParamList, 'ChangePassword'>;
@@ -42,7 +44,7 @@ const ChangePassword: React.FC = () => {
     if (!validatePasswords()) {
       return;
     }
-    
+
     setLoading(true);
     setMessage('');
 
@@ -77,26 +79,42 @@ const ChangePassword: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Change Password</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Enter new password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="lock-closed-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter new password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+      </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm new password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
-
-      <Button 
-        title={loading ? 'Changing Password...' : 'Change Password'} 
-        onPress={handleChangePassword} 
-        disabled={loading} 
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="lock-closed-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm new password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
+      </View>
+      
+      <Button
+        title={loading ? 'Changing Password...' : 'Change Password'}
+        onPress={handleChangePassword}
+        disabled={loading}
       />
 
       {message || errorText ? (
@@ -151,6 +169,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 15,
   },
+
+
+  inputContainer: {
+    marginBottom: 15,
+    position: 'relative', // מאפשר מיקום של האייקון בתוך הקלט
+  },
+  input: {
+    height: 50,
+    paddingLeft: 40, // רווח לשם האייקון בצד שמאל
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    fontSize: 16,
+    paddingVertical: 10,
+  },
+  icon: {
+    position: 'absolute',
+    left: 10, // מיקום האייקון בצד שמאל
+    top: '50%',
+    transform: [{ translateY: -16 }], // מיישר את האייקון באמצע
+  },
+  
 });
 
 export default ChangePassword;

@@ -7,6 +7,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import axios from 'axios'; 
 import { jwtDecode } from 'jwt-decode'; 
 import { JwtPayload, RootStackParamList } from './type';
+import { Ionicons } from '@expo/vector-icons';
+
 
 // הגדרת סוג הניווט למסך הלוגין
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -87,20 +89,70 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
 
-      <Input
-        value={username}
-        onChangeText={setUsername}
-        placeholder="Enter your username"
-        autoCapitalize="none"
-      />
 
-      <Input
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="person-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <Input
+          value={username}
+          onChangeText={setUsername}
+          placeholder="Enter your username"
+          autoCapitalize="none"
+          style={styles.input}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="lock-closed-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <Input
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Enter your password"
+          secureTextEntry
+          autoCapitalize="none"
+          style={styles.input}
+        />
+      </View>
+
+
+
+
+
+
+  
+
+
+      {/* // <Input */}
+      {/* //   value={username}
+      //   onChangeText={setUsername}
+      //   placeholder="Enter your username"
+      //   autoCapitalize="none"
+      //   leftIcon={ */}
+      {/* //     <Ionicons name="person-outline" size={24} color="gray" />
+      //   }
+      //   containerStyle={{ */}
+      {/* //     borderBottomWidth: 1,
+      //     borderBottomColor: 'gray',
+      //     paddingLeft: 10,
+      //   }}
+      // /> */}
+
+      {/* <Input
         value={password}
         onChangeText={setPassword}
         placeholder="Enter your password"
         secureTextEntry
         autoCapitalize="none"
-      />
+      /> */}
 
       <Button title="Login" onPress={handleLogin} />
 
@@ -151,6 +203,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20, 
   },
+
+  inputContainer: {
+    marginBottom: 15,
+    position: 'relative', // מאפשר מיקום של האייקון בתוך הקלט
+  },
+  input: {
+    height: 50,
+    paddingLeft: 40, // רווח לשם האייקון בצד שמאל
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    fontSize: 16,
+    paddingVertical: 10,
+  },
+  icon: {
+    position: 'absolute',
+    left: 10, // מיקום האייקון בצד שמאל
+    top: '50%',
+    transform: [{ translateY: -16 }], // מיישר את האייקון באמצע
+  },
+
+
+  
 });
 
 export default Login;

@@ -7,6 +7,9 @@ import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import { RootStackParamList } from '../type';  // קובץ שבו אתה מגדיר את המסכים
 
+import { Ionicons } from '@expo/vector-icons';
+
+
 // אנחנו מגדירים את סוג הפרופס כדי לקבל את ה-params דרך ה-route
 type EditProfileProps = {
     setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>; // עכשיו, אנחנו מקבלים את setIsLoggedIn כ-prop
@@ -20,7 +23,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
     const [error, setError] = useState<string | null>(null);
     const [emailError, setEmailError] = useState<string | null>(null);
     const navigation = useNavigation();
-    
+
     // גישה ל-userId דרך ה-route.params
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -104,7 +107,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Edit Profile</Text>
-            <Input
+            {/* <Input
                 value={username}
                 onChangeText={setUsername}
                 placeholder="Username"
@@ -126,7 +129,71 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
                 placeholder="Email"
                 keyboardType="email-address"
                 autoCapitalize="none"
-            />
+            /> */}
+
+
+            <View style={styles.inputContainer}>
+                <Ionicons
+                    name="person-outline"
+                    size={24}
+                    color="gray"
+                    style={styles.icon}
+                />
+                <Input
+                    value={username}
+                    onChangeText={setUsername}
+                    placeholder="Username"
+                    autoCapitalize="none"
+                    style={styles.input}
+                />
+            </View>
+
+            <View style={styles.inputContainer}>
+                <Ionicons
+                    name="person-outline"
+                    size={24}
+                    color="gray"
+                    style={styles.icon}
+                />
+                <Input
+                    value={firstName}
+                    onChangeText={setFirstName}
+                    placeholder="First Name"
+                    style={styles.input}
+                />
+            </View>
+
+            <View style={styles.inputContainer}>
+                <Ionicons
+                    name="person-outline"
+                    size={24}
+                    color="gray"
+                    style={styles.icon}
+                />
+                <Input
+                    value={lastName}
+                    onChangeText={setLastName}
+                    placeholder="Last Name"
+                    style={styles.input}
+                />
+            </View>
+
+            <View style={styles.inputContainer}>
+                <Ionicons
+                    name="mail-outline"
+                    size={24}
+                    color="gray"
+                    style={styles.icon}
+                />
+                <Input
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Email"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={styles.input}
+                />
+            </View>
 
             <Button title="Save Changes" onPress={handleSaveChanges} />
 
@@ -157,6 +224,26 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 20,
     },
+    inputContainer: {
+        marginBottom: 15,
+        position: 'relative', // מאפשר מיקום של האייקון בתוך הקלט
+      },
+      input: {
+        height: 50,
+        paddingLeft: 40, // רווח לשם האייקון בצד שמאל
+        borderWidth: 1,
+        borderRadius: 8,
+        borderColor: '#ccc',
+        fontSize: 16,
+        paddingVertical: 10,
+      },
+      icon: {
+        position: 'absolute',
+        left: 10, // מיקום האייקון בצד שמאל
+        top: '50%',
+        transform: [{ translateY: -16 }], // מיישר את האייקון באמצע
+      },
+      
 });
 
 export default EditProfile;

@@ -55,6 +55,46 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
     }
   };
 
+
+
+
+   // colorrrrr************* -- colooooooorrrrrrrrrrrrrrr ********************
+
+  //  const [backgroundColor, setBackgroundColor] = useState<string>('#fff');
+  //  const [textColor, setTextColor] = useState<string>('#000');
+ 
+  //  const [isBackgroundPickerVisible, setIsBackgroundPickerVisible] = useState(false);
+  //  const [isTextColorPickerVisible, setIsTextColorPickerVisible] = useState(false);
+
+
+  //  const loadColors = async () => {
+  //   const savedBackgroundColor = await AsyncStorage.getItem('backgroundColor');
+  //   const savedTextColor = await AsyncStorage.getItem('textColor');
+
+  //   if (savedBackgroundColor) {
+  //     setBackgroundColor(savedBackgroundColor);
+  //   }
+  //   if (savedTextColor) {
+  //     setTextColor(savedTextColor);
+  //   }
+  // };
+
+  //  const handleTextColorChange = async (color: HsvColor | string) => {
+  //   const colorHex = typeof color === 'string' ? color : hsvToHex(color.h, color.s, color.v);
+  //   setTextColor(colorHex);
+  //   await AsyncStorage.setItem('textColor', colorHex); // שמירה באמצעות AsyncStorage
+  //   setIsTextColorPickerVisible(false);
+  // };
+
+  // const handleBackgroundColorChange = async (color: HsvColor | string) => {
+  //   const colorHex = typeof color === 'string' ? color : hsvToHex(color.h, color.s, color.v);
+  //   setBackgroundColor(colorHex);
+  //   await AsyncStorage.setItem('backgroundColor', colorHex); // שמירה באמצעות AsyncStorage
+  //   setIsBackgroundPickerVisible(false);
+  // };
+
+  // colorrrrr************* -- colooooooorrrrrrrrrrrrrrr ********************
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{appName}</Text>
@@ -117,8 +157,30 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
       {/* </TouchableOpacity> */}
 
       {/* אולי להוסיף התראות ליומן????? */}
+{/* 
 
+      <TouchableOpacity onPress={() => setIsBackgroundPickerVisible(true)} style={styles.iconContainer}>
+        <Ionicons name="color-palette-outline" size={50} color="white" />
+        <Text style={styles.iconLabel}>Background</Text>
+      </TouchableOpacity>
 
+      <TouchableOpacity onPress={() => setIsTextColorPickerVisible(true)} style={styles.iconContainer}>
+            <Ionicons name="text-outline" size={50} color="white" />
+            <Text style={styles.iconLabel}>Text Color</Text>
+          </TouchableOpacity>
+
+             {/* כאן יש להוסיף ColorPicker לבחירת צבע */}
+             {/* {isBackgroundPickerVisible && (
+            <ColorPicker
+              onColorChange={handleBackgroundColorChange}
+              sliderComponent={Slider as any}
+            />
+          )}
+          {isTextColorPickerVisible && (
+            <ColorPicker
+              onColorChange={handleTextColorChange}
+              sliderComponent={Slider as any}
+            /> */} 
 
       <TouchableOpacity onPress={navigateToEditProfile} style={styles.editProfileButton}>
         <Ionicons name="pencil-outline" size={30} color="green" />

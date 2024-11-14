@@ -8,6 +8,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { JwtPayload, RootStackParamList } from './type'; // Ensure the path is correct
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
+import { Ionicons } from '@expo/vector-icons';
+
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -133,41 +135,86 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register</Text>
-      <Input
-        value={username}
-        onChangeText={setUsername}
-        placeholder="Username"
-        autoCapitalize="none"
-      />
 
-      <Input
-        value={firstName}
-        onChangeText={setFirstName}
-        placeholder="First Name"
-      />
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="person-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <Input
+          value={username}
+          onChangeText={setUsername}
+          placeholder="Username"
+          autoCapitalize="none"
+          style={styles.input}
+        />
+      </View>
 
-      <Input
-        value={lastName}
-        onChangeText={setLastName}
-        placeholder="Last Name"
-      />
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="person-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <Input
+          value={firstName}
+          onChangeText={setFirstName}
+          placeholder="First Name"
+          style={styles.input}
+        />
+      </View>
 
-      <Input
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="person-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <Input
+          value={lastName}
+          onChangeText={setLastName}
+          placeholder="Last Name"
+          style={styles.input}
+        />
+      </View>
 
-      <Input
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
-        secureTextEntry
-        autoCapitalize="none"
-      />
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="mail-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <Input
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          style={styles.input}
+        />
+      </View>
 
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="lock-closed-outline"
+          size={24}
+          color="gray"
+          style={styles.icon}
+        />
+        <Input
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Password"
+          secureTextEntry
+          autoCapitalize="none"
+          style={styles.input}
+        />
+      </View>
       <Button title="Register" onPress={handleRegister} />
 
       {/* הצגת הודעות השגיאה */}
@@ -217,6 +264,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
+  inputContainer: {
+    marginBottom: 15,
+    position: 'relative', // מאפשר מיקום של האייקון בתוך הקלט
+  },
+  input: {
+    height: 50,
+    paddingLeft: 40, // רווח לשם האייקון בצד שמאל
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    fontSize: 16,
+    paddingVertical: 10,
+  },
+  icon: {
+    position: 'absolute',
+    left: 10, // מיקום האייקון בצד שמאל
+    top: '50%',
+    transform: [{ translateY: -16 }], // מיישר את האייקון באמצע
+  },
+  
 });
 
 export default Register;
