@@ -43,6 +43,9 @@ const ListItemDetails: React.FC = () => {
 
   const [images, setImages] = useState<ImageData[]>([]);
 
+  const [backgroundImageId, setBackgroundImageId] = useState<number | null>(null);
+
+
   console.log(title, listItem, items, images)
 
 
@@ -66,6 +69,24 @@ const ListItemDetails: React.FC = () => {
       // loadColors();
     }, [listItem])
   );
+
+  
+  const storedUserId = AsyncStorage.getItem('userId');
+
+  useEffect(() => {
+    // קבלת התמונה שבחר היוזר מהשרת
+    const fetchBackgroundImage = async () => {
+
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/customizations/${storedUserId}/`);
+        setBackgroundImageId(response.data.background_image_id);
+      } catch (error) {
+        console.error("Error fetching background image:", error);
+      }
+    };
+
+    fetchBackgroundImage();
+  }, [storedUserId]);
 
 
   // post griopulist - http://127.0.0.1:8000/grouplists/
@@ -451,6 +472,8 @@ const ListItemDetails: React.FC = () => {
 
   return (
     <View style={styles.container}>
+    {/* <View style={backgroundImageId ? { backgroundImage: backgroundImages[backgroundImageId - 1].url } : {}}> */}
+
       <View style={styles.header}>
         <TextInput
           style={[styles.titleInput, { outline: 'none' }]}
