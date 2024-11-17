@@ -32,11 +32,8 @@ const ListItemDetails: React.FC = () => {
   const [permission, setPermission] = useState('read_only');
   const [shareValue, setShareValue] = useState('');
 
-
   // לבדוקקקקק
   const { width, height } = Dimensions.get('window'); // קבלת גודל המסך
-
-
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -52,19 +49,59 @@ const ListItemDetails: React.FC = () => {
   const [backgroundImageId, setBackgroundImageId] = useState<string | null>(null);
 
 
+
   console.log(title, listItem, items, images)
 
 
 
+  // const getImages = async () => {
+  //   if (listItem?.id) {
+  //     const response = await axios.get(`http://127.0.0.1:8000/listitemimages/${listItem.id}/get_images_for_list_item/`);
+  //     setImages(response.data.images)
+  //   }
+  //   else {
+  //     setImages([])
+  //   }
+  // };
+
+  // פונקציה לשליפת התמונות מהשרת
   const getImages = async () => {
-    if(listItem?.id) {
-      const response = await axios.get(`http://127.0.0.1:8000/listitemimages/${listItem.id}/get_images_for_list_item/`);
-      setImages(response.data.images)
-    }
-    else {
-      setImages([])
+    try {
+      if (listItem?.id) {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/listitemimages/${listItem.id}/get_images_for_list_item/`
+        );
+
+        if (response.status === 200 && Array.isArray(response.data.images)) {
+          // עיבוד התמונות כדי לוודא תאימות
+          const formattedImages = response.data.images.map((image: any, index: number) => {
+            const imageUrl = image.url.startsWith("http")
+              ? image.url
+              : `http://127.0.0.1:8000${image.url}`;
+
+            return {
+              id: image.id || 0,
+              uri: imageUrl || "",
+              fileName: image.fileName || "unknown.jpg", // אם לא קיים שם קובץ
+              mimeType: image.mimeType || "image/jpeg", // אם לא קיים mimeType
+              index: index,
+            };
+          });
+          console.log('formattedImages', formattedImages)
+          setImages(formattedImages); // שמירת התמונות בסטייט
+        } else {
+          console.error("Invalid response format:", response.data);
+          setImages([]); // איפוס אם המבנה לא תקין
+        }
+      } else {
+        setImages([]); // איפוס אם אין listItem.id
+      }
+    } catch (error) {
+      console.error("Error fetching images:", error);
+      setImages([]); // איפוס במקרה של שגיאה
     }
   };
+
 
   const getBackgroundImage = async () => {
     const backgroundId = await AsyncStorage.getItem('customizations');
@@ -82,6 +119,7 @@ const ListItemDetails: React.FC = () => {
   );
 
   // post griopulist - http://127.0.0.1:8000/grouplists/
+
 
   const handleAddItem = async () => {
     console.log('====================================');
@@ -168,6 +206,9 @@ const ListItemDetails: React.FC = () => {
     const newItems = [...items];
     newItems.splice(index, 1);
     setItems(newItems);
+    const newImages = [...images]
+    newImages.splice(index, 1);
+    setImages(newImages);
   };
 
   const handleSharePress = () => {
@@ -371,7 +412,7 @@ const ListItemDetails: React.FC = () => {
     console.log('images', images);
 
     const formData = new FormData();
-    formData.append('list_item',  listItemId.toString());
+    formData.append('list_item', listItemId.toString());
 
     for (const image of images) {
       const base64Image = image.uri.split(',')[1];  // הסרת המידע המיותר מ-URI של base64
@@ -398,6 +439,63 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
+  // const handleSaveImages = async (listItemId: number) => {
+  //   console.log('images', images);
+
+  //   const formData = new FormData();
+  //   formData.append('list_item', listItemId.toString());
+
+  //   for (const image of images) {
+  //     // אם התמונה היא ב-Base64
+  //     if (image.uri && image.uri.includes(',')) {
+  //       const base64Image = image.uri.split(',')[1];
+  //       // שליחה כ-string של base64
+  //       formData.append('images', base64Image);
+  //       formData.append('fileName', image.fileName || 'unknown.jpg');
+  //       formData.append('mimeType', image.mimeType || 'image/jpeg');
+  //       if (image.index !== undefined) {
+  //         formData.append('index', image.index.toString());
+  //       }
+  //     } else if (image.uri) {
+  //       // במקרה שהתמונה היא URI של קובץ
+  //       const file = {
+  //         uri: image.uri,
+  //         type: image.mimeType || 'image/jpeg', // סוג MIME של הקובץ
+  //         name: image.fileName || 'unknown.jpg', // שם הקובץ
+  //       };
+  //       formData.append('images', file);
+  //     } else {
+  //       console.warn('Invalid image URI:', image.uri);
+  //     }
+  //   }
+
+  //   try {
+  //     const response = await axios.post(
+  //       'http://127.0.0.1:8000/listitemimages/upload_images/',
+  //       formData,
+  //       {
+  //         headers: {
+  //           'Content-Type': 'multipart/form-data',
+  //         },
+  //       }
+  //     );
+
+  //     console.log('response', response);
+  //     // קריאה מחדש לפונקציה שמעדכנת את התמונות
+  //     await getImages();
+
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error uploading images', error);
+  //     throw error;
+  //   }
+  // };
+
+
+
+
+
+
 
 
 
@@ -423,6 +521,23 @@ const ListItemDetails: React.FC = () => {
 
 
 
+  // const fetchListItemImages = async (listItemId: number, index?: number) => {
+  //   try {
+  //     const url = index !== undefined
+  //       ? `http://127.0.0.1:8000/listitemimages/${listItemId}/get_images_for_list_item/?index=${index}`
+  //       : `http://127.0.0.1:8000/listitemimages/${listItemId}/get_images_for_list_item/`;
+
+  //     const response = await axios.get(url);
+
+  //     if (response.status === 200) {
+  //       setImages(response.data.images); // שמירת התמונות בסטייט
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching images", error);
+  //   }
+  // };
+
+
   const fetchListItemImages = async (listItemId: number, index?: number) => {
     try {
       const url = index !== undefined
@@ -431,13 +546,21 @@ const ListItemDetails: React.FC = () => {
 
       const response = await axios.get(url);
 
-      if (response.status === 200) {
-        setImages(response.data.images); // שמירת התמונות בסטייט
+      if (response.status === 200 && Array.isArray(response.data.images)) {
+        const formattedImages = response.data.images.map((image: any) => ({
+          uri: image.uri || image.url, // טיפול גם ב-url וגם ב-uri
+          id: image.id || null, // שדה זיהוי, אם יש
+        }));
+
+        setImages(formattedImages); // שמירת התמונות ב-state
+      } else {
+        console.error("Invalid response format", response.data);
       }
     } catch (error) {
       console.error("Error fetching images", error);
     }
   };
+
 
 
 
@@ -460,27 +583,17 @@ const ListItemDetails: React.FC = () => {
   //imaaggeeeeeeeeeeeee -- imaaggeeeeeeeeeeeee ******************** $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 
-
-
   return (
     <ImageBackground
-
-    source={{ uri: `../assets/background/back${backgroundImageId}.jpg` }} 
-
-      // source={{ uri: `../assets/background/back14.jpg` }} // or require('./path-to-local-image.jpg')
-
-
-
+      source={{ uri: `../assets/background/back${backgroundImageId}.jpg` }}
       style={[styles.background, { width, height }]} // מתאימים את התמונה לגודל המסך
-      // resizeMode="stretch" // Try "contain" or "stretch" if needed
       resizeMode="cover" // התמונה תתממשק עם המסך ותחסה אותו כל הזמן
     >
 
+      <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
 
-    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
 
-   
-      {/* <View style={styles.container}> */}
+        {/* <View style={styles.container}> */}
         <View style={styles.header}>
           <TextInput
             style={[styles.titleInput, { outline: 'none' }]}
@@ -508,20 +621,30 @@ const ListItemDetails: React.FC = () => {
             return (
               <View style={styles.item}>
                 <TouchableOpacity onPress={() => handleToggleItem(index)} style={{ marginRight: 10 }}>
-                  <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={24} />
+                  <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={25} />
                 </TouchableOpacity>
-                {filterImage.length > 0 ? 
-                  <TouchableOpacity onPress={() => fetchListItemImages(index)} style={{ marginRight: 10 }}>
-                    <Image
+
+
+
+                {filterImage.length > 0 ? (
+                    <TouchableOpacity
+                      key={filterImage[0].id}
+                      onPress={() => fetchListItemImages(index)}
+                      style={{ marginRight: 10 }}
+                    >
+                      <Image
                         source={{ uri: filterImage[0].uri }}
-                        style={{ width: 40, height: 40, borderRadius: 5 }}
+                        style={{ width: 25, height: 25, borderRadius: 5 }} // הגדלה של התמונה כדי שתהיה ברורה יותר
+                        onError={() => console.error("Failed to load image")}
                       />
-                  </TouchableOpacity>
-                : 
+                    </TouchableOpacity>
+                ) : (
                   <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
-                    <FontAwesome name="image" size={40} color="blue" />
+                    <FontAwesome name="image" size={25} color="blue" />
                   </TouchableOpacity>
-                }
+                )}
+
+
                 <Modal visible={modalVisible} transparent={true}>
                   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
                     <TouchableOpacity onPress={handleCloseLargeImage} style={{ position: 'absolute', top: 20, right: 20 }}>
@@ -531,7 +654,7 @@ const ListItemDetails: React.FC = () => {
                   </View>
                 </Modal>
                 <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
-                  <AntDesign name="delete" size={20} color="red" />
+                  <AntDesign name="delete" size={25} color="red" />
                 </TouchableOpacity>
                 <TextInput
                   style={[
@@ -679,10 +802,10 @@ const ListItemDetails: React.FC = () => {
         </Modal> */}
 
 
-      {/* </View> */}
+        {/* </View> */}
       </ScrollView>
     </ImageBackground>
-   
+
 
   );
 };
@@ -698,7 +821,6 @@ const ListItemDetails: React.FC = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // שכבה כהה שקופה
 
   },
   container: { flex: 1, padding: 20 },

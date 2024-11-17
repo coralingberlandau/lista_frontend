@@ -4,12 +4,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';  // יש לוודא שאתה משתמש בזה
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../type';  // קובץ שבו אתה מגדיר את המסכים
+import { BackgroundImage, RootStackParamList } from '../type';  // קובץ שבו אתה מגדיר את המסכים
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 
 import { Image } from 'react-native';
 import axios from 'axios';
-import { ScrollView } from 'react-native-gesture-handler';
+import { FlatList, ScrollView } from 'react-native-gesture-handler';
+
+import _ from 'lodash';
+
 
 // טיפוס עבור פרופס של Settings
 type SettingsProps = {
@@ -64,15 +67,15 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
 
+
   // const storedUserId = AsyncStorage.getItem('userId')
 
   console.log('====================================');
   // console.log('ehhatttt idddddddd: ', storedUserId);
   console.log('====================================');
 
-  const backgroundImages = [
 
-
+  const backgroundImages: BackgroundImage[] = [
     { id: 1, url: require('../../assets/background/back1.jpg') },
     { id: 2, url: require('../../assets/background/back2.jpg') },
     { id: 3, url: require('../../assets/background/back3.jpg') },
@@ -96,75 +99,189 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
     { id: 22, url: require('../../assets/background/back22.jpg') },
     { id: 23, url: require('../../assets/background/back23.jpg') },
     { id: 24, url: require('../../assets/background/back24.jpg') },
+    { id: 25, url: require('../../assets/background/back25.jpg') },
+
   ];
 
-  const handleBackgroundChange = async (imageId: number) => {
-    setSelectedImage(imageId);
-
-    // שמירת התמונה ב-AsyncStorage
-    await AsyncStorage.setItem('backgroundImageId', imageId.toString());
+  // הגדרת הפונקציה הדחויה (debounced)
+const debounceSaveToServer = _.debounce(async (imageId: number) => {
+  try {
     const token = await AsyncStorage.getItem('token');
-
-    try {
-      console.log("imageId:", imageId);
-  
-      const response = await axios.post(`http://127.0.0.1:8000/customizations/`, {
-        background_image_id: imageId || 0,  // אם לא נשלח, משתמשים ב-"0" כערך ברירת מחדל
-      },{
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await axios.post(
+      `http://127.0.0.1:8000/customizations/`,
+      {
+        background_image_id: imageId || 0, // אם לא נשלח, השתמש ב-0 כערך ברירת מחדל
       },
-      }); 
-
-
-      if(response.status === 200) {
-        await AsyncStorage.setItem('customizations', imageId.toString()); // אם לא נשלח, משתמשים ב-"0" כערך ברירת מחדל
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
+    
+    if (response.status === 200) {
+      // שמירת התמונה ב-AsyncStorage
+      await AsyncStorage.setItem('customizations', imageId.toString());
+    }
 
-  
-      console.log('Response:', response.data);
-    } catch (error) {
-      console.error("Error updating background image:", error);
-      if (error.response) {
-        console.error('Response error:', error.response.data);
-      }
-  };
-  
-  
-  };
+    Toast.show({
+      type: 'success',
+      text1: 'Background changed successfully!',
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    Toast.show({
+      type: 'error',
+      text1: 'An error occurred. Please try again later.',
+    });
+  }
+}, 500);
+
+
+// הפונקציה שמקבלת את ה-ID של התמונה ומבצע קריאה לפונקציה הדחויה
+const handleBackgroundChange = async (imageId: number) => {
+  setSelectedImage(imageId);
+  debounceSaveToServer(imageId); // קריאה לפונקציה הדחויה
+};
+
+
+
+
+  // const handleBackgroundChange = async (imageId: number) => {
+  //   setSelectedImage(imageId);
+
+  //   // שמירת התמונה ב-AsyncStorage
+  //   await AsyncStorage.setItem('backgroundImageId', imageId.toString());
+  //   const token = await AsyncStorage.getItem('token');
+
+  //   try {
+  //     console.log("imageId:", imageId);
+
+  //     const response = await axios.post(`http://127.0.0.1:8000/customizations/`, {
+  //       background_image_id: imageId || 0,  // אם לא נשלח, משתמשים ב-"0" כערך ברירת מחדל
+  //     }, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     if (response.status === 200) {
+  //       await AsyncStorage.setItem('customizations', imageId.toString()); // אם לא נשלח, משתמשים ב-"0" כערך ברירת מחדל
+  //     }
+
+  //     Toast.show({
+  //       type: 'success',
+  //       text1: 'Background changed successfully!',
+  //     });
+
+  //     console.log('Response:', response.data);
+  //   }
+  //   catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       console.error('Axios error:', error.response?.data || error.message);
+
+  //       Toast.show({
+  //         type: 'error',
+  //         text1: 'Server error.',
+  //         text2: error.response?.data?.message || 'Please try again later.',
+  //       });
+  //     } else {
+  //       const err = error as Error; // טיפול בשגיאה שאינה של Axios
+  //       console.error('Unexpected error:', err.message);
+
+  //       Toast.show({
+  //         type: 'error',
+  //         text1: 'Unexpected error occurred. Please try again later.',
+  //       });
+  //     }
+    // }
+
+
+  // };
 
   return (
     <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
 
       {/* <View style={styles.container}> */}
-        {/* <View style={styles.container}> */}
+      {/* <View style={styles.container}> */}
 
 
-        <Text style={styles.title}>{appName}</Text>
-        <Text style={styles.version}>Version: {version}</Text>
+      <Text style={styles.title}>{appName}</Text>
+      <Text style={styles.version}>Version: {version}</Text>
 
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <AntDesign name="logout" size={20} color="red" />
-          <Text style={styles.iconLabelLogout}>Logout</Text>
-        </TouchableOpacity>
-        <Text style={styles.sectionTitle}>Support</Text>
-        <Text style={styles.supportInfo}>For assistance, please contact Lista support:</Text>
-        <TouchableOpacity onPress={handleEmailPress}>
-          <Text style={styles.supportContact}>{supportContact}</Text>
-        </TouchableOpacity>
-        <Text style={styles.notification}>If you need any assistance, feel free to reach out!</Text>
-        <Text style={styles.inspirationText}>Keep achieving great things with Lista!</Text>
-        <TouchableOpacity onPress={navigateToEditProfile} style={styles.editProfileButton}>
-          <Ionicons name="pencil-outline" size={30} color="green" />
-          <Text style={styles.iconLabel}>Edit Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.touchable}>
-          <Ionicons name="color-palette-outline" size={33} color="black" style={styles.icon} />
-          {/* <Text style={[styles.iconLabel, styles.boldText]}>Background</Text> */}
-          <Text style={[styles.iconLabel]}>Background</Text>
-        </TouchableOpacity>
-        {/* הצגת התמונות לבחירה */}
-        <View style={styles.backgroundPickerContainer}>
+      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+        <AntDesign name="logout" size={20} color="red" />
+        <Text style={styles.iconLabelLogout}>Logout</Text>
+      </TouchableOpacity>
+      <Text style={styles.sectionTitle}>Support</Text>
+      <Text style={styles.supportInfo}>For assistance, please contact Lista support:</Text>
+      <TouchableOpacity onPress={handleEmailPress}>
+        <Text style={styles.supportContact}>{supportContact}</Text>
+      </TouchableOpacity>
+      <Text style={styles.notification}>If you need any assistance, feel free to reach out!</Text>
+      <Text style={styles.inspirationText}>Keep achieving great things with Lista!</Text>
+      <TouchableOpacity onPress={navigateToEditProfile} style={styles.editProfileButton}>
+        <Ionicons name="pencil-outline" size={30} color="green" />
+        <Text style={styles.iconLabel}>Edit Profile</Text>
+      </TouchableOpacity>
+      {/* <TouchableOpacity style={styles.touchable}> */}
+        <Ionicons name="color-palette-outline" size={33} color="black" style={styles.icon} />
+        {/* <Text style={[styles.iconLabel, styles.boldText]}>Background</Text> */}
+        <Text style={[styles.iconLabel]}>Background</Text>
+      {/* </TouchableOpacity> */}
+
+
+      {/* הצגת התמונות לבחירה */}
+      <View style={styles.backgroundPickerContainer}>
+
+        {/* <FlatList
+          data={backgroundImages} // מערך התמונות
+          renderItem={({ item }: { item: BackgroundImage }) => (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => handleBackgroundChange(item.id)}
+              style={[
+                styles.backgroundImageOption,
+                { margin: 10 },
+                selectedImage === item.id && { borderColor: 'blue', borderWidth: 2 },
+              ]}
+            >
+              {/* <Image source={item.url} style={{ width: 100, height: 100 }} resizeMode="cover" /> */}
+
+              {/* <Image source={item.url} style={styles.backgroundImage} resizeMode="cover" />
+
+
+
+            </TouchableOpacity>
+          )} */}
+          {/* keyExtractor={(item) => item.id.toString()} // מזהה ייחודי לכל אובייקט */}
+        {/* /> */} 
+
+
+
+<FlatList
+    data={backgroundImages} // מערך התמונות
+    renderItem={({ item }: { item: BackgroundImage }) => (
+      <TouchableOpacity
+        onPress={() => handleBackgroundChange(item.id)}
+        style={[
+          styles.backgroundImageOption,
+          { margin: 10 },
+          selectedImage === item.id && { borderColor: 'blue', borderWidth: 2 },
+        ]}
+      >
+        <Image
+          source={item.url}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+        />
+      </TouchableOpacity>
+    )}
+    keyExtractor={(item) => item.id.toString()} // מזהה ייחודי לכל אובייקט
+    numColumns={3} // מספר התמונות בכל שורה
+  />
+
+        {/* 
+
           {backgroundImages.map((image) => (
             <TouchableOpacity
               key={image.id}
@@ -174,15 +291,22 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
                 selectedImage === image.id && styles.selectedBackgroundImage,
               ]}
             >
-              <Image source={image.url} style={styles.backgroundImage} />
-            </TouchableOpacity>
-          ))}
-        </View>
-        <View style={styles.footerContainer}>
-          <Text style={styles.footerText}>
-            © All rights reserved to Coral Landau, Founder of Lista.
-          </Text>
-        </View>
+              <Image source={image.url} style={styles.backgroundImage} /> */}
+
+        {/* <Image source={image.url} style={styles.backgroundImage} resizeMode="contain" /> */}
+
+        {/* </TouchableOpacity>
+          ))} */}
+
+
+
+
+      </View>
+      <View style={styles.footerContainer}>
+        <Text style={styles.footerText}>
+          © All rights reserved to Coral Landau, Founder of Lista.
+        </Text>
+      </View>
       {/* </View> */}
     </ScrollView>
 
@@ -286,19 +410,11 @@ const styles = StyleSheet.create({
 
   },
 
-
-
-
-
-
-
   iconLabel: {
     color: 'black',
     marginTop: 5,
     // marginTop: 10,
-
     fontSize: 16,
-
 
   },
 
@@ -325,6 +441,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: 20,
+
+
   },
 
   backgroundImageOption: {

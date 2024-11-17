@@ -1,3 +1,5 @@
+import { ImageSourcePropType } from "react-native";
+
 // types.ts
 export type RootStackParamList = {
   Login: undefined;  
@@ -58,17 +60,17 @@ export interface GroupListResponse {
 }
 
 
-declare module 'react-color' {
+// declare module 'react-color' {
 
-  export interface HsvColor {
-    h: number; // Hue
-    s: number; // Saturation
-    v: number; // Value
-  }
+//   export interface HsvColor {
+//     h: number; // Hue
+//     s: number; // Saturation
+//     v: number; // Value
+//   }
 
-  export function hsvToHex(h: number, s: number, v: number): string;
+//   export function hsvToHex(h: number, s: number, v: number): string;
 
-}
+// }
 
 export interface Image {
   uri: string;
@@ -79,22 +81,6 @@ export interface Image {
 export interface User {
   id: number
 }
-
-
-// export interface ListItemImage {
-//   id: number; // או כל מזהה אחר של התמונה
-//   list_item: ListItem; // המידע על האייטם שאליו שייכת התמונה
-//   image: string; // ה-URL של התמונה
-
-// }
-
-// export interface ListItemImage {
-//   listItemId: number;
-//   uri: string;
-//   fileName: string;
-//   mimeType: string;
-//   index: number;
-// }
 
 export interface ListItemImage {
   id: number;
@@ -107,10 +93,14 @@ export interface ListItemImage {
 }
 
 export interface ImageData {
+  id: number; // זיהוי ייחודי
   uri: string;
   fileName: string;
   mimeType: string;
   index: number;
 }
 
-
+export interface BackgroundImage {
+  id: number;
+  url: ImageSourcePropType;  // טיפוס נכון לתמונה
+};
