@@ -9,6 +9,7 @@ import { JwtPayload, RootStackParamList } from './type'; // Ensure the path is c
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
@@ -133,7 +134,10 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   }
 
   return (
-    <View style={styles.container}>
+
+    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+
+    {/* <View style={styles.container}> */}
       <Text style={styles.title}>Register</Text>
 
       <View style={styles.inputContainer}>
@@ -229,7 +233,10 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
           <Text style={styles.loginLink}>Click here to log in</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    {/* </View> */}
+
+</ScrollView>
+
   );
 };
 

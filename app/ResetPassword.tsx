@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from './type';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -64,7 +64,14 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+
+    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+
+
+
+    {/* <View style={styles.container}> */}
+
+    
       <Text style={styles.title}>Reset Password</Text>
 
       {/* <TextInput
@@ -111,7 +118,10 @@ const ResetPassword: React.FC = () => {
       <TouchableOpacity onPress={navigateToLogin}>
         <Text style={styles.linkTo}>Click here to login</Text>
       </TouchableOpacity>
-    </View>
+    {/* </View> */}
+
+</ScrollView>
+
   );
 };
 

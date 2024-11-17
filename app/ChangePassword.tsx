@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useRoute } from '@react-navigation/native'; // Import useRoute hook
@@ -76,7 +76,12 @@ const ChangePassword: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+
+
+    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+
+
+    {/* <View style={styles.container}> */}
       <Text style={styles.title}>Change Password</Text>
 
       <View style={styles.inputContainer}>
@@ -122,7 +127,10 @@ const ChangePassword: React.FC = () => {
           {message || errorText}
         </Text>
       ) : null}
-    </View>
+    {/* </View> */}
+
+</ScrollView>
+
   );
 };
 

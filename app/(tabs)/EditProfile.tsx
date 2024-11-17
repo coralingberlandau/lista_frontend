@@ -8,6 +8,7 @@ import Toast from 'react-native-toast-message';
 import { RootStackParamList } from '../type';  // קובץ שבו אתה מגדיר את המסכים
 
 import { Ionicons } from '@expo/vector-icons';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 // אנחנו מגדירים את סוג הפרופס כדי לקבל את ה-params דרך ה-route
@@ -105,7 +106,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
     };
 
     return (
-        <View style={styles.container}>
+
+        <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+
+        {/* <View style={styles.container}> */}
             <Text style={styles.title}>Edit Profile</Text>
             {/* <Input
                 value={username}
@@ -202,7 +206,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
                     {error || emailError}
                 </Text>
             )}
-        </View>
+        {/* </View> */}
+
+</ScrollView>
+
     );
 };
 

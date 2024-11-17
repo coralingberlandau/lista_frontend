@@ -8,6 +8,7 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode'; 
 import { JwtPayload, RootStackParamList } from './type';
 import { Ionicons } from '@expo/vector-icons';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 // הגדרת סוג הניווט למסך הלוגין
@@ -102,7 +103,11 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
   };
 
   return (
-    <View style={styles.container}>
+
+    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+
+    
+    {/* <View style={styles.container}> */}
       <Text style={styles.title}>Login</Text>
 
 
@@ -139,37 +144,6 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
         />
       </View>
 
-
-
-
-
-
-  
-
-
-      {/* // <Input */}
-      {/* //   value={username}
-      //   onChangeText={setUsername}
-      //   placeholder="Enter your username"
-      //   autoCapitalize="none"
-      //   leftIcon={ */}
-      {/* //     <Ionicons name="person-outline" size={24} color="gray" />
-      //   }
-      //   containerStyle={{ */}
-      {/* //     borderBottomWidth: 1,
-      //     borderBottomColor: 'gray',
-      //     paddingLeft: 10,
-      //   }}
-      // /> */}
-
-      {/* <Input
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Enter your password"
-        secureTextEntry
-        autoCapitalize="none"
-      /> */}
-
       <Button title="Login" onPress={handleLogin} />
 
       <Text style={styles.errorText}>{errorText}</Text>
@@ -184,7 +158,10 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
           <Text style={styles.linkTo}>Forgot password?</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    {/* </View> */}
+
+</ScrollView>
+
   );
 };
 

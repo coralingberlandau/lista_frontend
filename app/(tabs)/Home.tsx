@@ -6,6 +6,7 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ListItem, RootStackParamList } from '../type';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { ScrollView } from 'react-native-gesture-handler';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'ListItemDetails'>;
 
@@ -66,7 +67,12 @@ const Home: React.FC = () => {
   };
   
   return (
-    <View style={styles.container}>
+
+    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+
+
+
+    {/* <View style={styles.container}> */}
       {loading ? (
         <Text>Loading...</Text>
       ) : (
@@ -94,7 +100,10 @@ const Home: React.FC = () => {
           </TouchableOpacity>
         </>
       )}
-    </View>
+    {/* </View> */}
+
+</ScrollView>
+
   );
 };
 

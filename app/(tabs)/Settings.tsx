@@ -71,26 +71,31 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
   console.log('====================================');
 
   const backgroundImages = [
-    { id: 1, url: require('../../assets/background/back.jpeg') },
-    { id: 2, url: require('../../assets/background/back1.jpeg') },
-    { id: 3, url: require('../../assets/background/back2.jpg') },
-    { id: 4, url: require('../../assets/background/back3.webp') },
-    { id: 5, url: require('../../assets/background/back4.jpg') },
-    { id: 6, url: require('../../assets/background/back5.jpeg') },
-    { id: 7, url: require('../../assets/background/back6.webp') },
-    { id: 8, url: require('../../assets/background/back7.jpeg') },
-    { id: 9, url: require('../../assets/background/back8.jpeg') },
-    { id: 10, url: require('../../assets/background/back9.jpeg') },
-    { id: 11, url: require('../../assets/background/back10.jpeg') },
-    { id: 12, url: require('../../assets/background/back11.jpeg') },
-    { id: 13, url: require('../../assets/background/back12.jpeg') },
-    { id: 14, url: require('../../assets/background/back13.jpeg') },
-    { id: 15, url: require('../../assets/background/back14.jpeg') },
-    { id: 17, url: require('../../assets/background/back16.jpeg') },
-    { id: 18, url: require('../../assets/background/back17.jpg') },
-    { id: 19, url: require('../../assets/background/back18.jpg') },
-    { id: 20, url: require('../../assets/background/back19.jpeg') },
-    { id: 21, url: require('../../assets/background/back20.jpeg') },
+
+
+    { id: 1, url: require('../../assets/background/back1.jpg') },
+    { id: 2, url: require('../../assets/background/back2.jpg') },
+    { id: 3, url: require('../../assets/background/back3.jpg') },
+    { id: 4, url: require('../../assets/background/back4.jpg') },
+    { id: 5, url: require('../../assets/background/back5.jpg') },
+    { id: 6, url: require('../../assets/background/back6.jpg') },
+    { id: 7, url: require('../../assets/background/back7.jpg') },
+    { id: 8, url: require('../../assets/background/back8.jpg') },
+    { id: 9, url: require('../../assets/background/back9.jpg') },
+    { id: 10, url: require('../../assets/background/back10.jpg') },
+    { id: 11, url: require('../../assets/background/back11.jpg') },
+    { id: 12, url: require('../../assets/background/back12.jpg') },
+    { id: 13, url: require('../../assets/background/back13.jpg') },
+    { id: 15, url: require('../../assets/background/back14.jpg') },
+    { id: 16, url: require('../../assets/background/back16.jpg') },
+    { id: 17, url: require('../../assets/background/back17.jpg') },
+    { id: 18, url: require('../../assets/background/back18.jpg') },
+    { id: 19, url: require('../../assets/background/back19.jpg') },
+    { id: 20, url: require('../../assets/background/back20.jpg') },
+    { id: 21, url: require('../../assets/background/back21.jpg') },
+    { id: 22, url: require('../../assets/background/back22.jpg') },
+    { id: 23, url: require('../../assets/background/back23.jpg') },
+    { id: 24, url: require('../../assets/background/back24.jpg') },
   ];
 
   const handleBackgroundChange = async (imageId: number) => {
@@ -110,6 +115,12 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
         Authorization: `Bearer ${token}`,
       },
       }); 
+
+
+      if(response.status === 200) {
+        await AsyncStorage.setItem('customizations', imageId.toString()); // אם לא נשלח, משתמשים ב-"0" כערך ברירת מחדל
+      }
+
   
       console.log('Response:', response.data);
     } catch (error) {
@@ -119,38 +130,16 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
       }
   };
   
-    
-
-    // שליחת המידע לשרת לעדכון בדאטה בייס עם user_id
-    // try {
-
-    //   console.log("imageId:", imageId); // בדיקה
-    //   console.log("userId:", userId); // בדיקה
-
-
-    //   await axios.post(`http://127.0.0.1:8000/customizations/${userId}/update_background/`, {
-    //     user_id: userId,
-    //     background_image_id: imageId || 0, // ברירת מחדל אם imageId ריק
-        
-    //   });      
-    // } catch (error) {
-    //   console.error("Error updating background image:", error);
-    // }
-
-
-    // שליחת המידע לשרת לעדכון בדאטה בייס עם user_id
-    // try {
-    //   await axios.post('http://127.0.0.1:8000/customizations/${storedUserId}/', { user_id: userId, background_image_id: imageId });
-    // } catch (error) {
-    //   console.error("Error updating background image:", error);
-    // }
+  
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
 
-      <View style={styles.container}>
+      {/* <View style={styles.container}> */}
         {/* <View style={styles.container}> */}
+
+
         <Text style={styles.title}>{appName}</Text>
         <Text style={styles.version}>Version: {version}</Text>
 
@@ -194,7 +183,7 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
             © All rights reserved to Coral Landau, Founder of Lista.
           </Text>
         </View>
-      </View>
+      {/* </View> */}
     </ScrollView>
 
   );

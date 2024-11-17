@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ColorPicker } from 'react-native-color-picker';
 import { Picker } from '@react-native-picker/picker'; // Import Picker component
 import Slider from '@react-native-community/slider';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 type ListItemDetailsRouteProp = RouteProp<RootStackParamList, 'ListItemDetails'>;
@@ -370,7 +371,7 @@ const ListItemDetails: React.FC = () => {
     console.log('images', images);
 
     const formData = new FormData();
-    formData.append('list_item', listItemId.toString());
+    formData.append('list_item',  listItemId.toString());
 
     for (const image of images) {
       const base64Image = image.uri.split(',')[1];  // הסרת המידע המיותר מ-URI של base64
@@ -463,38 +464,23 @@ const ListItemDetails: React.FC = () => {
 
   return (
     <ImageBackground
-    // source={{ uri: `../assets/background/back${backgroundImageId}.jpeg` }} 
 
-      source={{ uri: `../assets/background/back.jpeg` }} // or require('./path-to-local-image.jpg')
+    source={{ uri: `../assets/background/back${backgroundImageId}.jpg` }} 
 
+      // source={{ uri: `../assets/background/back14.jpg` }} // or require('./path-to-local-image.jpg')
 
-      // { id: 1, url: require('../../assets/background/back.jpeg') },
-      // { id: 2, url: require('../../assets/background/back1.jpeg') },
-      // { id: 3, url: require('../../assets/background/back2.jpg') },
-      // { id: 4, url: require('../../assets/background/back3.webp') },
-      // { id: 5, url: require('../../assets/background/back4.jpg') },
-      // { id: 6, url: require('../../assets/background/back5.jpeg') },
-      // { id: 7, url: require('../../assets/background/back6.webp') },
-      // { id: 8, url: require('../../assets/background/back7.jpeg') },
-      // { id: 9, url: require('../../assets/background/back8.jpeg') },
-      // { id: 10, url: require('../../assets/background/back9.jpeg') },
-      // { id: 11, url: require('../../assets/background/back10.jpeg') },
-      // { id: 12, url: require('../../assets/background/back11.jpeg') },
-      // { id: 13, url: require('../../assets/background/back12.jpeg') },
-      // { id: 14, url: require('../../assets/background/back13.jpeg') },
-      // { id: 15, url: require('../../assets/background/back14.jpeg') },
-      // { id: 17, url: require('../../assets/background/back16.jpeg') },
-      // { id: 18, url: require('../../assets/background/back17.jpg') },
-      // { id: 19, url: require('../../assets/background/back18.jpg') },
-      // { id: 20, url: require('../../assets/background/back19.jpeg') },
-      // { id: 21, url: require('../../assets/background/back20.jpeg') },
 
 
       style={[styles.background, { width, height }]} // מתאימים את התמונה לגודל המסך
       // resizeMode="stretch" // Try "contain" or "stretch" if needed
       resizeMode="cover" // התמונה תתממשק עם המסך ותחסה אותו כל הזמן
     >
-      <View style={styles.container}>
+
+
+    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+
+   
+      {/* <View style={styles.container}> */}
         <View style={styles.header}>
           <TextInput
             style={[styles.titleInput, { outline: 'none' }]}
@@ -693,8 +679,11 @@ const ListItemDetails: React.FC = () => {
         </Modal> */}
 
 
-      </View>
+      {/* </View> */}
+      </ScrollView>
     </ImageBackground>
+   
+
   );
 };
 
@@ -709,6 +698,8 @@ const ListItemDetails: React.FC = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // שכבה כהה שקופה
+
   },
   container: { flex: 1, padding: 20 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
