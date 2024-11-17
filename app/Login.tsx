@@ -57,6 +57,22 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
           throw new Error("User ID is undefined");
         }
 
+        // const customizations = await axios.get('http://127.0.0.1:8000/customizations/get_user_customization/', {
+        //   headers: {
+        //     Authorization: `Bearer ${accessToken}`,
+        //   },
+        // });
+
+        const customizations = await axios.get('http://127.0.0.1:8000/customizations/get_user_customization/', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+
+        if(customizations.status === 200) {
+          await AsyncStorage.setItem('customizations', customizations.data.data.background_image_id);
+        }
+
         // שמירת הטוקן וה-userId באחסון המקומי (AsyncStorage)
         await AsyncStorage.setItem('token', accessToken); // שמירה של הטוקן
         await AsyncStorage.setItem('userId', userId.toString()); // שמירת ה-userId

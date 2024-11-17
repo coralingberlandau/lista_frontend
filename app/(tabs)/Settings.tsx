@@ -64,7 +64,11 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
 
-  const storedUserId = AsyncStorage.getItem('userId');
+  // const storedUserId = AsyncStorage.getItem('userId')
+
+  console.log('====================================');
+  // console.log('ehhatttt idddddddd: ', storedUserId);
+  console.log('====================================');
 
   const backgroundImages = [
     { id: 1, url: require('../../assets/background/back.jpeg') },
@@ -89,84 +93,93 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
     { id: 21, url: require('../../assets/background/back20.jpeg') },
   ];
 
-  // טוענים את תמונת הרקע שהיוזר בחר ב-AsyncStorage
-  useEffect(() => {
-    const fetchBackgroundImage = async () => {
-      const savedImageId = await AsyncStorage.getItem('backgroundImageId');
-      if (savedImageId) {
-        setSelectedImage(Number(savedImageId));
-      }
-    };
-
-    fetchBackgroundImage();
-  }, []);
-
-  const handleBackgroundChange = async (imageId: number, userId: number) => {
+  const handleBackgroundChange = async (imageId: number) => {
     setSelectedImage(imageId);
 
     // שמירת התמונה ב-AsyncStorage
     await AsyncStorage.setItem('backgroundImageId', imageId.toString());
+    const token = await AsyncStorage.getItem('token');
 
-    // שליחת המידע לשרת לעדכון בדאטה בייס עם user_id
     try {
-      await axios.post('http://127.0.0.1:8000/customizations/', { user_id: userId, background_image_id: imageId });
+      console.log("imageId:", imageId);
+  
+      const response = await axios.post(`http://127.0.0.1:8000/customizations/`, {
+        background_image_id: imageId || 0,  // אם לא נשלח, משתמשים ב-"0" כערך ברירת מחדל
+      },{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      }); 
+  
+      console.log('Response:', response.data);
     } catch (error) {
       console.error("Error updating background image:", error);
-    }
+      if (error.response) {
+        console.error('Response error:', error.response.data);
+      }
+  };
+  
+    
+
+    // שליחת המידע לשרת לעדכון בדאטה בייס עם user_id
+    // try {
+
+    //   console.log("imageId:", imageId); // בדיקה
+    //   console.log("userId:", userId); // בדיקה
+
+
+    //   await axios.post(`http://127.0.0.1:8000/customizations/${userId}/update_background/`, {
+    //     user_id: userId,
+    //     background_image_id: imageId || 0, // ברירת מחדל אם imageId ריק
+        
+    //   });      
+    // } catch (error) {
+    //   console.error("Error updating background image:", error);
+    // }
+
+
+    // שליחת המידע לשרת לעדכון בדאטה בייס עם user_id
+    // try {
+    //   await axios.post('http://127.0.0.1:8000/customizations/${storedUserId}/', { user_id: userId, background_image_id: imageId });
+    // } catch (error) {
+    //   console.error("Error updating background image:", error);
+    // }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
 
       <View style={styles.container}>
-
         {/* <View style={styles.container}> */}
-
         <Text style={styles.title}>{appName}</Text>
         <Text style={styles.version}>Version: {version}</Text>
-
 
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <AntDesign name="logout" size={20} color="red" />
           <Text style={styles.iconLabelLogout}>Logout</Text>
         </TouchableOpacity>
-
-
-
-
-
-
-
-
-
-
         <Text style={styles.sectionTitle}>Support</Text>
         <Text style={styles.supportInfo}>For assistance, please contact Lista support:</Text>
         <TouchableOpacity onPress={handleEmailPress}>
           <Text style={styles.supportContact}>{supportContact}</Text>
         </TouchableOpacity>
-
         <Text style={styles.notification}>If you need any assistance, feel free to reach out!</Text>
         <Text style={styles.inspirationText}>Keep achieving great things with Lista!</Text>
-
         <TouchableOpacity onPress={navigateToEditProfile} style={styles.editProfileButton}>
           <Ionicons name="pencil-outline" size={30} color="green" />
           <Text style={styles.iconLabel}>Edit Profile</Text>
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.touchable}>
           <Ionicons name="color-palette-outline" size={33} color="black" style={styles.icon} />
           {/* <Text style={[styles.iconLabel, styles.boldText]}>Background</Text> */}
           <Text style={[styles.iconLabel]}>Background</Text>
         </TouchableOpacity>
-
-
         {/* הצגת התמונות לבחירה */}
         <View style={styles.backgroundPickerContainer}>
           {backgroundImages.map((image) => (
             <TouchableOpacity
               key={image.id}
-              onPress={() => handleBackgroundChange(image.id, 1)} // כאן 1 הוא ה- userId
+              onPress={() => handleBackgroundChange(image.id)} // כאן 1 הוא ה- userId
               style={[
                 styles.backgroundImageOption,
                 selectedImage === image.id && styles.selectedBackgroundImage,
@@ -176,13 +189,11 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
             </TouchableOpacity>
           ))}
         </View>
-
         <View style={styles.footerContainer}>
           <Text style={styles.footerText}>
             © All rights reserved to Coral Landau, Founder of Lista.
           </Text>
         </View>
-
       </View>
     </ScrollView>
 
@@ -274,7 +285,7 @@ const styles = StyleSheet.create({
   // },
 
   logoutButton: {
-    backgroundColor: '#f5f5f5',  
+    backgroundColor: '#f5f5f5',
     padding: 10,  // מרווחים
     borderRadius: 50,  // עיגול מלא
     justifyContent: 'center',
@@ -330,7 +341,6 @@ const styles = StyleSheet.create({
   backgroundImageOption: {
     margin: 5,
     // margin: 10,
-
     width: 80,
     height: 80,
     borderRadius: 10,

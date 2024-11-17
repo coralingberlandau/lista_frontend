@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, ImageBackground, Dimensions } from 'react-native';
 import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { ImageData, ListItem, ListItemImage, RootStackParamList, User } from './type';
 import { Ionicons, AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
@@ -32,6 +32,11 @@ const ListItemDetails: React.FC = () => {
   const [shareValue, setShareValue] = useState('');
 
 
+  // לבדוקקקקק
+  const { width, height } = Dimensions.get('window'); // קבלת גודל המסך
+
+
+
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -43,7 +48,7 @@ const ListItemDetails: React.FC = () => {
 
   const [images, setImages] = useState<ImageData[]>([]);
 
-  const [backgroundImageId, setBackgroundImageId] = useState<number | null>(null);
+  const [backgroundImageId, setBackgroundImageId] = useState<string | null>(null);
 
 
   console.log(title, listItem, items, images)
@@ -60,34 +65,20 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
+  const getBackgroundImage = async () => {
+    const backgroundId = await AsyncStorage.getItem('customizations');
+    setBackgroundImageId(backgroundId)
+  };
+
   useFocusEffect(
     useCallback(() => {
       console.log('render', listItem?.id)
       setTitle(listItem?.title || '');
       setItems(listItem?.items.split("|") || ['']);
       getImages()
-      // loadColors();
+      getBackgroundImage()
     }, [listItem])
   );
-
-  
-  const storedUserId = AsyncStorage.getItem('userId');
-
-  useEffect(() => {
-    // קבלת התמונה שבחר היוזר מהשרת
-    const fetchBackgroundImage = async () => {
-
-      try {
-        const response = await axios.get(`http://127.0.0.1:8000/customizations/${storedUserId}/`);
-        setBackgroundImageId(response.data.background_image_id);
-      } catch (error) {
-        console.error("Error fetching background image:", error);
-      }
-    };
-
-    fetchBackgroundImage();
-  }, [storedUserId]);
-
 
   // post griopulist - http://127.0.0.1:8000/grouplists/
 
@@ -471,208 +462,239 @@ const ListItemDetails: React.FC = () => {
 
 
   return (
-    <View style={styles.container}>
-    {/* <View style={backgroundImageId ? { backgroundImage: backgroundImages[backgroundImageId - 1].url } : {}}> */}
+    <ImageBackground
+    // source={{ uri: `../assets/background/back${backgroundImageId}.jpeg` }} 
 
-      <View style={styles.header}>
-        <TextInput
-          style={[styles.titleInput, { outline: 'none' }]}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Edit Title"
-        />
+      source={{ uri: `../assets/background/back.jpeg` }} // or require('./path-to-local-image.jpg')
 
 
-        {/* כפתורררר שלוש נקודותתת */}
-        {/* <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.menuButton}>
-          <Entypo name="dots-three-horizontal" size={35} color="black" />
-        </TouchableOpacity> */}
+      // { id: 1, url: require('../../assets/background/back.jpeg') },
+      // { id: 2, url: require('../../assets/background/back1.jpeg') },
+      // { id: 3, url: require('../../assets/background/back2.jpg') },
+      // { id: 4, url: require('../../assets/background/back3.webp') },
+      // { id: 5, url: require('../../assets/background/back4.jpg') },
+      // { id: 6, url: require('../../assets/background/back5.jpeg') },
+      // { id: 7, url: require('../../assets/background/back6.webp') },
+      // { id: 8, url: require('../../assets/background/back7.jpeg') },
+      // { id: 9, url: require('../../assets/background/back8.jpeg') },
+      // { id: 10, url: require('../../assets/background/back9.jpeg') },
+      // { id: 11, url: require('../../assets/background/back10.jpeg') },
+      // { id: 12, url: require('../../assets/background/back11.jpeg') },
+      // { id: 13, url: require('../../assets/background/back12.jpeg') },
+      // { id: 14, url: require('../../assets/background/back13.jpeg') },
+      // { id: 15, url: require('../../assets/background/back14.jpeg') },
+      // { id: 17, url: require('../../assets/background/back16.jpeg') },
+      // { id: 18, url: require('../../assets/background/back17.jpg') },
+      // { id: 19, url: require('../../assets/background/back18.jpg') },
+      // { id: 20, url: require('../../assets/background/back19.jpeg') },
+      // { id: 21, url: require('../../assets/background/back20.jpeg') },
 
-        {/* כפתורררר שלוש נקודותתת */}
+
+      style={[styles.background, { width, height }]} // מתאימים את התמונה לגודל המסך
+      // resizeMode="stretch" // Try "contain" or "stretch" if needed
+      resizeMode="cover" // התמונה תתממשק עם המסך ותחסה אותו כל הזמן
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TextInput
+            style={[styles.titleInput, { outline: 'none' }]}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Edit Title"
+          />
+
+
+          {/* כפתורררר שלוש נקודותתת */}
+          {/* <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.menuButton}>
+            <Entypo name="dots-three-horizontal" size={35} color="black" />
+          </TouchableOpacity> */}
+
+          {/* כפתורררר שלוש נקודותתת */}
 
 
 
 
-      </View>
-      <FlatList
-        data={items}
-        renderItem={({ item, index }) => {
-          const filterImage = images && images.filter((img) => img.index === index)
-          return (
-            <View style={styles.item}>
-              <TouchableOpacity onPress={() => handleToggleItem(index)} style={{ marginRight: 10 }}>
-                <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={24} />
-              </TouchableOpacity>
-              {filterImage.length > 0 ? 
-                <TouchableOpacity onPress={() => fetchListItemImages(index)} style={{ marginRight: 10 }}>
-                  <Image
-                      source={{ uri: filterImage[0].uri }}
-                      style={{ width: 40, height: 40, borderRadius: 5 }}
-                    />
+        </View>
+        <FlatList
+          data={items}
+          renderItem={({ item, index }) => {
+            const filterImage = images && images.filter((img) => img.index === index)
+            return (
+              <View style={styles.item}>
+                <TouchableOpacity onPress={() => handleToggleItem(index)} style={{ marginRight: 10 }}>
+                  <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={24} />
                 </TouchableOpacity>
-              : 
-                <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
-                  <FontAwesome name="image" size={40} color="blue" />
-                </TouchableOpacity>
-              }
-              <Modal visible={modalVisible} transparent={true}>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
-                  <TouchableOpacity onPress={handleCloseLargeImage} style={{ position: 'absolute', top: 20, right: 20 }}>
-                    <FontAwesome name="close" size={30} color="white" />
+                {filterImage.length > 0 ? 
+                  <TouchableOpacity onPress={() => fetchListItemImages(index)} style={{ marginRight: 10 }}>
+                    <Image
+                        source={{ uri: filterImage[0].uri }}
+                        style={{ width: 40, height: 40, borderRadius: 5 }}
+                      />
                   </TouchableOpacity>
-                  <Image source={{ uri: largeImage }} style={{ width: '80%', height: '80%', resizeMode: 'contain' }} />
-                </View>
-              </Modal>
-              <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
-                <AntDesign name="delete" size={20} color="red" />
-              </TouchableOpacity>
-              <TextInput
-                style={[
-                  styles.textArea,
-                  {
-                    outline: 'none',
-                    textDecorationLine: item.includes('✔️') ? 'line-through' : 'none',
-                  },
-                ]}
-                placeholder="Write here..."
-                multiline={false}  // Set to false for a single line
-                value={item}
-                onChangeText={(text) => handleItemChange(text, index)}
-              />
-            </View>
-          )
-          
-        }}
-        keyExtractor={(_, index) => index.toString()} />
-
-
-
-      {selectedImage && (
-        <Modal visible={true} transparent={true} animationType="fade">
-          <View style={styles.modalContainer}>
-            <TouchableOpacity style={styles.closeButton} onPress={handleCloseLargeImage}>
-              <Text style={{ color: 'white', fontSize: 18 }}>X</Text>
-            </TouchableOpacity>
-            <Image source={{ uri: selectedImage }} style={styles.largeImage} />
-          </View>
-        </Modal>
-      )}
-
-
-
-
-      {/* // מודל להצגת תמונה בגדול */}
-
-      {isModalVisible && (
-        <Modal
-          transparent={true}
-          visible={isModalVisible}
-          onRequestClose={() => setIsModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>X</Text>
-            </TouchableOpacity>
-            <Image
-              source={{ uri: modalImage }}
-              style={styles.largeImage}
-            />
-          </View>
-        </Modal>
-      )}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <View style={styles.iconRowContainer}>
-        {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
-          <Ionicons name="share-outline" size={25} color="black" />
-          <Text style={styles.iconLabel}>Share</Text>
-        </TouchableOpacity>}
-
-        {isModalVisible && (
-          <View style={styles.overlay}>
-
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Select Permission</Text>
-
-              {/* Dropdown for permissions */}
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={permission}
-                  onValueChange={handlePermissionSelect}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Read Only" value="read_only" />
-                  <Picker.Item label="Full Access" value="full_access" />
-                </Picker>
+                : 
+                  <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
+                    <FontAwesome name="image" size={40} color="blue" />
+                  </TouchableOpacity>
+                }
+                <Modal visible={modalVisible} transparent={true}>
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
+                    <TouchableOpacity onPress={handleCloseLargeImage} style={{ position: 'absolute', top: 20, right: 20 }}>
+                      <FontAwesome name="close" size={30} color="white" />
+                    </TouchableOpacity>
+                    <Image source={{ uri: largeImage }} style={{ width: '80%', height: '80%', resizeMode: 'contain' }} />
+                  </View>
+                </Modal>
+                <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
+                  <AntDesign name="delete" size={20} color="red" />
+                </TouchableOpacity>
+                <TextInput
+                  style={[
+                    styles.textArea,
+                    {
+                      outline: 'none',
+                      textDecorationLine: item.includes('✔️') ? 'line-through' : 'none',
+                    },
+                  ]}
+                  placeholder="Write here..."
+                  multiline={false}  // Set to false for a single line
+                  value={item}
+                  onChangeText={(text) => handleItemChange(text, index)}
+                />
               </View>
-              {/* Text Input for custom value */}
-              <TextInput
-                placeholder="Enter a email"
-                value={shareValue}
-                onChangeText={setShareValue}
-                style={styles.input}
-              />
-              {/* Confirm Share Button */}
-              <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmShare}>
-                <Text style={styles.confirmButtonText}>Confirm Share</Text>
-              </TouchableOpacity>
+            )
 
-              {/* Close Button */}
-              <TouchableOpacity style={styles.closeButtonShare} onPress={() => setIsModalVisible(false)}>
-                <Text style={styles.closeButtonText}>Close</Text>
+          }}
+          keyExtractor={(_, index) => index.toString()} />
+
+
+
+        {selectedImage && (
+          <Modal visible={true} transparent={true} animationType="fade">
+            <View style={styles.modalContainer}>
+              <TouchableOpacity style={styles.closeButton} onPress={handleCloseLargeImage}>
+                <Text style={{ color: 'white', fontSize: 18 }}>X</Text>
               </TouchableOpacity>
+              <Image source={{ uri: selectedImage }} style={styles.largeImage} />
             </View>
-
-          </View>
-
+          </Modal>
         )}
 
-        {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(listItem.id)}>
-          <AntDesign name="delete" size={25} color="black" />
-          <Text style={styles.iconLabel}>Delete</Text>
-        </TouchableOpacity>}
+
+
+
+        {/* // מודל להצגת תמונה בגדול */}
+
+        {isModalVisible && (
+          <Modal
+            transparent={true}
+            visible={isModalVisible}
+            onRequestClose={() => setIsModalVisible(false)}
+          >
+            <View style={styles.modalContainer}>
+              <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>X</Text>
+              </TouchableOpacity>
+              <Image
+                source={{ uri: modalImage }}
+                style={styles.largeImage}
+              />
+            </View>
+          </Modal>
+        )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <View style={styles.iconRowContainer}>
+          {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
+            <Ionicons name="share-outline" size={25} color="black" />
+            <Text style={styles.iconLabel}>Share</Text>
+          </TouchableOpacity>}
+
+          {isModalVisible && (
+            <View style={styles.overlay}>
+
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Select Permission</Text>
+
+                {/* Dropdown for permissions */}
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={permission}
+                    onValueChange={handlePermissionSelect}
+                    style={styles.picker}
+                  >
+                    <Picker.Item label="Read Only" value="read_only" />
+                    <Picker.Item label="Full Access" value="full_access" />
+                  </Picker>
+                </View>
+                {/* Text Input for custom value */}
+                <TextInput
+                  placeholder="Enter a email"
+                  value={shareValue}
+                  onChangeText={setShareValue}
+                  style={styles.input}
+                />
+                {/* Confirm Share Button */}
+                <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmShare}>
+                  <Text style={styles.confirmButtonText}>Confirm Share</Text>
+                </TouchableOpacity>
+
+                {/* Close Button */}
+                <TouchableOpacity style={styles.closeButtonShare} onPress={() => setIsModalVisible(false)}>
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+
+            </View>
+
+          )}
+
+          {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(listItem.id)}>
+            <AntDesign name="delete" size={25} color="black" />
+            <Text style={styles.iconLabel}>Delete</Text>
+          </TouchableOpacity>}
+        </View>
+
+
+
+        <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
+          <Text style={styles.addItemButtonText}>Add Item</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
+          <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
+        </TouchableOpacity>
+
+
+
+
+
+
+        {/* <Modal visible={isMenuVisible} transparent={true} animationType="slide">
+          <View style={styles.modalBackground}> 
+            <TouchableOpacity onPress={() => setIsMenuVisible(false)} style={styles.iconContainer}>
+              <Ionicons name="close-circle-outline" size={50} color="white" />
+              <Text style={styles.iconLabel}>Close</Text>
+            </TouchableOpacity> 
+
+        </View>
+        </Modal> */}
+
+
       </View>
-
-
-
-      <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
-        <Text style={styles.addItemButtonText}>Add Item</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
-        <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
-      </TouchableOpacity>
-
-
-
-
-
-
-      {/* <Modal visible={isMenuVisible} transparent={true} animationType="slide">
-        <View style={styles.modalBackground}> 
-          <TouchableOpacity onPress={() => setIsMenuVisible(false)} style={styles.iconContainer}>
-            <Ionicons name="close-circle-outline" size={50} color="white" />
-            <Text style={styles.iconLabel}>Close</Text>
-          </TouchableOpacity> 
-
-      </View>
-      </Modal> */}
-
-
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -685,7 +707,10 @@ const ListItemDetails: React.FC = () => {
           </TouchableOpacity> */}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  background: {
+    flex: 1,
+  },
+  container: { flex: 1, padding: 20 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   titleInput: {
     fontSize: 24,
