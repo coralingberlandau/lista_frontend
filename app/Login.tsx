@@ -99,12 +99,7 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
   return (
 
     <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
-
-    
-    {/* <View style={styles.container}> */}
       <Text style={styles.title}>Login</Text>
-
-
       <View style={styles.inputContainer}>
         <Ionicons
           name="person-outline"
@@ -152,10 +147,7 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
           <Text style={styles.linkTo}>Forgot password?</Text>
         </TouchableOpacity>
       </View>
-    {/* </View> */}
-
 </ScrollView>
-
   );
 };
 
@@ -210,9 +202,6 @@ const styles = StyleSheet.create({
     top: '50%',
     transform: [{ translateY: -16 }], // מיישר את האייקון באמצע
   },
-
-
-  
 });
 
 export default Login;

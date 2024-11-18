@@ -98,6 +98,8 @@ export interface ImageData {
   fileName: string;
   mimeType: string;
   index: number;
+  largeImage: string;  // הוסף שדה שיכיל את ה-URI של התמונה הגדולה
+
 }
 
 export interface BackgroundImage {

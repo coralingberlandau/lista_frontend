@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, ImageBackground, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, ImageBackground, Dimensions, useWindowDimensions } from 'react-native';
 import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { ImageData, ListItem, ListItemImage, RootStackParamList, User } from './type';
 import { Ionicons, AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
@@ -33,14 +33,13 @@ const ListItemDetails: React.FC = () => {
   const [shareValue, setShareValue] = useState('');
 
   // לבדוקקקקק
-  const { width, height } = Dimensions.get('window'); // קבלת גודל המסך
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [largeImage, setLargeImage] = useState(null);
+  const [largeImage, setLargeImage] = useState<string | null>(null);
 
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -52,19 +51,8 @@ const ListItemDetails: React.FC = () => {
 
   console.log(title, listItem, items, images)
 
+  const { width, height } = useWindowDimensions();
 
-
-  // const getImages = async () => {
-  //   if (listItem?.id) {
-  //     const response = await axios.get(`http://127.0.0.1:8000/listitemimages/${listItem.id}/get_images_for_list_item/`);
-  //     setImages(response.data.images)
-  //   }
-  //   else {
-  //     setImages([])
-  //   }
-  // };
-
-  // פונקציה לשליפת התמונות מהשרת
   const getImages = async () => {
     try {
       if (listItem?.id) {
@@ -334,8 +322,6 @@ const ListItemDetails: React.FC = () => {
     }
   }
 
-
-
   // פונקציה לעדכון רשימה
   const handleUpdateList = async () => {
     const itemsToString = items.join("|");
@@ -357,6 +343,9 @@ const ListItemDetails: React.FC = () => {
       );
 
       await handleSaveImages(listItem.id)
+      console.log('====================================');
+      console.log(listItem.id);
+      console.log('====================================');
 
       Toast.show({
         type: 'success',
@@ -407,7 +396,6 @@ const ListItemDetails: React.FC = () => {
   };
 
 
-
   const handleSaveImages = async (listItemId: number) => {
     console.log('images', images);
 
@@ -415,6 +403,10 @@ const ListItemDetails: React.FC = () => {
     formData.append('list_item', listItemId.toString());
 
     for (const image of images) {
+      if (image.fileName === 'unknown.jpg') {
+        continue
+      }
+
       const base64Image = image.uri.split(',')[1];  // הסרת המידע המיותר מ-URI של base64
 
       // הוספת המידע המפוקסל כ-Base64
@@ -439,64 +431,6 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
-  // const handleSaveImages = async (listItemId: number) => {
-  //   console.log('images', images);
-
-  //   const formData = new FormData();
-  //   formData.append('list_item', listItemId.toString());
-
-  //   for (const image of images) {
-  //     // אם התמונה היא ב-Base64
-  //     if (image.uri && image.uri.includes(',')) {
-  //       const base64Image = image.uri.split(',')[1];
-  //       // שליחה כ-string של base64
-  //       formData.append('images', base64Image);
-  //       formData.append('fileName', image.fileName || 'unknown.jpg');
-  //       formData.append('mimeType', image.mimeType || 'image/jpeg');
-  //       if (image.index !== undefined) {
-  //         formData.append('index', image.index.toString());
-  //       }
-  //     } else if (image.uri) {
-  //       // במקרה שהתמונה היא URI של קובץ
-  //       const file = {
-  //         uri: image.uri,
-  //         type: image.mimeType || 'image/jpeg', // סוג MIME של הקובץ
-  //         name: image.fileName || 'unknown.jpg', // שם הקובץ
-  //       };
-  //       formData.append('images', file);
-  //     } else {
-  //       console.warn('Invalid image URI:', image.uri);
-  //     }
-  //   }
-
-  //   try {
-  //     const response = await axios.post(
-  //       'http://127.0.0.1:8000/listitemimages/upload_images/',
-  //       formData,
-  //       {
-  //         headers: {
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       }
-  //     );
-
-  //     console.log('response', response);
-  //     // קריאה מחדש לפונקציה שמעדכנת את התמונות
-  //     await getImages();
-
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error('Error uploading images', error);
-  //     throw error;
-  //   }
-  // };
-
-
-
-
-
-
-
 
 
   //imaaggeeeeeeeeeeeee -- imaaggeeeeeeeeeeeee ******************** $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -504,39 +438,38 @@ const ListItemDetails: React.FC = () => {
 
   // פונקציות להגדלת תמונה ולסגירת המודאל
 
+  // const handleShowLargeImage = (index) => {
+  //   const largeImg = images[index].largeImage;  // גישה ל-largeImage
+  //   setLargeImage(largeImg);  // עדכון ה-state עם התמונה הגדולה
+  //   setModalVisible(true);  // הצגת המודאל
+  // };
 
-  const handleShowLargeImage = (imageUrl: any) => {
-    setLargeImage(imageUrl); // שמירת ה-URL של התמונה כדי להציג אותה במודאל
-    setModalVisible(true); // הצגת המודאל
+  const handleShowLargeImage = (index: number) => {
+    const selectedImage = images.find((img) => img.index === index); // מציאת התמונה התואמת
+    if (selectedImage) {
+      setLargeImage(selectedImage.uri); // שמירת ה-URI של התמונה הגדולה
+      setModalVisible(true); // הצגת ה-Modal
+      console.log('Images fetched:', images); // הדפסת כל התמונות
+      console.log("Large Image URI:", largeImage); // הדפסת ה-URI של התמונה הגדולה
+
+
+
+    } else {
+      console.error("Image not found for index:", index);
+    }
   };
+
+
+
+
 
   const handleCloseLargeImage = () => {
     setModalVisible(false); // הסתרת המודאל
-    setLargeImage(null); // איפוס ה-URL של התמונה
+    // setLargeImage(null); // איפוס ה-URL של התמונה
   };
 
 
-
   // שליפת תמונות מהדאטהבייס
-
-
-
-  // const fetchListItemImages = async (listItemId: number, index?: number) => {
-  //   try {
-  //     const url = index !== undefined
-  //       ? `http://127.0.0.1:8000/listitemimages/${listItemId}/get_images_for_list_item/?index=${index}`
-  //       : `http://127.0.0.1:8000/listitemimages/${listItemId}/get_images_for_list_item/`;
-
-  //     const response = await axios.get(url);
-
-  //     if (response.status === 200) {
-  //       setImages(response.data.images); // שמירת התמונות בסטייט
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching images", error);
-  //   }
-  // };
-
 
   const fetchListItemImages = async (listItemId: number, index?: number) => {
     try {
@@ -563,7 +496,6 @@ const ListItemDetails: React.FC = () => {
 
 
 
-
   const renderItem = ({ item, index }: { item: ListItemImage, index: number }) => (
     <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
       <Image source={{ uri: item.uri }} style={{ width: 40, height: 40, borderRadius: 5 }} />
@@ -584,52 +516,46 @@ const ListItemDetails: React.FC = () => {
 
 
   return (
-    <ImageBackground
-      source={{ uri: `../assets/background/back${backgroundImageId}.jpg` }}
-      style={[styles.background, { width, height }]} // מתאימים את התמונה לגודל המסך
-      resizeMode="cover" // התמונה תתממשק עם המסך ותחסה אותו כל הזמן
-    >
+    <View style={{ flex: 1 }}>
+      <ImageBackground
+        source={{ uri: `../assets/background/back${backgroundImageId}.jpg` }}
+        style={[styles.background, { width, height }]} // מתאימים את התמונה לגודל המסך
+        resizeMode="cover">
+        <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+          <View style={styles.header}>
+            <TextInput
+              style={[styles.titleInput, { outline: 'none' }]}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Edit Title" />
 
-      <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
-
-
-        {/* <View style={styles.container}> */}
-        <View style={styles.header}>
-          <TextInput
-            style={[styles.titleInput, { outline: 'none' }]}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Edit Title"
-          />
-
-
-          {/* כפתורררר שלוש נקודותתת */}
-          {/* <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.menuButton}>
+            {/* כפתורררר שלוש נקודותתת */}
+            {/* <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.menuButton}>
             <Entypo name="dots-three-horizontal" size={35} color="black" />
           </TouchableOpacity> */}
-
-          {/* כפתורררר שלוש נקודותתת */}
-
+            {/* כפתורררר שלוש נקודותתת */}
 
 
-
-        </View>
-        <FlatList
-          data={items}
-          renderItem={({ item, index }) => {
-            const filterImage = images && images.filter((img) => img.index === index)
-            return (
-              <View style={styles.item}>
-                <TouchableOpacity onPress={() => handleToggleItem(index)} style={{ marginRight: 10 }}>
-                  <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={25} />
-                </TouchableOpacity>
+          </View>
 
 
+          {/* wooooorrrrkkkkk */}
+          <FlatList
+            data={items}
+            renderItem={({ item, index }) => {
+              const filterImage = images && images.filter((img) => img.index === index)
+              return (
+                <View style={styles.item}>
+                  <TouchableOpacity onPress={() => handleToggleItem(index)} style={{ marginRight: 10 }}>
+                    <FontAwesome name={item.includes('✔️') ? "check-square-o" : "square-o"} size={25} />
+                  </TouchableOpacity>
 
-                {filterImage.length > 0 ? (
+                  {filterImage.length > 0 ? (
                     <TouchableOpacity
                       key={filterImage[0].id}
-                      onPress={() => fetchListItemImages(index)}
+                      // onPress={() => fetchListItemImages(index)} מוחקקקק את התמונה
+                      onPress={() => handleShowLargeImage(index)}
+
                       style={{ marginRight: 10 }}
                     >
                       <Image
@@ -638,78 +564,11 @@ const ListItemDetails: React.FC = () => {
                         onError={() => console.error("Failed to load image")}
                       />
                     </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
-                    <FontAwesome name="image" size={25} color="blue" />
-                  </TouchableOpacity>
-                )}
-
-
-                <Modal visible={modalVisible} transparent={true}>
-                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
-                    <TouchableOpacity onPress={handleCloseLargeImage} style={{ position: 'absolute', top: 20, right: 20 }}>
-                      <FontAwesome name="close" size={30} color="white" />
+                  ) : (
+                    <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
+                      <FontAwesome name="image" size={25} color="blue" />
                     </TouchableOpacity>
-                    <Image source={{ uri: largeImage }} style={{ width: '80%', height: '80%', resizeMode: 'contain' }} />
-                  </View>
-                </Modal>
-                <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
-                  <AntDesign name="delete" size={25} color="red" />
-                </TouchableOpacity>
-                <TextInput
-                  style={[
-                    styles.textArea,
-                    {
-                      outline: 'none',
-                      textDecorationLine: item.includes('✔️') ? 'line-through' : 'none',
-                    },
-                  ]}
-                  placeholder="Write here..."
-                  multiline={false}  // Set to false for a single line
-                  value={item}
-                  onChangeText={(text) => handleItemChange(text, index)}
-                />
-              </View>
-            )
-
-          }}
-          keyExtractor={(_, index) => index.toString()} />
-
-
-
-        {selectedImage && (
-          <Modal visible={true} transparent={true} animationType="fade">
-            <View style={styles.modalContainer}>
-              <TouchableOpacity style={styles.closeButton} onPress={handleCloseLargeImage}>
-                <Text style={{ color: 'white', fontSize: 18 }}>X</Text>
-              </TouchableOpacity>
-              <Image source={{ uri: selectedImage }} style={styles.largeImage} />
-            </View>
-          </Modal>
-        )}
-
-
-
-
-        {/* // מודל להצגת תמונה בגדול */}
-
-        {isModalVisible && (
-          <Modal
-            transparent={true}
-            visible={isModalVisible}
-            onRequestClose={() => setIsModalVisible(false)}
-          >
-            <View style={styles.modalContainer}>
-              <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>X</Text>
-              </TouchableOpacity>
-              <Image
-                source={{ uri: modalImage }}
-                style={styles.largeImage}
-              />
-            </View>
-          </Modal>
-        )}
+                  )}
 
 
 
@@ -725,73 +584,196 @@ const ListItemDetails: React.FC = () => {
 
 
 
-        <View style={styles.iconRowContainer}>
-          {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
-            <Ionicons name="share-outline" size={25} color="black" />
-            <Text style={styles.iconLabel}>Share</Text>
-          </TouchableOpacity>}
 
-          {isModalVisible && (
-            <View style={styles.overlay}>
+                  {/* foorrrr whhatttttt */}
+                  {/* <Modal visible={modalVisible} transparent={true}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
+                      <TouchableOpacity onPress={handleCloseLargeImage} style={{ position: 'absolute', top: 20, right: 20 }}>
+                        <FontAwesome name="close" size={30} color="white" />
+                      </TouchableOpacity>
+                      <Image source={{ uri: largeImage }} style={{ width: '80%', height: '80%', resizeMode: 'contain' }} />
+                    </View>
+                  </Modal> */}
+                  {/* foorrrr whhatttttt */}
 
-              <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Select Permission</Text>
 
-                {/* Dropdown for permissions */}
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={permission}
-                    onValueChange={handlePermissionSelect}
-                    style={styles.picker}
+
+                  <Modal
+                    visible={modalVisible}
+                    onRequestClose={handleCloseLargeImage}
+                    animationType="fade"
+                    transparent={true}
                   >
-                    <Picker.Item label="Read Only" value="read_only" />
-                    <Picker.Item label="Full Access" value="full_access" />
-                  </Picker>
-                </View>
-                {/* Text Input for custom value */}
-                <TextInput
-                  placeholder="Enter a email"
-                  value={shareValue}
-                  onChangeText={setShareValue}
-                  style={styles.input}
-                />
-                {/* Confirm Share Button */}
-                <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmShare}>
-                  <Text style={styles.confirmButtonText}>Confirm Share</Text>
-                </TouchableOpacity>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#e3f2fd'}}>
+                    {/* backgroundColor: '#f2f2f2' */}
+                    {/* backgroundColor: 'rgba(0, 0, 0, 0.6)' */}
 
-                {/* Close Button */}
-                <TouchableOpacity style={styles.closeButtonShare} onPress={() => setIsModalVisible(false)}>
-                  <Text style={styles.closeButtonText}>Close</Text>
+
+                      <View style={styles.seeImage}>
+                      {/* <View style={{ padding: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}> */}
+
+                        <TouchableOpacity onPress={handleCloseLargeImage}>
+
+                        {/* <TouchableOpacity style={styles.closeButton} onPress={handleCloseLargeImage}>
+                          <Text style={{ color: 'black', fontSize: 18 }}>X</Text> */}
+
+                          {largeImage ? (
+                            <Image
+                              source={{ uri: largeImage }} // ה-URI של התמונה הגדולה
+                              style={{
+                                width: width * 0.9, // 90% מרוחב המסך
+                                height: height * 0.7, // 70% מגובה המסך
+                                borderRadius: 10,
+                                resizeMode: 'contain', // שומר על פרופורציות התמונה
+                              }}
+                              onError={() => console.error('Failed to load large image')}
+                            />
+                          ) : (
+                            <Text>Image not available</Text>
+                          )}
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
+
+
+                  {/* seeImage */}
+                  {/* {selectedImage && (
+                    <Modal visible={true} transparent={true} animationType="fade">
+                      <View style={styles.modalContainer}>
+                        <TouchableOpacity style={styles.closeButton} onPress={handleCloseLargeImage}>
+                          <Text style={{ color: 'white', fontSize: 18 }}>X</Text>
+                        </TouchableOpacity>
+                        <Image source={{ uri: selectedImage }} style={styles.largeImage} />
+                      </View>
+                    </Modal>
+                  )} */}
+
+
+
+
+
+
+
+
+
+                  <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
+                    <AntDesign name="delete" size={25} color="red" />
+                  </TouchableOpacity>
+                  <TextInput
+                    style={[
+                      styles.textArea,
+                      {
+                        outline: 'none',
+                        textDecorationLine: item.includes('✔️') ? 'line-through' : 'none',
+                      },
+                    ]}
+                    placeholder="Write here..."
+                    multiline={false}  // Set to false for a single line
+                    value={item}
+                    onChangeText={(text) => handleItemChange(text, index)}
+                  />
+                </View>
+              )
+
+            }}
+            keyExtractor={(_, index) => index.toString()} />
+
+
+
+
+
+
+
+          {/* // מודל להצגת תמונה בגדול */}
+
+          {/* {isModalVisible && (
+            <Modal
+              transparent={true}
+              visible={isModalVisible}
+              onRequestClose={() => setIsModalVisible(false)}
+            >
+              <View style={styles.modalContainer}>
+                <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeButton}>
+                  <Text style={styles.closeButtonText}>X</Text>
                 </TouchableOpacity>
+                <Image
+                  source={{ uri: modalImage }}
+                  style={styles.largeImage}
+                />
+              </View>
+            </Modal>
+          )} */}
+
+
+
+
+
+          <View style={styles.iconRowContainer}>
+            {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
+              <Ionicons name="share-outline" size={25} color="black" />
+              <Text style={styles.iconLabel}>Share</Text>
+            </TouchableOpacity>}
+
+            {isModalVisible && (
+              <View style={styles.overlay}>
+
+                <View style={styles.modalContainer}>
+                  <Text style={styles.modalTitle}>Select Permission</Text>
+
+                  {/* Dropdown for permissions */}
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={permission}
+                      onValueChange={handlePermissionSelect}
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="Read Only" value="read_only" />
+                      <Picker.Item label="Full Access" value="full_access" />
+                    </Picker>
+                  </View>
+                  {/* Text Input for custom value */}
+                  <TextInput
+                    placeholder="Enter a email"
+                    value={shareValue}
+                    onChangeText={setShareValue}
+                    style={styles.input}
+                  />
+                  {/* Confirm Share Button */}
+                  <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmShare}>
+                    <Text style={styles.confirmButtonText}>Confirm Share</Text>
+                  </TouchableOpacity>
+
+                  {/* Close Button */}
+                  <TouchableOpacity style={styles.closeButtonShare} onPress={() => setIsModalVisible(false)}>
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+
               </View>
 
-            </View>
+            )}
 
-          )}
-
-          {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(listItem.id)}>
-            <AntDesign name="delete" size={25} color="black" />
-            <Text style={styles.iconLabel}>Delete</Text>
-          </TouchableOpacity>}
-        </View>
+            {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(listItem.id)}>
+              <AntDesign name="delete" size={25} color="black" />
+              <Text style={styles.iconLabel}>Delete</Text>
+            </TouchableOpacity>}
+          </View>
 
 
+          <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
+            <Text style={styles.addItemButtonText}>Add Item</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
-          <Text style={styles.addItemButtonText}>Add Item</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
-          <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
+            <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
+          </TouchableOpacity>
 
 
 
 
 
-
-        {/* <Modal visible={isMenuVisible} transparent={true} animationType="slide">
+          {/* <Modal visible={isMenuVisible} transparent={true} animationType="slide">
           <View style={styles.modalBackground}> 
             <TouchableOpacity onPress={() => setIsMenuVisible(false)} style={styles.iconContainer}>
               <Ionicons name="close-circle-outline" size={50} color="white" />
@@ -802,30 +784,21 @@ const ListItemDetails: React.FC = () => {
         </Modal> */}
 
 
-        {/* </View> */}
-      </ScrollView>
-    </ImageBackground>
-
-
+          {/* </View> */}
+        </ScrollView>
+      </ImageBackground>
+    </View>
   );
 };
-
-
-{/* immaaaggeeeeeeeeee ??????????????????/ */ }
-
-{/* <TouchableOpacity style={styles.iconContainer} onPress={() => handleAddImage(item?.id)}>
-            <AntDesign name="upload" size={50} color="white" />
-            <Text style={styles.iconLabel}>Add Image</Text>
-          </TouchableOpacity> */}
 
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-
   },
   container: { flex: 1, padding: 20 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', },
   titleInput: {
+    width: '90%', // התאמה למסך
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,
@@ -833,6 +806,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   item: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center', // Center icons with text input
     marginBottom: 10,
@@ -956,8 +930,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    // backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   largeImage: {
     width: 300,
@@ -966,6 +939,7 @@ const styles = StyleSheet.create({
   },
 
   iconRowContainer: {
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'flex-end', // מיישר את האייקונים לימין
     position: 'absolute', // מיקום אבסולוטי כדי למקם את הקונטיינר למעלה
@@ -1033,19 +1007,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+  // closeButton: {
+    // position: 'absolute',
+    // alignItems: 'center',
+    // top: 40,
+    // right: 20,
+    // padding: 10,
+    // // backgroundColor: 'red',
+    // borderRadius: 20,
+    // // fontWeight: 'bold',
+  // },
+
+
   closeButton: {
     position: 'absolute',
-    top: 40,
-    right: 20,
-    padding: 10,
+    top: 10,
+    right: 10,
     backgroundColor: 'red',
     borderRadius: 20,
-    fontWeight: 'bold',
+    padding: 10,
   },
-
-
-
-
 
   closeButtonShare: {
     backgroundColor: '#f44336',
@@ -1057,8 +1038,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
   },
-
-
   overlay: {
     position: 'fixed', // מבטיח שהמודאל תמיד יצוף על פני הדף, גם בעת גלילה
     top: 0,
@@ -1070,8 +1049,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center', // ממקם את התוכן במרכז אופקי
     alignItems: 'center', // ממקם את התוכן במרכז אנכי
     zIndex: 1, // מבטיח שהמודאל יהיה מעל לכל התוכן
-  }
+  },
 
+  seeImage: {
+    padding: 20, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#ffffff', // לבן נקי
+    borderRadius: 10, // פינות מעוגלות למראה מודרני
+    shadowColor: '#000', // צללים להבלטה
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
 
 
 });
