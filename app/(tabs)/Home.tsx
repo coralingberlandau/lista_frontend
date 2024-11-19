@@ -65,14 +65,10 @@ const Home: React.FC = () => {
   const handlePressItem = (item: ListItem) => {
     navigation.navigate('ListItemDetails', { listItem: item });
   };
-  
+
   return (
 
-    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
-
-
-
-    {/* <View style={styles.container}> */}
+    <ScrollView contentContainerStyle={styles.container}>
       {loading ? (
         <Text>Loading...</Text>
       ) : (
@@ -100,10 +96,7 @@ const Home: React.FC = () => {
           </TouchableOpacity>
         </>
       )}
-    {/* </View> */}
-
-</ScrollView>
-
+    </ScrollView>
   );
 };
 

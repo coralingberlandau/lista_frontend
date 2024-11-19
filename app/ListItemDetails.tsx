@@ -1,118 +1,84 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, ImageBackground, Dimensions, useWindowDimensions } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, ImageBackground, useWindowDimensions } from 'react-native';
 import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { ImageData, ListItem, ListItemImage, RootStackParamList, User } from './type';
-import { Ionicons, AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
+import { Ionicons, AntDesign, FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import { Share } from 'react-native';
-import { HsvColor, hsvToHex } from 'react-color'; // או מהספרייה המתאימה
 import * as ImagePicker from 'expo-image-picker';
-import { ColorPicker } from 'react-native-color-picker';
-import { Picker } from '@react-native-picker/picker'; // Import Picker component
-import Slider from '@react-native-community/slider';
+import { Picker } from '@react-native-picker/picker';
 import { ScrollView } from 'react-native-gesture-handler';
-
 
 type ListItemDetailsRouteProp = RouteProp<RootStackParamList, 'ListItemDetails'>;
 
 const ListItemDetails: React.FC = () => {
   const route = useRoute<ListItemDetailsRouteProp>();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
-
   const { listItem }: { listItem?: ListItem } = route.params || {};
-
   const isUpdateMode = !!listItem
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [title, setTitle] = useState(listItem ? listItem.title : '');
   const [items, setItems] = useState<string[]>(listItem ? listItem.items.split("|") : ['']);
   const [permission, setPermission] = useState('read_only');
   const [shareValue, setShareValue] = useState('');
-
-  // לבדוקקקקק
-
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
   const [isModalVisible, setIsModalVisible] = useState(false);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [largeImage, setLargeImage] = useState<string | null>(null);
-
   const [selectedImage, setSelectedImage] = useState(null);
-
   const [images, setImages] = useState<ImageData[]>([]);
-
   const [backgroundImageId, setBackgroundImageId] = useState<string | null>(null);
-
-
-
-  console.log(title, listItem, items, images)
-
   const { width, height } = useWindowDimensions();
-
-  const getImages = async () => {
-    try {
-      if (listItem?.id) {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/listitemimages/${listItem.id}/get_images_for_list_item/`
-        );
-
-        if (response.status === 200 && Array.isArray(response.data.images)) {
-          // עיבוד התמונות כדי לוודא תאימות
-          const formattedImages = response.data.images.map((image: any, index: number) => {
-            const imageUrl = image.url.startsWith("http")
-              ? image.url
-              : `http://127.0.0.1:8000${image.url}`;
-
-            return {
-              id: image.id || 0,
-              uri: imageUrl || "",
-              fileName: image.fileName || "unknown.jpg", // אם לא קיים שם קובץ
-              mimeType: image.mimeType || "image/jpeg", // אם לא קיים mimeType
-              index: index,
-            };
-          });
-          console.log('formattedImages', formattedImages)
-          setImages(formattedImages); // שמירת התמונות בסטייט
-        } else {
-          console.error("Invalid response format:", response.data);
-          setImages([]); // איפוס אם המבנה לא תקין
-        }
-      } else {
-        setImages([]); // איפוס אם אין listItem.id
-      }
-    } catch (error) {
-      console.error("Error fetching images:", error);
-      setImages([]); // איפוס במקרה של שגיאה
-    }
-  };
-
-
-  const getBackgroundImage = async () => {
-    const backgroundId = await AsyncStorage.getItem('customizations');
-    setBackgroundImageId(backgroundId)
-  };
+  const [recommendations, setRecommendations] = useState([]); // שמירה על ההמלצות
+  const [loading, setLoading] = useState(false); // מצב טעינה
 
   useFocusEffect(
     useCallback(() => {
-      console.log('render', listItem?.id)
       setTitle(listItem?.title || '');
       setItems(listItem?.items.split("|") || ['']);
       getImages()
       getBackgroundImage()
+      fetchRecommendations(listItem?.id);
     }, [listItem])
   );
 
-  // post griopulist - http://127.0.0.1:8000/grouplists/
+  const fetchRecommendations = async () => {
+    if (!listItem || !listItem.id) {
+      console.error('Item ID is not available');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await getRecommendations(listItem.id);
+      if (data && data.recommended_items) {
+        setRecommendations(data.recommended_items.split(','));
+        console.log('Recommendations data:', data);
+
+      }
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRecommendations = async (listItemId: number) => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/recommendations/${listItemId}/`)
+      if (response.status !== 200) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.data;
+      return data;
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+    }
+  };
 
 
   const handleAddItem = async () => {
-    console.log('====================================');
-    console.log('testttt loooggggg');
-    console.log('====================================');
     const storedUserId = await AsyncStorage.getItem('userId');
     const token = await AsyncStorage.getItem('token');
 
@@ -130,13 +96,8 @@ const ListItemDetails: React.FC = () => {
           },
         });
 
-        console.log("printttt", storedUserId)
         console.log('List item added:', response.data);
         const itemId = response.data.id;
-
-        console.log('====================================');
-        console.log("printttt", storedUserId, "idddddddddd", itemId);
-        console.log('====================================');
 
         const response1 = await axios.post(`http://127.0.0.1:8000/grouplists/`, {
           user: storedUserId,
@@ -183,9 +144,9 @@ const ListItemDetails: React.FC = () => {
     const newItems = [...items];
     const itemText = newItems[index];
     if (itemText.startsWith('✔️ ')) {
-      newItems[index] = itemText.replace('✔️ ', ''); // Remove check mark
+      newItems[index] = itemText.replace('✔️ ', '');
     } else {
-      newItems[index] = `✔️ ${itemText}`; // Add check mark
+      newItems[index] = `✔️ ${itemText}`;
     }
     setItems(newItems);
   };
@@ -194,16 +155,22 @@ const ListItemDetails: React.FC = () => {
     const newItems = [...items];
     newItems.splice(index, 1);
     setItems(newItems);
-    const newImages = [...images]
-    newImages.splice(index, 1);
-    setImages(newImages);
+    const newImages = images.slice(); // יצירת עותק חדש לגמרי
+    console.log('בדיקהה לפניייי', images, 'index:', index);
+    const updatedImages = newImages.filter((i) => i.index !== index); // מחיקת איבר מהעותק החדש
+    setImages(updatedImages);
+    console.log('בדיקהה אחריייייי', images);
+
+
+    // const newImages = [...images]
+    // console.log('בדיקהה לפניייי', images);
+    // newImages.splice(index, 1);
+    // setImages(newImages);
+    // console.log('בדיקהה אחריייייי', images);
   };
 
   const handleSharePress = () => {
-    console.log('====================================');
-    console.log('testttt sherrrrrreee');
-    console.log('====================================');
-    setIsModalVisible(true); // פותח את המודל
+    setIsModalVisible(true);
   };
 
   const handlePermissionSelect = (selectedPermission: string) => {
@@ -269,16 +236,48 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
-  // *********************************************************** 
+  const getImages = async () => {
+    try {
+      if (listItem?.id) {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/listitemimages/${listItem.id}/get_images_for_list_item/`
+        );
+
+        if (response.status === 200 && Array.isArray(response.data.images)) {
+          const formattedImages = response.data.images.map((image: any) => {
+            const imageUrl = image.url.startsWith("http")
+              ? image.url
+              : `http://127.0.0.1:8000${image.url}`;
+            return {
+              id: image.id || 0,
+              uri: imageUrl || "",
+              fileName: image.fileName || "unknown.jpg",
+              mimeType: image.mimeType || "image/jpeg",
+              index: image.index,
+            };
+          });
+          setImages(formattedImages);
+        } else {
+          console.error("Invalid response format:", response.data);
+          setImages([]);
+        }
+      } else {
+        setImages([]);
+      }
+    } catch (error) {
+      console.error("Error fetching images:", error);
+      setImages([]);
+    }
+  };
+
+  const getBackgroundImage = async () => {
+    const backgroundId = await AsyncStorage.getItem('customizations');
+    setBackgroundImageId(backgroundId)
+  };
 
   const handleDeleteItem = async (itemId: number) => {
-    const storedUserId = await AsyncStorage.getItem('userId');
-    console.log('====================================');
-    console.log(itemId);
-    console.log(listItem.id);
-    console.log('====================================');
     try {
-      const token = await AsyncStorage.getItem('token');  // קבלת הטוקן מ-AsyncStorage
+      const token = await AsyncStorage.getItem('token');
       if (!token) {
         console.error("User is not logged in!");
         return;
@@ -289,14 +288,11 @@ const ListItemDetails: React.FC = () => {
         { is_active: false },
         {
           headers: {
-            'Authorization': `Bearer ${token}`,  // הוספת הטוקן לכותרת Authorization
+            'Authorization': `Bearer ${token}`,
           },
         }
       );
 
-      console.log("Item successfully deleted!");
-
-      // הצגת הודעת הצלחה
       Toast.show({
         type: 'success',
         text1: 'The item has been deleted successfully!',
@@ -304,16 +300,13 @@ const ListItemDetails: React.FC = () => {
 
       setIsMenuVisible(false);
       navigation.navigate('Home');
+
     } catch (error: unknown) {
-      // טיפול בשגיאה בצורה מדויקת
       if (axios.isAxiosError(error)) {
-        // אם זו שגיאת Axios, הצג את הודעת השגיאה
         console.error("Error deleting item:", error.response ? error.response.data : error.message);
       } else {
-        // במקרה של שגיאה אחרת
         console.error("Unexpected error:", error);
       }
-
       Toast.show({
         type: 'error',
         text1: 'Error deleting the item',
@@ -322,11 +315,10 @@ const ListItemDetails: React.FC = () => {
     }
   }
 
-  // פונקציה לעדכון רשימה
   const handleUpdateList = async () => {
     const itemsToString = items.join("|");
     try {
-      const token = await AsyncStorage.getItem('token');  // קבלת הטוקן מ-AsyncStorage
+      const token = await AsyncStorage.getItem('token');
       if (!token) {
         console.error("User is not logged in!");
         return;
@@ -337,16 +329,12 @@ const ListItemDetails: React.FC = () => {
         { title, items: itemsToString },
         {
           headers: {
-            'Authorization': `Bearer ${token}`,  // הוספת הטוקן לכותרת Authorization
+            'Authorization': `Bearer ${token}`,
           },
         }
       );
 
       await handleSaveImages(listItem.id)
-      console.log('====================================');
-      console.log(listItem.id);
-      console.log('====================================');
-
       Toast.show({
         type: 'success',
         text1: 'The list has been updated successfully!',
@@ -354,12 +342,10 @@ const ListItemDetails: React.FC = () => {
 
       navigation.navigate('Home');
     } catch (error: unknown) {
-      // טיפול בשגיאה בצורה מדויקת
+
       if (axios.isAxiosError(error)) {
-        // אם זו שגיאת Axios, הצג את הודעת השגיאה
         console.error("Error updating list:", error.response ? error.response.data : error.message);
       } else {
-        // במקרה של שגיאה אחרת
         console.error("Unexpected error:", error);
       }
       Toast.show({
@@ -370,12 +356,7 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
-
-  {/* תמונווווווווותתתתתתתתתת !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */ }
-
-
   const handleAddImage = async (index: number) => {
-    console.log("Image index: ", index);
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -395,10 +376,7 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
-
   const handleSaveImages = async (listItemId: number) => {
-    console.log('images', images);
-
     const formData = new FormData();
     formData.append('list_item', listItemId.toString());
 
@@ -407,11 +385,10 @@ const ListItemDetails: React.FC = () => {
         continue
       }
 
-      const base64Image = image.uri.split(',')[1];  // הסרת המידע המיותר מ-URI של base64
+      const base64Image = image.uri.split(',')[1];
 
-      // הוספת המידע המפוקסל כ-Base64
       formData.append('images', JSON.stringify({
-        uri: base64Image,  // הוספת התמונה ב-Base64
+        uri: base64Image,
         fileName: image.fileName,
         mimeType: image.mimeType,
         index: image.index
@@ -431,45 +408,22 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
-
-
-  //imaaggeeeeeeeeeeeee -- imaaggeeeeeeeeeeeee ******************** $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-
-  // פונקציות להגדלת תמונה ולסגירת המודאל
-
-  // const handleShowLargeImage = (index) => {
-  //   const largeImg = images[index].largeImage;  // גישה ל-largeImage
-  //   setLargeImage(largeImg);  // עדכון ה-state עם התמונה הגדולה
-  //   setModalVisible(true);  // הצגת המודאל
-  // };
-
   const handleShowLargeImage = (index: number) => {
-    const selectedImage = images.find((img) => img.index === index); // מציאת התמונה התואמת
+    const selectedImage = images.find((img) => img.index === index);
     if (selectedImage) {
-      setLargeImage(selectedImage.uri); // שמירת ה-URI של התמונה הגדולה
-      setModalVisible(true); // הצגת ה-Modal
-      console.log('Images fetched:', images); // הדפסת כל התמונות
-      console.log("Large Image URI:", largeImage); // הדפסת ה-URI של התמונה הגדולה
-
-
+      setLargeImage(selectedImage.uri);
+      setModalVisible(true);
+      console.log('Images fetched:', images);
+      console.log("Large Image URI:", largeImage);
 
     } else {
       console.error("Image not found for index:", index);
     }
   };
 
-
-
-
-
   const handleCloseLargeImage = () => {
-    setModalVisible(false); // הסתרת המודאל
-    // setLargeImage(null); // איפוס ה-URL של התמונה
+    setModalVisible(false);
   };
-
-
-  // שליפת תמונות מהדאטהבייס
 
   const fetchListItemImages = async (listItemId: number, index?: number) => {
     try {
@@ -481,11 +435,11 @@ const ListItemDetails: React.FC = () => {
 
       if (response.status === 200 && Array.isArray(response.data.images)) {
         const formattedImages = response.data.images.map((image: any) => ({
-          uri: image.uri || image.url, // טיפול גם ב-url וגם ב-uri
-          id: image.id || null, // שדה זיהוי, אם יש
+          uri: image.uri || image.url,
+          id: image.id || null,
         }));
 
-        setImages(formattedImages); // שמירת התמונות ב-state
+        setImages(formattedImages);
       } else {
         console.error("Invalid response format", response.data);
       }
@@ -494,25 +448,17 @@ const ListItemDetails: React.FC = () => {
     }
   };
 
-
-
   const renderItem = ({ item, index }: { item: ListItemImage, index: number }) => (
     <TouchableOpacity onPress={() => handleAddImage(index)} style={{ marginRight: 10 }}>
       <Image source={{ uri: item.uri }} style={{ width: 40, height: 40, borderRadius: 5 }} />
     </TouchableOpacity>
   );
 
-
   const ListEmptyComponent = () => (
     <TouchableOpacity onPress={() => handleAddImage(0)} style={{ marginRight: 10 }}>
       <FontAwesome name="image" size={20} color="blue" />
     </TouchableOpacity>
   );
-
-
-
-
-  //imaaggeeeeeeeeeeeee -- imaaggeeeeeeeeeeeee ******************** $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 
   return (
@@ -528,22 +474,14 @@ const ListItemDetails: React.FC = () => {
               value={title}
               onChangeText={setTitle}
               placeholder="Edit Title" />
-
-            {/* כפתורררר שלוש נקודותתת */}
-            {/* <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.menuButton}>
-            <Entypo name="dots-three-horizontal" size={35} color="black" />
-          </TouchableOpacity> */}
-            {/* כפתורררר שלוש נקודותתת */}
-
-
           </View>
 
 
-          {/* wooooorrrrkkkkk */}
           <FlatList
             data={items}
             renderItem={({ item, index }) => {
               const filterImage = images && images.filter((img) => img.index === index)
+              console.log(filterImage, 'filterImage')
               return (
                 <View style={styles.item}>
                   <TouchableOpacity onPress={() => handleToggleItem(index)} style={{ marginRight: 10 }}>
@@ -553,7 +491,6 @@ const ListItemDetails: React.FC = () => {
                   {filterImage.length > 0 ? (
                     <TouchableOpacity
                       key={filterImage[0].id}
-                      // onPress={() => fetchListItemImages(index)} מוחקקקק את התמונה
                       onPress={() => handleShowLargeImage(index)}
 
                       style={{ marginRight: 10 }}
@@ -571,60 +508,23 @@ const ListItemDetails: React.FC = () => {
                   )}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                  {/* foorrrr whhatttttt */}
-                  {/* <Modal visible={modalVisible} transparent={true}>
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
-                      <TouchableOpacity onPress={handleCloseLargeImage} style={{ position: 'absolute', top: 20, right: 20 }}>
-                        <FontAwesome name="close" size={30} color="white" />
-                      </TouchableOpacity>
-                      <Image source={{ uri: largeImage }} style={{ width: '80%', height: '80%', resizeMode: 'contain' }} />
-                    </View>
-                  </Modal> */}
-                  {/* foorrrr whhatttttt */}
-
-
-
                   <Modal
                     visible={modalVisible}
                     onRequestClose={handleCloseLargeImage}
                     animationType="fade"
                     transparent={true}
                   >
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#e3f2fd'}}>
-                    {/* backgroundColor: '#f2f2f2' */}
-                    {/* backgroundColor: 'rgba(0, 0, 0, 0.6)' */}
-
-
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
                       <View style={styles.seeImage}>
-                      {/* <View style={{ padding: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}> */}
-
                         <TouchableOpacity onPress={handleCloseLargeImage}>
-
-                        {/* <TouchableOpacity style={styles.closeButton} onPress={handleCloseLargeImage}>
-                          <Text style={{ color: 'black', fontSize: 18 }}>X</Text> */}
-
                           {largeImage ? (
                             <Image
-                              source={{ uri: largeImage }} // ה-URI של התמונה הגדולה
+                              source={{ uri: largeImage }}
                               style={{
-                                width: width * 0.9, // 90% מרוחב המסך
-                                height: height * 0.7, // 70% מגובה המסך
+                                width: width * 0.9,
+                                height: height * 0.7,
                                 borderRadius: 10,
-                                resizeMode: 'contain', // שומר על פרופורציות התמונה
+                                resizeMode: 'contain',
                               }}
                               onError={() => console.error('Failed to load large image')}
                             />
@@ -635,28 +535,6 @@ const ListItemDetails: React.FC = () => {
                       </View>
                     </View>
                   </Modal>
-
-
-                  {/* seeImage */}
-                  {/* {selectedImage && (
-                    <Modal visible={true} transparent={true} animationType="fade">
-                      <View style={styles.modalContainer}>
-                        <TouchableOpacity style={styles.closeButton} onPress={handleCloseLargeImage}>
-                          <Text style={{ color: 'white', fontSize: 18 }}>X</Text>
-                        </TouchableOpacity>
-                        <Image source={{ uri: selectedImage }} style={styles.largeImage} />
-                      </View>
-                    </Modal>
-                  )} */}
-
-
-
-
-
-
-
-
-
                   <TouchableOpacity onPress={() => handleRemoveItem(index)} style={{ marginRight: 10 }}>
                     <AntDesign name="delete" size={25} color="red" />
                   </TouchableOpacity>
@@ -669,7 +547,7 @@ const ListItemDetails: React.FC = () => {
                       },
                     ]}
                     placeholder="Write here..."
-                    multiline={false}  // Set to false for a single line
+                    multiline={false}
                     value={item}
                     onChangeText={(text) => handleItemChange(text, index)}
                   />
@@ -678,36 +556,6 @@ const ListItemDetails: React.FC = () => {
 
             }}
             keyExtractor={(_, index) => index.toString()} />
-
-
-
-
-
-
-
-          {/* // מודל להצגת תמונה בגדול */}
-
-          {/* {isModalVisible && (
-            <Modal
-              transparent={true}
-              visible={isModalVisible}
-              onRequestClose={() => setIsModalVisible(false)}
-            >
-              <View style={styles.modalContainer}>
-                <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeButton}>
-                  <Text style={styles.closeButtonText}>X</Text>
-                </TouchableOpacity>
-                <Image
-                  source={{ uri: modalImage }}
-                  style={styles.largeImage}
-                />
-              </View>
-            </Modal>
-          )} */}
-
-
-
-
 
           <View style={styles.iconRowContainer}>
             {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
@@ -732,34 +580,53 @@ const ListItemDetails: React.FC = () => {
                       <Picker.Item label="Full Access" value="full_access" />
                     </Picker>
                   </View>
-                  {/* Text Input for custom value */}
                   <TextInput
                     placeholder="Enter a email"
                     value={shareValue}
                     onChangeText={setShareValue}
                     style={styles.input}
                   />
-                  {/* Confirm Share Button */}
                   <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmShare}>
                     <Text style={styles.confirmButtonText}>Confirm Share</Text>
                   </TouchableOpacity>
-
-                  {/* Close Button */}
                   <TouchableOpacity style={styles.closeButtonShare} onPress={() => setIsModalVisible(false)}>
                     <Text style={styles.closeButtonText}>Close</Text>
                   </TouchableOpacity>
                 </View>
-
               </View>
-
             )}
-
             {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(listItem.id)}>
               <AntDesign name="delete" size={25} color="black" />
               <Text style={styles.iconLabel}>Delete</Text>
             </TouchableOpacity>}
+
+
+            {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
+
           </View>
 
+          {/* 
+            {isUpdateMode &&<Button title="Get Recommendations" onPress={fetchRecommendations} />}
+          {loading ? ( */}
+          {/* // <ActivityIndicator size="large" color="#0000ff" />  */}
+          {/* // ) : ( */}
+          {/* // <View> */}
+          {/* //   <Text>Recommendations:</Text> */}
+          {/* הצגת ההמלצות */}
+
+          {/* <FlatList */}
+          {/* //       data={recommendations} // הצגת ההמלצות
+          //       keyExtractor={(item, index) => index.toString()}
+          //       renderItem={({ item }) => ( */}
+          {/* //         <View>
+          //           <Text>{item}</Text>
+          //         </View>
+          //       )}
+          //     />
+          //   </View>
+          // )} */}
+
+          {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
 
           <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
             <Text style={styles.addItemButtonText}>Add Item</Text>
@@ -768,23 +635,6 @@ const ListItemDetails: React.FC = () => {
           <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
             <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
           </TouchableOpacity>
-
-
-
-
-
-          {/* <Modal visible={isMenuVisible} transparent={true} animationType="slide">
-          <View style={styles.modalBackground}> 
-            <TouchableOpacity onPress={() => setIsMenuVisible(false)} style={styles.iconContainer}>
-              <Ionicons name="close-circle-outline" size={50} color="white" />
-              <Text style={styles.iconLabel}>Close</Text>
-            </TouchableOpacity> 
-
-        </View>
-        </Modal> */}
-
-
-          {/* </View> */}
         </ScrollView>
       </ImageBackground>
     </View>
@@ -795,10 +645,18 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
-  container: { flex: 1, padding: 20 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', },
+  container: {
+    flex: 1,
+    padding: 20
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
   titleInput: {
-    width: '90%', // התאמה למסך
+    width: '90%',
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,
@@ -808,27 +666,24 @@ const styles = StyleSheet.create({
   item: {
     width: '100%',
     flexDirection: 'row',
-    alignItems: 'center', // Center icons with text input
+    alignItems: 'center',
     marginBottom: 10,
   },
   textArea: {
     flex: 2,
-    borderWidth: 0, // No border
+    borderWidth: 0,
     paddingLeft: 10,
     fontSize: 18,
   },
   addItemButton: {
     backgroundColor: "#39B8D4",
-    // backgroundColor: "#A3D9FF",
-    // backgroundColor: "#80D4FF",
-    // backgroundColor: '#4CAF50',
     paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center',
-    alignSelf: 'center',  // מרכז את הכפתור בתוך המיכל
+    alignSelf: 'center',
     marginVertical: 20,
-    width: '80%',  // הכפתור יתפוס 80% מהמסך, לא משנה גודלו
+    width: '80%',
 
   },
   addItemButtonText: {
@@ -846,48 +701,43 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
   },
-
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  },
-  // iconContainer: {
+  // modalBackground: {
+  //   flex: 1,
+  //   justifyContent: 'center',
   //   alignItems: 'center',
-  // //   marginVertical: 20,
+  //   backgroundColor: 'rgba(0, 0, 0, 0.7)',
   // },
-  // iconLabel: {
-  //   color: 'white',
-  //   marginTop: 5,
+
+  // modalTitle: {
+
   // },
   modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#fff',
-  },
-  permissionOption: {
-    fontSize: 18,
-    color: '#fff',
-    marginVertical: 10,
-  },
-  cancelButton: {
-    fontSize: 18,
-    color: 'red',
-    marginTop: 20,
-  },
-  optionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 15,
+    color: '#333',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
-  checkbox: {
-    marginRight: 10,
-  },
-  optionText: {
-    fontSize: 16,
-  },
+  // permissionOption: {
+  //   fontSize: 18,
+  //   color: '#fff',
+  //   marginVertical: 10,
+  // },
+  // cancelButton: {
+  //   fontSize: 18,
+  //   color: 'red',
+  //   marginTop: 20,
+  // },
+  // optionContainer: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   marginBottom: 15,
+  // },
+  // checkbox: {
+  //   marginRight: 10,
+  // },
+  // optionText: {
+  //   fontSize: 16,
+  // },
   confirmButton: {
     backgroundColor: '#4CAF50',
     padding: 10,
@@ -895,64 +745,60 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginTop: 20,
+    paddingVertical: 12,
+    marginBottom: 10,
   },
-  shareButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 8,
-  },
-  shareButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  // modalOverlay: {
-  //   flex: 1,
-  //   backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  //   justifyContent: 'center',
-  // //   alignItems: 'center',
+
+  // shareButton: {
+  //   backgroundColor: '#4CAF50',
+  //   padding: 10,
+  //   borderRadius: 8,
+  // },
+  // shareButtonText: {
+  //   color: '#fff',
+  //   fontSize: 16,
   // },
 
 
-  modalContainerSh: {
-    position: 'absolute', // שומר את המיקום במרכז
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -100 }, { translateY: -100 }], // ממקם את המודל בדיוק במרכז המסך
-    width: 200, // רוחב המודל
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
-    flex: 1,
-    justifyContent: 'center',
-    // backgroundColor: 'rgba(0, 0, 0, 0.8)',
-  },
-  largeImage: {
-    width: 300,
-    height: 300,
-    borderRadius: 10,
-  },
+  // modalContainerSh: {
+  //   position: 'absolute', 
+  //   top: '50%',
+  //   left: '50%',
+  //   transform: [{ translateX: -100 }, { translateY: -100 }], 
+  //   width: 200, 
+  //   padding: 20,
+  //   backgroundColor: 'white',
+  //   borderRadius: 10,
+  //   alignItems: 'center',
+  //   shadowColor: '#000',
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.8,
+  //   shadowRadius: 2,
+  //   elevation: 5,
+  //   flex: 1,
+  //   justifyContent: 'center',
+  // },
+  // largeImage: {
+  //   width: 300,
+  //   height: 300,
+  //   borderRadius: 10,
+  // },
 
   iconRowContainer: {
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'flex-end', // מיישר את האייקונים לימין
-    position: 'absolute', // מיקום אבסולוטי כדי למקם את הקונטיינר למעלה
+    justifyContent: 'flex-end',
+    position: 'absolute',
     paddingHorizontal: 10,
     marginTop: 10,
-    top: 0, // מצמיד את הקונטיינר לחלק העליון
-    right: 0, // מצמיד את הקונטיינר לימין
+    top: 0,
+    right: 0,
     padding: 10,
-    zIndex: 1, // מבטיח שהאייקונים יהיו מ
+    zIndex: 1,
   },
   iconContainer: {
     alignItems: 'center',
-    marginHorizontal: 10, // רווח בין האייקונים
+    marginHorizontal: 10,
   },
   iconLabel: {
     fontSize: 12,
@@ -968,12 +814,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
   },
   pickerContainer: {
     backgroundColor: '#f0f0f0',
@@ -994,31 +834,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     backgroundColor: '#f9f9f9',
   },
-  confirmButton: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
   confirmButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
   },
-
-  // closeButton: {
-    // position: 'absolute',
-    // alignItems: 'center',
-    // top: 40,
-    // right: 20,
-    // padding: 10,
-    // // backgroundColor: 'red',
-    // borderRadius: 20,
-    // // fontWeight: 'bold',
-  // },
-
-
   closeButton: {
     position: 'absolute',
     top: 10,
@@ -1027,7 +847,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
   },
-
   closeButtonShare: {
     backgroundColor: '#f44336',
     paddingVertical: 10,
@@ -1039,32 +858,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   overlay: {
-    position: 'fixed', // מבטיח שהמודאל תמיד יצוף על פני הדף, גם בעת גלילה
+    position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    // backgroundColor: 'rgba(0, 0, 0, 0.5)', // רקע כהה חצי שקוף
-    display: 'flex', // מאפשר גמישות במיקום התוכן
-    justifyContent: 'center', // ממקם את התוכן במרכז אופקי
-    alignItems: 'center', // ממקם את התוכן במרכז אנכי
-    zIndex: 1, // מבטיח שהמודאל יהיה מעל לכל התוכן
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
-
   seeImage: {
-    padding: 20, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    backgroundColor: '#ffffff', // לבן נקי
-    borderRadius: 10, // פינות מעוגלות למראה מודרני
-    shadowColor: '#000', // צללים להבלטה
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
-
-
 });
 
 export default ListItemDetails;

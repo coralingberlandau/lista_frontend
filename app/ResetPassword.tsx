@@ -11,11 +11,11 @@ import { Ionicons } from '@expo/vector-icons';
 type NavigationProps = StackNavigationProp<RootStackParamList>;
 
 const ResetPassword: React.FC = () => {
-  const [email, setEmail] = useState<string>(''); // הוספתי שדה לאימייל
+  const [email, setEmail] = useState<string>(''); 
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [errorText, setErrorText] = useState<string>('');
-  const navigation = useNavigation<NavigationProps>(); // הגדרת טיפוס הניווט
+  const navigation = useNavigation<NavigationProps>(); 
 
   const isValidEmail = (email: string): boolean => {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -23,7 +23,7 @@ const ResetPassword: React.FC = () => {
   };
 
   const handleRequestResetLink = async () => {
-    setErrorText(''); // ניקוי הודעת השגיאה לפני שליחה
+    setErrorText(''); 
 
     if (!email) {
       setErrorText('Please enter your email.');
@@ -60,30 +60,13 @@ const ResetPassword: React.FC = () => {
   };
 
   const navigateToLogin = () => {
-    navigation.navigate('Login'); // נווט למסך הלוגין
+    navigation.navigate('Login'); 
   };
 
   return (
 
-    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
-
-
-
-    {/* <View style={styles.container}> */}
-
-    
+    <ScrollView contentContainerStyle={styles.container}> 
       <Text style={styles.title}>Reset Password</Text>
-
-      {/* <TextInput
-        style={styles.input}
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      /> */}
-
-  
-
       <View style={styles.inputContainer}>
         <Ionicons
           name="mail-outline"
@@ -101,12 +84,10 @@ const ResetPassword: React.FC = () => {
         />
       </View>
 
-
       <Button
         title={loading ? 'Sending Reset Link...' : 'Send Reset Link'}
         onPress={handleRequestResetLink}
-        disabled={loading}
-      />
+        disabled={loading} />
 
       {message || errorText ? (
         <Text style={message ? styles.message : styles.errorText}>
@@ -118,9 +99,7 @@ const ResetPassword: React.FC = () => {
       <TouchableOpacity onPress={navigateToLogin}>
         <Text style={styles.linkTo}>Click here to login</Text>
       </TouchableOpacity>
-    {/* </View> */}
-
-</ScrollView>
+    </ScrollView>
 
   );
 };
@@ -169,26 +148,27 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   inputContainer: {
-    flexDirection: 'row', // מסדר את האייקון והטקסט באותו שורה
-    alignItems: 'center', // ממרכז את האייקון והטקסט אנכית
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 15,
     borderWidth: 1,
     borderRadius: 8,
     borderColor: '#ccc',
-    paddingHorizontal: 10, // רווח פנימי משני הצדדים
+    paddingHorizontal: 10,
     height: 50,
   },
   input: {
-    flex: 1, // מאפשר ל-TextInput למלא את כל השטח הנותר
+    flex: 1,
     fontSize: 16,
-    paddingLeft: 10, // רווח לשם האייקון בצד שמאל
+    paddingLeft: 10,
   },
   icon: {
     color: 'gray',
     top: '50%',
-    transform: [{ translateY: -24}], // מיישר את האייקון באמצע
+    transform: [{ translateY: -24 }],
   },
-  
+
 });
 
 export default ResetPassword;
+

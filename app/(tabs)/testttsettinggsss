@@ -11,6 +11,8 @@
 
 
 
+      
+
 
 
 
@@ -28,22 +30,11 @@
 
 
 
+
+
      {/* <TouchableOpacity style={styles.settingOption} onPress={handleRateApp}>
         <Text style={styles.settingText}>Rate Us</Text>
       </TouchableOpacity> */}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

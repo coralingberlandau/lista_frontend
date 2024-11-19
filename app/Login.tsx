@@ -4,29 +4,23 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Input from '@/components/Input';
 import { StackNavigationProp } from '@react-navigation/stack';
-import axios from 'axios'; 
-import { jwtDecode } from 'jwt-decode'; 
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 import { JwtPayload, RootStackParamList } from './type';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 
-
-// הגדרת סוג הניווט למסך הלוגין
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> }> = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [errorText, setErrorText] = useState('');
-
-  
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const handleLogin = async () => {
-    // איפוס הודעת השגיאה
     setErrorText('');
 
-    // בדוק אם יש שדות חסרים
     if (!username || !password) {
       setErrorText('Please enter both username and password.');
       return;
@@ -34,26 +28,19 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
 
     if (username && password) {
       try {
-        // קריאה ל-API לבדוק את פרטי ההתחברות
         const response = await axios.post('http://127.0.0.1:8000/login/', {
-          username, // שליחה של שם משתמש
+          username,
           password,
         });
 
-        console.log('======== Response ========');
-        console.log(response);
+        const accessToken = response.data.access;
 
-        const accessToken = response.data.access; // קבלת הטוקן מהשרת
-
-        // פענוח הטוקן באמצעות jwtDecode
         const decodedToken: JwtPayload = jwtDecode(accessToken);
         console.log('Decoded token:', decodedToken);
 
-        // קבלת ה-user_id מהטוקן
         const userId = decodedToken.user_id;
         console.log('User ID from token:', userId);
 
-        // בדיקה אם userId קיים
         if (userId === undefined) {
           throw new Error("User ID is undefined");
         }
@@ -64,20 +51,17 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
           },
         })
 
-        if(customizations.status === 200) {
+        if (customizations.status === 200) {
           await AsyncStorage.setItem('customizations', customizations.data.data.background_image_id);
         }
 
-        // שמירת הטוקן וה-userId באחסון המקומי (AsyncStorage)
-        await AsyncStorage.setItem('token', accessToken); // שמירה של הטוקן
-        await AsyncStorage.setItem('userId', userId.toString()); // שמירת ה-userId
-        await AsyncStorage.setItem('userName', username); // שמירה של שם המשתמש
+        await AsyncStorage.setItem('token', accessToken);
+        await AsyncStorage.setItem('userId', userId.toString());
+        await AsyncStorage.setItem('userName', username);
 
-        console.log('Logged in successfully');
         setIsLoggedIn(true);
       } catch (error: any) {
         console.error(error);
-        // נבדוק אם יש שגיאה ספציפית
         if (error.response && error.response.status === 401) {
           setErrorText('Incorrect username or password. Please try again.');
         } else {
@@ -88,11 +72,10 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
   }
 
   const navigateToRegister = () => {
-    navigation.navigate('Register'); // נווט למסך ה-Register
+    navigation.navigate('Register');
   };
 
   const navigateToResetPassword = () => {
-    console.log('שככחחתיייי סיסמהההה');
     navigation.navigate('ResetPassword');
   };
 
@@ -147,7 +130,7 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
           <Text style={styles.linkTo}>Forgot password?</Text>
         </TouchableOpacity>
       </View>
-</ScrollView>
+    </ScrollView>
   );
 };
 
@@ -180,16 +163,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'red',
     textAlign: 'center',
-    marginTop: 20, 
+    marginTop: 20,
   },
-
   inputContainer: {
     marginBottom: 15,
-    position: 'relative', // מאפשר מיקום של האייקון בתוך הקלט
+    position: 'relative',
   },
   input: {
     height: 50,
-    paddingLeft: 40, // רווח לשם האייקון בצד שמאל
+    paddingLeft: 40,
     borderWidth: 1,
     borderRadius: 8,
     borderColor: '#ccc',
@@ -198,9 +180,9 @@ const styles = StyleSheet.create({
   },
   icon: {
     position: 'absolute',
-    left: 10, // מיקום האייקון בצד שמאל
+    left: 10,
     top: '50%',
-    transform: [{ translateY: -16 }], // מיישר את האייקון באמצע
+    transform: [{ translateY: -16 }],
   },
 });
 

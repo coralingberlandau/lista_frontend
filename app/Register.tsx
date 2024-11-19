@@ -2,10 +2,10 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import { View, Text, Button, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Input from '@/components/Input'; // Adjust path if necessary
+import Input from '@/components/Input'; 
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { JwtPayload, RootStackParamList } from './type'; // Ensure the path is correct
+import { JwtPayload, RootStackParamList } from './type'; 
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,9 +22,8 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   const [password, setPassword] = useState<string>('');
   const navigation = useNavigation<RegisterScreenNavigationProp>();
   const [error, setError] = useState<string | null>(null);
-  const [emailError, setEmailError] = useState<string | null>(null); // מצב חדש עבור שגיאות מייל
+  const [emailError, setEmailError] = useState<string | null>(null); 
 
-  // משתנה לבדיקת מילוי כל השדות
   const allFieldsFilled: boolean =
     username.trim() !== '' &&
     firstName.trim() !== '' &&
@@ -32,26 +31,25 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
     email.trim() !== '' &&
     password.trim() !== '';
 
-  // פונקציית בדיקת מייל
   const isValidEmail = (email: string): boolean => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   };
 
   const handleRegister = async () => {
-    console.log('Register button pressed'); // הוספת לוג כאן
+    console.log('Register button pressed'); 
 
     setError(null);
-    setEmailError(null); // איפוס שגיאת המייל לפני הבדיקה
+    setEmailError(null); 
 
     if (!allFieldsFilled) {
       setError('All fields must be filled in to complete the registration.');
-      console.log('All fields not filled'); // לוג נוסף
+      console.log('All fields not filled'); 
       return;
     }
     if (!isValidEmail(email)) {
-      setEmailError('The email is invalid. Please enter a valid email address.'); // הגדרת שגיאת מייל אם הוא לא תקין
-      return; // הפסקת התהליך אם המייל לא תקין
+      setEmailError('The email is invalid. Please enter a valid email address.'); 
+      return; 
     }
 
     if (username && firstName && lastName && email && password) {
@@ -69,24 +67,20 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
         console.log('====================================');
 
         if (response.status === 201) {
-          const accessToken = response.data.access; // קבלת הטוקן מהשרת
+          const accessToken = response.data.access;
 
-          // פענוח הטוקן באמצעות jwtDecode
           const decodedToken: JwtPayload = jwtDecode(accessToken);
           console.log('Decoded token:', decodedToken);
 
-          // קבלת ה-user_id מהטוקן
-          const userId = decodedToken.user_id; // ודא שהשדה הזה קיים בטוקן
+          const userId = decodedToken.user_id; 
 
-          // בדיקה אם userId קיים
           if (userId === undefined) {
             throw new Error("User ID is undefined");
           }
 
-          // שמירה של הטוקן וה-userId באחסון המקומי (AsyncStorage)
-          await AsyncStorage.setItem('token', accessToken); // שמירה של הטוקן
-          await AsyncStorage.setItem('userId', userId.toString()); // שמירת ה-userId
-          await AsyncStorage.setItem('userName', username); // שמירה של שם המשתמש
+          await AsyncStorage.setItem('token', accessToken);
+          await AsyncStorage.setItem('userId', userId.toString());
+          await AsyncStorage.setItem('userName', username);
 
           console.log('testtttt tokennnnn', accessToken);
           Alert.alert('Registration Successful', 'You can now log in.');
@@ -95,30 +89,26 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
             text1: 'The user has been saved successfully!',
           });
 
-          // עדכון isLoggedIn למעבר ל-Tab.Navigator
           setIsLoggedIn(true);
 
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
-              routes: [{ name: 'Home' }], // העברת פרמטרים אם יש צורך
+              routes: [{ name: 'Home' }],
             })
           );
         }
       } catch (error) {
         console.log('Error caught:', error);
-        // לוג של השגיאה
 
-        // נוודא שהשגיאה מתעדכנת כמו שצריך
         if (axios.isAxiosError(error)) {
-          console.log('Error caught:', error); // לוג של השגיאה
-          console.log('Response data:', error.response?.data); // לוג של נתוני השגיאה
+          console.log('Error caught:', error);
+          console.log('Response data:', error.response?.data);
 
           if (axios.isAxiosError(error)) {
             if (error.response) {
-              // בדוק אם הסטטוס הוא 400
               if (error.response.status === 400) {
-                setError(error.response.data.error); // הגדרת השגיאה מהשרת
+                setError(error.response.data.error);
               } else {
                 setError('Error 500 - Something went wrong. Please try again.');
               }
@@ -135,11 +125,8 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
 
   return (
 
-    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
-
-    {/* <View style={styles.container}> */}
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Register</Text>
-
       <View style={styles.inputContainer}>
         <Ionicons
           name="person-outline"
@@ -221,10 +208,9 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
       </View>
       <Button title="Register" onPress={handleRegister} />
 
-      {/* הצגת הודעות השגיאה */}
       {(error || emailError) && (
         <Text style={styles.erroText}>
-          {error || emailError} {/* הצגת אחת מהשגיאות */}
+          {error || emailError}
         </Text>
       )}
       <View style={styles.loginContainer}>
@@ -233,9 +219,7 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
           <Text style={styles.loginLink}>Click here to log in</Text>
         </TouchableOpacity>
       </View>
-    {/* </View> */}
-
-</ScrollView>
+    </ScrollView>
 
   );
 };
@@ -273,11 +257,11 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 15,
-    position: 'relative', // מאפשר מיקום של האייקון בתוך הקלט
+    position: 'relative',
   },
   input: {
     height: 50,
-    paddingLeft: 40, // רווח לשם האייקון בצד שמאל
+    paddingLeft: 40,
     borderWidth: 1,
     borderRadius: 8,
     borderColor: '#ccc',
@@ -286,11 +270,12 @@ const styles = StyleSheet.create({
   },
   icon: {
     position: 'absolute',
-    left: 10, // מיקום האייקון בצד שמאל
+    left: 10,
     top: '50%',
-    transform: [{ translateY: -16 }], // מיישר את האייקון באמצע
+    transform: [{ translateY: -16 }],
   },
-  
+
 });
 
 export default Register;
+

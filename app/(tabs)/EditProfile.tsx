@@ -5,15 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Input from '@/components/Input';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
-import { RootStackParamList } from '../type';  // קובץ שבו אתה מגדיר את המסכים
-
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 
-
-// אנחנו מגדירים את סוג הפרופס כדי לקבל את ה-params דרך ה-route
 type EditProfileProps = {
-    setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>; // עכשיו, אנחנו מקבלים את setIsLoggedIn כ-prop
+    setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>;
 };
 
 const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
@@ -24,13 +20,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
     const [error, setError] = useState<string | null>(null);
     const [emailError, setEmailError] = useState<string | null>(null);
     const navigation = useNavigation();
-
-    // גישה ל-userId דרך ה-route.params
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
         const loadUserData = async () => {
-            // אם לא נמצא userId בפרמטרים, אז ננסה לקחת אותו מ-AsyncStorage
             const storedUserId = await AsyncStorage.getItem('userId');
             if (storedUserId) setUserId(storedUserId);
 
@@ -87,7 +80,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
                         type: 'success',
                         text1: 'Your profile has been updated successfully!',
                     });
-                    setIsLoggedIn(true);  // עדכון סטטוס הכניסה למשתמש
+                    setIsLoggedIn(true);
                     navigation.goBack();
                 }
             } catch (error) {
@@ -97,45 +90,17 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
                 } else {
                     setError('An error occurred. Please try again.');
                 }
-                setIsLoggedIn(false);  // אם יש שגיאה, עידכון סטטוס הכניסה כ-לא מחובר
+                setIsLoggedIn(false);
             }
         } else {
             setError('User ID not found.');
-            setIsLoggedIn(false);  // אם לא נמצא מזהה משתמש, עידכון סטטוס הכניסה כ-לא מחובר
+            setIsLoggedIn(false);
         }
     };
 
     return (
-
-        <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
-
-        {/* <View style={styles.container}> */}
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Edit Profile</Text>
-            {/* <Input
-                value={username}
-                onChangeText={setUsername}
-                placeholder="Username"
-                autoCapitalize="none"
-            />
-            <Input
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder="First Name"
-            />
-            <Input
-                value={lastName}
-                onChangeText={setLastName}
-                placeholder="Last Name"
-            />
-            <Input
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-            /> */}
-
-
             <View style={styles.inputContainer}>
                 <Ionicons
                     name="person-outline"
@@ -206,9 +171,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
                     {error || emailError}
                 </Text>
             )}
-        {/* </View> */}
-
-</ScrollView>
+        </ScrollView>
 
     );
 };
@@ -233,24 +196,23 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         marginBottom: 15,
-        position: 'relative', // מאפשר מיקום של האייקון בתוך הקלט
-      },
-      input: {
+        position: 'relative', 
+    },
+    input: {
         height: 50,
-        paddingLeft: 40, // רווח לשם האייקון בצד שמאל
+        paddingLeft: 40, 
         borderWidth: 1,
         borderRadius: 8,
         borderColor: '#ccc',
         fontSize: 16,
         paddingVertical: 10,
-      },
-      icon: {
+    },
+    icon: {
         position: 'absolute',
-        left: 10, // מיקום האייקון בצד שמאל
+        left: 10, 
         top: '50%',
-        transform: [{ translateY: -16 }], // מיישר את האייקון באמצע
-      },
-      
+        transform: [{ translateY: -16 }], 
+    },
 });
 
 export default EditProfile;

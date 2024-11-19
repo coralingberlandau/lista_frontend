@@ -6,7 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerRootComponent } from 'expo';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import Toast from 'react-native-toast-message';
-
 import Home from './(tabs)/Home';
 import Login from './Login';
 import Register from './Register';
@@ -42,10 +41,10 @@ const App: React.FC = () => {
   }, []);
 
   const linking = {
-    prefixes: ['http://localhost:8081/'],  // Replace 'myapp' with your custom URL scheme or domain
+    prefixes: ['http://localhost:8081/'],
     config: {
       screens: {
-        ChangePassword: 'change-password', // When the URL is /change-password, navigate to ChangePassword
+        ChangePassword: 'change-password',
       },
     },
   };
@@ -54,42 +53,32 @@ const App: React.FC = () => {
     <NavigationContainer linking={linking}>
       {isLoggedIn ? (
         <Tab.Navigator>
-
           <Tab.Screen name="Home" component={Home}
             options={{
               title: 'Home', tabBarIcon: ({ color, focused }) => (
                 <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />),
               headerShown: false,
             }} />
-
           <Tab.Screen name="ListItemDetails" component={ListItemDetails}
-            options={{ tabBarButton: () => null, headerShown: false, title: 'List Item Details' }}
-          />
+            options={{ tabBarButton: () => null, headerShown: false, title: 'List Item Details' }} />
 
           <Tab.Screen
             name="Settings"
-            children={(props) => <Settings {...props} setIsLoggedIn={setIsLoggedIn} />} // מעבירים את setIsLoggedIn כ-Prop
+            children={(props) => <Settings {...props} setIsLoggedIn={setIsLoggedIn} />}
             options={{
               title: 'Settings',
               tabBarIcon: ({ color, focused }) => (
                 <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
-              ),
-              headerShown: false,
-            }}
-          />
+              ), headerShown: false,
+            }} />
 
           <Tab.Screen
             name="EditProfile"
             options={{
-              tabBarButton: () => null, // אם לא רוצים כפתור טאב
-              headerShown: false, // לא להציג כותרת
-              title: 'Edit Profile',
-            }}
-          >
+              tabBarButton: () => null, headerShown: false, title: 'Edit Profile',
+            }} >
             {(props) => <EditProfile {...props} setIsLoggedIn={setIsLoggedIn} />}
-
           </Tab.Screen>
-
         </Tab.Navigator>
       ) : (
         <Stack.Navigator>
@@ -101,15 +90,11 @@ const App: React.FC = () => {
             {(props) => <Register {...props} setIsLoggedIn={setIsLoggedIn} />}
           </Stack.Screen>
 
-
           <Stack.Screen name="ResetPassword" component={ResetPassword}
-            options={{ headerShown: false, title: 'Reset Password' }}
-          />
+            options={{ headerShown: false, title: 'Reset Password' }} />
 
           <Stack.Screen name="ChangePassword" component={ChangePassword}
-            options={{ headerShown: false, title: 'Change Password' }}
-          />
-
+            options={{ headerShown: false, title: 'Change Password' }} />
         </Stack.Navigator>
       )}
       <Toast />
