@@ -136,8 +136,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
-    borderRadius: 5,
     marginBottom: 20,
+    height: 50,
+    paddingLeft: 40,
+    borderRadius: 8,
+    fontSize: 16,
+    paddingVertical: 10,
   },
   message: {
     marginTop: 20,
@@ -166,15 +170,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 15,
     position: 'relative',
-  },
-  input: {
-    height: 50,
-    paddingLeft: 40,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: '#ccc',
-    fontSize: 16,
-    paddingVertical: 10,
   },
   icon: {
     position: 'absolute',

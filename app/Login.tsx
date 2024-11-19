@@ -81,7 +81,7 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
 
   return (
 
-    <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+    <ScrollView contentContainerStyle={styles.container}> 
       <Text style={styles.title}>Login</Text>
       <View style={styles.inputContainer}>
         <Ionicons
