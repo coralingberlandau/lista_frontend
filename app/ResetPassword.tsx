@@ -7,7 +7,6 @@ import { RootStackParamList } from './type';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 
-
 type NavigationProps = StackNavigationProp<RootStackParamList>;
 
 const ResetPassword: React.FC = () => {
@@ -80,7 +79,7 @@ const ResetPassword: React.FC = () => {
           placeholder="Enter your email"
           keyboardType="email-address"
           autoCapitalize="none"
-          style={styles.input}
+          style={styles.inputText}
         />
       </View>
 
@@ -157,9 +156,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     height: 50,
   },
-  input: {
+  inputText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     paddingLeft: 10,
   },
   icon: {

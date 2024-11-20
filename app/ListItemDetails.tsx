@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, ImageBackground, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Image, FlatList, ImageBackground, useWindowDimensions, Button, ActivityIndicator } from 'react-native';
 import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { ImageData, ListItem, ListItemImage, RootStackParamList, User } from './type';
 import { Ionicons, AntDesign, FontAwesome } from '@expo/vector-icons';
@@ -10,6 +10,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { ScrollView } from 'react-native-gesture-handler';
+
+// import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 type ListItemDetailsRouteProp = RouteProp<RootStackParamList, 'ListItemDetails'>;
 
@@ -32,49 +34,56 @@ const ListItemDetails: React.FC = () => {
   const { width, height } = useWindowDimensions();
   const [recommendations, setRecommendations] = useState([]); // שמירה על ההמלצות
   const [loading, setLoading] = useState(false); // מצב טעינה
+  const [updatedImagesIndex, setUpdatedImagesIndex] = useState<string[]>([])
+  const [deletedImagesIndex, setDeletedImagesIndex] = useState<string[]>([])
 
+  console.log('images', images)
   useFocusEffect(
     useCallback(() => {
       setTitle(listItem?.title || '');
       setItems(listItem?.items.split("|") || ['']);
+      setUpdatedImagesIndex([])
+      setDeletedImagesIndex([])
       getImages()
       getBackgroundImage()
-      fetchRecommendations(listItem?.id);
     }, [listItem])
   );
 
   const fetchRecommendations = async () => {
-    if (!listItem || !listItem.id) {
-      console.error('Item ID is not available');
-      return;
-    }
+    console.log('====================================');
+    console.log('woerrkkkk aiiii');
+    console.log('====================================');
+    //   if (!listItem || !listItem.id) {
+    //     console.error('Item ID is not available');
+    //     return;
+    //   }
 
-    setLoading(true);
-    try {
-      const data = await getRecommendations(listItem.id);
-      if (data && data.recommended_items) {
-        setRecommendations(data.recommended_items.split(','));
-        console.log('Recommendations data:', data);
+    //   setLoading(true);
+    //   try {
+    //     const data = await getRecommendations(listItem.id);
+    //     if (data && data.recommended_items) {
+    //       setRecommendations(data.recommended_items.split(','));
+    //       console.log('Recommendations data:', data);
 
-      }
-    } catch (error) {
-      console.error('Error fetching recommendations:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    //     }
+    //   } catch (error) {
+    //     console.error('Error fetching recommendations:', error);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
 
-  const getRecommendations = async (listItemId: number) => {
-    try {
-      const response = await axios.get(`http://127.0.0.1:8000/recommendations/${listItemId}/`)
-      if (response.status !== 200) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.data;
-      return data;
-    } catch (error) {
-      console.error('Error fetching recommendations:', error);
-    }
+    // const getRecommendations = async (listItemId: number) => {
+    //   try {
+    //     const response = await axios.get(`http://127.0.0.1:8000/recommendations/${listItemId}/`)
+    //     if (response.status !== 200) {
+    //       throw new Error('Network response was not ok');
+    //     }
+    //     const data = await response.data;
+    //     return data;
+    //   } catch (error) {
+    //     console.error('Error fetching recommendations:', error);
+    //   }
   };
 
 
@@ -151,25 +160,36 @@ const ListItemDetails: React.FC = () => {
     setItems(newItems);
   };
 
+  const handleRemoveImages = (index: number) => {
+    setDeletedImagesIndex(prev => [...prev, images[index].index.toString()])
+    const newImages = images.filter((image) => image.index !== index)
+    setImages(newImages);
+    images.forEach((image) =>{
+      if(image.index > index) {
+        const imgeIndex = image.index
+        setUpdatedImagesIndex(prev => [...prev, imgeIndex.toString()])
+        image.index--
+      }
+    })
+  }
+
   const handleRemoveItem = (index: number) => {
     const newItems = [...items];
     newItems.splice(index, 1);
     setItems(newItems);
-    const newImages = images.slice(); // יצירת עותק חדש לגמרי
-    console.log('בדיקהה לפניייי', images, 'index:', index);
-    const updatedImages = newImages.filter((i) => i.index !== index); // מחיקת איבר מהעותק החדש
-    setImages(updatedImages);
-    console.log('בדיקהה אחריייייי', images);
-
-
-    // const newImages = [...images]
-    // console.log('בדיקהה לפניייי', images);
-    // newImages.splice(index, 1);
-    // setImages(newImages);
-    // console.log('בדיקהה אחריייייי', images);
+    images[index] && handleRemoveImages(index)
   };
 
+
+
   const handleSharePress = () => {
+    if (permission === 'read_only') {
+      Toast.show({
+        type: 'error',
+        text1: 'You do not have permission to share this list.',
+      });
+      return;
+    }
     setIsModalVisible(true);
   };
 
@@ -244,6 +264,7 @@ const ListItemDetails: React.FC = () => {
         );
 
         if (response.status === 200 && Array.isArray(response.data.images)) {
+          console.log('response', response.data.images)
           const formattedImages = response.data.images.map((image: any) => {
             const imageUrl = image.url.startsWith("http")
               ? image.url
@@ -276,6 +297,13 @@ const ListItemDetails: React.FC = () => {
   };
 
   const handleDeleteItem = async (itemId: number) => {
+    // if (permission === 'read_only') {
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: 'You do not have permission to delete this item.',
+    //   });
+    //   return;
+    // }
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
@@ -377,6 +405,24 @@ const ListItemDetails: React.FC = () => {
   };
 
   const handleSaveImages = async (listItemId: number) => {
+
+    if (isUpdateMode && (deletedImagesIndex.length > 0 || updatedImagesIndex.length > 0)) {
+      try {
+        console.log({deletedImagesIndex, updatedImagesIndex})
+        await axios.post('http://127.0.0.1:8000/listitemimages/update_images/',
+          {
+            list_item_id: listItem.id,
+            deletedImagesIndex: deletedImagesIndex,
+            updatedImagesIndex: updatedImagesIndex
+          }, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      }
+      catch { }
+    }
+
     const formData = new FormData();
     formData.append('list_item', listItemId.toString());
 
@@ -395,16 +441,18 @@ const ListItemDetails: React.FC = () => {
       }));
     }
 
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/listitemimages/upload_images/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('response', response);
-      return response.data;
-    } catch (error) {
-      console.error('Error uploading images', error);
+    if (formData.has('images')) {
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/listitemimages/upload_images/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        console.log('response', response);
+        return response.data;
+      } catch (error) {
+        console.error('Error uploading images', error);
+      }
     }
   };
 
@@ -475,8 +523,6 @@ const ListItemDetails: React.FC = () => {
               onChangeText={setTitle}
               placeholder="Edit Title" />
           </View>
-
-
           <FlatList
             data={items}
             renderItem={({ item, index }) => {
@@ -506,7 +552,6 @@ const ListItemDetails: React.FC = () => {
                       <FontAwesome name="image" size={25} color="blue" />
                     </TouchableOpacity>
                   )}
-
 
                   <Modal
                     visible={modalVisible}
@@ -586,10 +631,17 @@ const ListItemDetails: React.FC = () => {
                     onChangeText={setShareValue}
                     style={styles.input}
                   />
-                  <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmShare}>
+                  <TouchableOpacity style={styles.confirmButton} onPress={() => {
+                    handleConfirmShare();
+                    setShareValue('');
+                  }}>
                     <Text style={styles.confirmButtonText}>Confirm Share</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.closeButtonShare} onPress={() => setIsModalVisible(false)}>
+
+                  <TouchableOpacity style={styles.closeButtonShare} onPress={() => {
+                    setShareValue('');
+                    setIsModalVisible(false);
+                  }}>
                     <Text style={styles.closeButtonText}>Close</Text>
                   </TouchableOpacity>
                 </View>
@@ -601,30 +653,55 @@ const ListItemDetails: React.FC = () => {
             </TouchableOpacity>}
 
 
+
+
+
+
+
+
+
+
+
             {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
 
+
+
+            {/* {isUpdateMode && <Button title="Get Recommendations" onPress={fetchRecommendations} />} */}
+            {/* <FontAwesome name="lightbulb-o" size={25} color="purple" /> */}
+            {/* <FontAwesome name="magic" size={25} color="purple" />  */}
+
+
+
+            {/* {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={fetchRecommendations}>
+            <FontAwesome5 name="lightbulb" size={25} color="purple" />
+            <Text style={styles.iconLabel}>AI</Text>
+          </TouchableOpacity>}
+
+          
+
+          {loading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <View>
+              <Text>Recommendations:</Text> */}
+
+
+            {/* הצגת ההמלצות */}
+
+            {/* <FlatList
+                data={recommendations} // הצגת ההמלצות
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <View>
+                    <Text>{item}</Text>
+                  </View>
+                )}
+              />
+            </View>
+          )} */}
+
+
           </View>
-
-          {/* 
-            {isUpdateMode &&<Button title="Get Recommendations" onPress={fetchRecommendations} />}
-          {loading ? ( */}
-          {/* // <ActivityIndicator size="large" color="#0000ff" />  */}
-          {/* // ) : ( */}
-          {/* // <View> */}
-          {/* //   <Text>Recommendations:</Text> */}
-          {/* הצגת ההמלצות */}
-
-          {/* <FlatList */}
-          {/* //       data={recommendations} // הצגת ההמלצות
-          //       keyExtractor={(item, index) => index.toString()}
-          //       renderItem={({ item }) => ( */}
-          {/* //         <View>
-          //           <Text>{item}</Text>
-          //         </View>
-          //       )}
-          //     />
-          //   </View>
-          // )} */}
 
           {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
 
@@ -637,9 +714,11 @@ const ListItemDetails: React.FC = () => {
           </TouchableOpacity>
         </ScrollView>
       </ImageBackground>
-    </View>
+    </View >
+
   );
 };
+
 
 const styles = StyleSheet.create({
   background: {

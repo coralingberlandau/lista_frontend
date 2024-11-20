@@ -24,6 +24,7 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
   const navigation = useNavigation<EditProfileScreenNavigationProp>();
   const [selectedImage, setSelectedImage] = useState<number | null>(null); 
 
+  
 
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null); // אחסון התמונה שנבחרה
   const [isBackgroundPickerVisible, setIsBackgroundPickerVisible] = useState(false); // מצב של תצוגת הבחירה

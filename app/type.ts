@@ -1,20 +1,14 @@
 import { ImageSourcePropType } from "react-native";
 
-// types.ts
 export type RootStackParamList = {
   Login: undefined;  
-  // Home: { refresh?: boolean };         // מסך הבית, פרמטר אופציונלי בשם refresh
-  // מסך הלוגין, אין לו פרמטרים
-  Home: undefined // הוספת פרמטר אפשרי בשם refresh
+  Home: undefined 
   Register: undefined;
   Settings: undefined;
-  ListItemDetails?: { listItem: ListItem }; // פרמטר חדש עבור פרטי האייטם
-  ResetPassword: undefined; // מסך חדש עבור איפוס סיסמה
-  EditProfile: { userId: string } | undefined;  // אפשרות להעביר userId כפרמטר
+  ListItemDetails?: { listItem: ListItem }; 
+  ResetPassword: undefined; 
+  EditProfile: { userId: string } | undefined; 
   ChangePassword: { email: string };
-
-
-  // הוסף כאן מסכים נוספים לפי הצורך
 };
 
 export interface RouteParams {
@@ -30,15 +24,13 @@ export interface JwtPayload {
   username: string;
 }
 
-// types.ts
 export interface ListItemProps {
   title: string;
   items: string;
   user_id: string;
-  is_active: boolean; // שדה המייצג אם הפריט פעיל
+  is_active: boolean; 
 }
 
-// הגדרת הממשק ListItem
 export interface ListItem {
   id: number;
   title: string;
@@ -59,19 +51,6 @@ export interface GroupListResponse {
   };
 }
 
-
-// declare module 'react-color' {
-
-//   export interface HsvColor {
-//     h: number; // Hue
-//     s: number; // Saturation
-//     v: number; // Value
-//   }
-
-//   export function hsvToHex(h: number, s: number, v: number): string;
-
-// }
-
 export interface Image {
   uri: string;
   name: string;
@@ -84,8 +63,8 @@ export interface User {
 
 export interface ListItemImage {
   id: number;
-  list_item: number; // או טיפוס אחר שמתאים
-  image: string; // או טיפוס אחר שמתאים
+  list_item: number; 
+  image: string; 
   uri: string;
   fileName: string;
   mimeType: string;
@@ -93,16 +72,15 @@ export interface ListItemImage {
 }
 
 export interface ImageData {
-  id: number; // זיהוי ייחודי
+  id: number;
   uri: string;
   fileName: string;
   mimeType: string;
   index: number;
-  largeImage: string;  // הוסף שדה שיכיל את ה-URI של התמונה הגדולה
-
+  largeImage: string;  
 }
 
 export interface BackgroundImage {
   id: number;
-  url: ImageSourcePropType;  // טיפוס נכון לתמונה
+  url: ImageSourcePropType; 
 };

@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
-import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
-
 type NavigationProps = StackNavigationProp<RootStackParamList>;
 type RootStackParamList = {
   ChangePassword: { email: string };
+  Login: undefined; 
 };
 
 type ChangePasswordRouteProp = RouteProp<RootStackParamList, 'ChangePassword'>;
@@ -60,7 +60,7 @@ const ChangePassword: React.FC = () => {
 
       setMessage('Password has been changed successfully!');
       setTimeout(() => {
-        navigation.navigate('Login');
+        navigation.navigate('Login'); // מעבר למסך Login
       }, 2000);
     } catch (error: any) {
       console.error('Error:', error);
