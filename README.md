@@ -112,8 +112,11 @@ The idea for **Lista** arose from a daily need to organize, manage, and track li
 ### **Users**  
 Utilizes Django’s built-in `User` model:  
 - **User ID**: Unique identifier.  
-- **Username**: Unique within the system.  
-- **Email and Password**: For secure login.  
+- **Username**: Unique within the system, used for login alongside the password
+- **First Name**: User's given name. 
+- **Last Name:**: User's family name 
+- **Email**: Used for sharing lists and password recovery.  
+- **Password**: Secure authentication credential.  
 
 ### **ListItem**  
 Represents tasks or list items:  
@@ -146,6 +149,14 @@ upload_to='list_item_images/').
 Allows users to personalize their experience:  
 - **User**: Reference to the modifying user.  
 - **Background**: Identifier for a custom background image.  
+
+### **Recommendation**  
+Stores recommendations related to specific list items:
+- **List Item**: A foreign key linking to the ListItem model (on_delete=models.CASCADE, 
+related_name="recommendations").  
+- **Recommended Items**: A text field containing recommended items, separated by commas.
+- **Created At**: Automatically records the timestamp when the recommendation is created.
+python
 
 ---
 

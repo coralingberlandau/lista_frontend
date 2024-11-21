@@ -133,7 +133,8 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
         <Text style={styles.supportContact}>{supportContact}</Text>
       </TouchableOpacity>
       <Text style={styles.notification}>If you need any assistance, feel free to reach out!</Text>
-      <Text style={styles.inspirationText}>Keep achieving great things with Lista!</Text>
+      <Text style={styles.inspirationText}>Keep achieving great things with Lista! </Text>
+      <Text style={styles.inspirationText}>We’re here to make your life easier and more organized. 😊  </Text>
       <TouchableOpacity onPress={navigateToEditProfile} style={styles.editProfileButton}>
         <Ionicons name="pencil-outline" size={30} color="green" />
         <Text style={styles.iconLabel}>Edit Profile</Text>

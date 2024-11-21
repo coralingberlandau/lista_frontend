@@ -11,7 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { ScrollView } from 'react-native-gesture-handler';
 
-// import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 type ListItemDetailsRouteProp = RouteProp<RootStackParamList, 'ListItemDetails'>;
 
@@ -37,7 +37,18 @@ const ListItemDetails: React.FC = () => {
   const [updatedImagesIndex, setUpdatedImagesIndex] = useState<string[]>([])
   const [deletedImagesIndex, setDeletedImagesIndex] = useState<string[]>([])
 
+
+  const [error, setError] = useState<string | null>(null);
+
+  const [permissionType, setPermissionType] = useState<string | null>(null);
+
+
   console.log('images', images)
+
+  console.log('permissionType', permissionType);
+
+
+
   useFocusEffect(
     useCallback(() => {
       setTitle(listItem?.title || '');
@@ -46,8 +57,76 @@ const ListItemDetails: React.FC = () => {
       setDeletedImagesIndex([])
       getImages()
       getBackgroundImage()
+
+      fetchPermissionType();
     }, [listItem])
   );
+
+
+  // uppdatataaaaa premissssannn!!!!!!!
+
+  // הפונקציה שמבצעת את קריאת ה-API ומעדכנת את הסטייט של ה-permission_type
+  const fetchPermissionType = async () => {
+    const storedUserId = await AsyncStorage.getItem('userId');
+    const token = await AsyncStorage.getItem('token');
+
+
+    if (!storedUserId || !listItem?.id) {
+      setError('Missing user_id or list_item_id');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await axios.get('http://127.0.0.1:8000/grouplists/permission_type/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          user_id: storedUserId,
+          list_item_id: listItem?.id,
+        }
+      });
+
+      setPermissionType(response.data.permission_type);
+    } catch (err) {
+      console.error('Error fetching permission type:', err);
+      setError('Failed to fetch permission type');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // הפונקציה שמבצעת את שאר העדכונים, כמו title, items, וכו'
+  // const updateListItemDetails = useCallback(() => {
+  //   setTitle(listItem?.title || '');
+  //   setItems(listItem?.items.split("|") || ['']);
+  //   setUpdatedImagesIndex([]);
+  //   setDeletedImagesIndex([]);
+  //   getImages();
+  //   getBackgroundImage();
+  // }, [listItem]);
+
+  // // שימוש ב-useFocusEffect כדי לבצע את כל הפעולות כל פעם שהמסך מקבל פוקוס
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     updateListItemDetails();
+  //     fetchPermissionType(); // קריאה לפונקציה שמביאה את ה-permission_type
+
+  //     // הפונקציה הזו תתבצע כל פעם שהמסך מקבל פוקוס, כלומר כל פעם שהמשתמש חוזר למסך הזה
+  //   }, [listItem])
+  //   // [listItem, user_id, listItem]
+  // );
+
+
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>{error}</p>;
+
+  // uppdatataaaaa premissssannn!!!!!!!
+
 
   const fetchRecommendations = async () => {
     console.log('====================================');
@@ -160,30 +239,32 @@ const ListItemDetails: React.FC = () => {
     setItems(newItems);
   };
 
-  const handleRemoveImages = (index: number) => {
-    setDeletedImagesIndex(prev => [...prev, images[index].index.toString()])
+  const handleRemoveImages = (index: number, imageToRemove: ImageData) => {
+    setDeletedImagesIndex(prev => [...prev, imageToRemove.index.toString()])
     const newImages = images.filter((image) => image.index !== index)
     setImages(newImages);
-    images.forEach((image) =>{
-      if(image.index > index) {
-        const imgeIndex = image.index
-        setUpdatedImagesIndex(prev => [...prev, imgeIndex.toString()])
-        image.index--
-      }
-    })
   }
 
   const handleRemoveItem = (index: number) => {
     const newItems = [...items];
     newItems.splice(index, 1);
     setItems(newItems);
-    images[index] && handleRemoveImages(index)
+    images.forEach((image) => {
+      if (image.index > index) {
+        const imgeIndex = image.index
+        setUpdatedImagesIndex(prev => [...prev, imgeIndex.toString()])
+        image.index--
+      }
+    })
+    const imageToRemove = images.filter((image: ImageData) => image.index === index)
+    if(imageToRemove && imageToRemove.length > 0){
+      handleRemoveImages(index, imageToRemove[0])
+    }
   };
 
 
-
   const handleSharePress = () => {
-    if (permission === 'read_only') {
+    if (permissionType === 'read_only') {
       Toast.show({
         type: 'error',
         text1: 'You do not have permission to share this list.',
@@ -297,13 +378,13 @@ const ListItemDetails: React.FC = () => {
   };
 
   const handleDeleteItem = async (itemId: number) => {
-    // if (permission === 'read_only') {
-    //   Toast.show({
-    //     type: 'error',
-    //     text1: 'You do not have permission to delete this item.',
-    //   });
-    //   return;
-    // }
+    if (permissionType === 'read_only') {
+      Toast.show({
+        type: 'error',
+        text1: 'You do not have permission to delete this item.',
+      });
+      return;
+    }
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
@@ -408,7 +489,7 @@ const ListItemDetails: React.FC = () => {
 
     if (isUpdateMode && (deletedImagesIndex.length > 0 || updatedImagesIndex.length > 0)) {
       try {
-        console.log({deletedImagesIndex, updatedImagesIndex})
+        console.log({ deletedImagesIndex, updatedImagesIndex })
         await axios.post('http://127.0.0.1:8000/listitemimages/update_images/',
           {
             list_item_id: listItem.id,
@@ -602,7 +683,9 @@ const ListItemDetails: React.FC = () => {
             }}
             keyExtractor={(_, index) => index.toString()} />
 
-          <View style={styles.iconRowContainer}>
+
+
+          {/* <View style={styles.iconRowContainer}>
             {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
               <Ionicons name="share-outline" size={25} color="black" />
               <Text style={styles.iconLabel}>Share</Text>
@@ -615,7 +698,7 @@ const ListItemDetails: React.FC = () => {
                   <Text style={styles.modalTitle}>Select Permission</Text>
 
                   {/* Dropdown for permissions */}
-                  <View style={styles.pickerContainer}>
+          {/* <View style={styles.pickerContainer}>
                     <Picker
                       selectedValue={permission}
                       onValueChange={handlePermissionSelect}
@@ -646,49 +729,42 @@ const ListItemDetails: React.FC = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-            )}
+            )}-
+
+
             {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(listItem.id)}>
               <AntDesign name="delete" size={25} color="black" />
               <Text style={styles.iconLabel}>Delete</Text>
+            </TouchableOpacity>}  */}
+
+
+          <View style={styles.iconRowContainer}>
+
+          {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={fetchRecommendations}>
+              <FontAwesome5 name="lightbulb" size={25} color="purple" />
+              <Text style={styles.iconLabel}>AI</Text>
             </TouchableOpacity>}
+          {/* </View> */}
 
 
 
+          {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
 
 
 
+          {/* {isUpdateMode && <Button title="Get Recommendations" onPress={fetchRecommendations} />} */}
+          {/* <FontAwesome name="lightbulb-o" size={25} color="purple" /> */}
+          {/* <FontAwesome name="magic" size={25} color="purple" />  */}
 
-
-
-
-
-            {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
-
-
-
-            {/* {isUpdateMode && <Button title="Get Recommendations" onPress={fetchRecommendations} />} */}
-            {/* <FontAwesome name="lightbulb-o" size={25} color="purple" /> */}
-            {/* <FontAwesome name="magic" size={25} color="purple" />  */}
-
-
-
-            {/* {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={fetchRecommendations}>
-            <FontAwesome5 name="lightbulb" size={25} color="purple" />
-            <Text style={styles.iconLabel}>AI</Text>
-          </TouchableOpacity>}
-
-          
-
-          {loading ? (
+          {/* {loading ? (
             <ActivityIndicator size="large" color="#0000ff" />
           ) : (
             <View>
-              <Text>Recommendations:</Text> */}
+              <Text>Recommendations:</Text>  */}
 
+          {/* הצגת ההמלצות */}
 
-            {/* הצגת ההמלצות */}
-
-            {/* <FlatList
+          {/* <FlatList
                 data={recommendations} // הצגת ההמלצות
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
@@ -698,12 +774,78 @@ const ListItemDetails: React.FC = () => {
                 )}
               />
             </View>
-          )} */}
+          )}  */}
+
+            {isUpdateMode && permissionType === 'full_access' && (
+              <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
+                <Ionicons name="share-outline" size={25} color="black" />
+                <Text style={styles.iconLabel}>Share</Text>
+              </TouchableOpacity>
+            )}
+
+            {isModalVisible && (
+              <View style={styles.overlay}>
+                <View style={styles.modalContainer}>
+                  <Text style={styles.modalTitle}>Select Permission</Text>
+
+                  {/* Dropdown for permissions */}
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={permission}
+                      onValueChange={handlePermissionSelect}
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="Read Only" value="read_only" />
+                      <Picker.Item label="Full Access" value="full_access" />
+                    </Picker>
+                  </View>
+                  <TextInput
+                    placeholder="Enter a email"
+                    value={shareValue}
+                    onChangeText={setShareValue}
+                    style={styles.input}
+                  />
+                  <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={() => {
+                      handleConfirmShare();
+                      setShareValue('');
+                    }}
+                  >
+                    <Text style={styles.confirmButtonText}>Confirm Share</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.closeButtonShare}
+                    onPress={() => {
+                      setShareValue('');
+                      setIsModalVisible(false);
+                    }}
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {isUpdateMode && permissionType === 'full_access' && (
+              <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(listItem.id)}>
+                <AntDesign name="delete" size={25} color="black" />
+                <Text style={styles.iconLabel}>Delete</Text>
+              </TouchableOpacity>
+            )}
+
+
+
+
 
 
           </View>
 
-          {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
+
+        {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
+
+
 
           <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
             <Text style={styles.addItemButtonText}>Add Item</Text>
@@ -876,12 +1018,15 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   iconContainer: {
+    flexDirection: 'column', // האייקון והטקסט יישארו אחד מעל השני
     alignItems: 'center',
     marginHorizontal: 10,
   },
   iconLabel: {
     fontSize: 12,
     color: 'black',
+    textAlign: 'center',
+
   },
   modalContainer: {
     backgroundColor: 'white',
