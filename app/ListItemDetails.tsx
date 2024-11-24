@@ -130,40 +130,46 @@ const ListItemDetails: React.FC = () => {
 
 
   const fetchRecommendations = async () => {
+    console.log('listItem:', listItem);
+    console.log('listItem ID:', listItem?.id);
     console.log('====================================');
     console.log('woerrkkkk aiiii');
     console.log('====================================');
-    //   if (!listItem || !listItem.id) {
-    //     console.error('Item ID is not available');
-    //     return;
-    //   }
+      if (!listItem || !listItem.id) {
+        console.error('Item ID is not available');
+        return;
+      }
 
-    //   setLoading(true);
-    //   try {
-    //     const data = await getRecommendations(listItem.id);
-    //     if (data && data.recommended_items) {
-    //       setRecommendations(data.recommended_items.split(','));
-    //       console.log('Recommendations data:', data);
+      setLoading(true);
+      try {
+        const data = await getRecommendations(listItem.id);
+        if (data && data.recommended_items) {
+          setRecommendations(data.recommended_items.split(','));
+          console.log('Recommendations data:', data);
 
-    //     }
-    //   } catch (error) {
-    //     console.error('Error fetching recommendations:', error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
+        }
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // const getRecommendations = async (listItemId: number) => {
-    //   try {
-    //     const response = await axios.get(`http://127.0.0.1:8000/recommendations/${listItemId}/`)
-    //     if (response.status !== 200) {
-    //       throw new Error('Network response was not ok');
-    //     }
-    //     const data = await response.data;
-    //     return data;
-    //   } catch (error) {
-    //     console.error('Error fetching recommendations:', error);
-    //   }
+    const getRecommendations = async (listItemId: number) => {
+      console.log('====================================');
+      console.log('listItemId',  listItemId);
+      console.log('====================================');
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/recommendations/${listItemId}/`)
+        console.log('Server response:', response);  // הוסף לוג כדי לראות את התשובה מהשרת
+        if (response.status !== 200) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.data;
+        return data;
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+      }
   };
 
 
@@ -191,8 +197,8 @@ const ListItemDetails: React.FC = () => {
         const response1 = await axios.post(`http://127.0.0.1:8000/grouplists/`, {
           user: storedUserId,
           list_item: itemId,
-          role: 'admin', // הגדר תפקיד התחלתי, למשל "admin" ליוצר הרשימה
-          permission_type: 'full_access', // הרשאות גישה מלאות ליוצר הרשימה
+          role: 'admin', 
+          permission_type: 'full_access', 
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -299,8 +305,8 @@ const ListItemDetails: React.FC = () => {
         await axios.post(`http://127.0.0.1:8000/grouplists/`, {
           user: userResponse.data.id,
           list_item: listItem?.id,
-          role: 'member', // הגדר תפקיד התחלתי, למשל "admin" ליוצר הרשימה
-          permission_type: permission, // הרשאות גישה מלאות ליוצר הרשימה
+          role: 'member', 
+          permission_type: permission, 
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -598,9 +604,9 @@ const ListItemDetails: React.FC = () => {
     <View style={{ flex: 1 }}>
       <ImageBackground
         source={{ uri: `../assets/background/back${backgroundImageId}.jpg` }}
-        style={[styles.background, { width, height }]} // מתאימים את התמונה לגודל המסך
+        style={[styles.background, { width, height }]} 
         resizeMode="cover">
-        <ScrollView contentContainerStyle={styles.container}> {/* עטיפת כל התוכן ב-ScrollView */}
+        <ScrollView contentContainerStyle={styles.container}> 
           <View style={styles.header}>
             <TextInput
               style={[styles.titleInput, { outline: 'none' }]}
@@ -688,8 +694,7 @@ const ListItemDetails: React.FC = () => {
             keyExtractor={(_, index) => index.toString()} />
 
 
-          {/*  בדיקההה של אייקונים!lightbulb!!*/}
-
+          {/*  בAAAAIIIIIIIII!*/}
 
 
           <View style={styles.iconRowContainer}>
