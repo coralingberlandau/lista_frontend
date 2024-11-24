@@ -37,10 +37,11 @@ const ListItemDetails: React.FC = () => {
   const [updatedImagesIndex, setUpdatedImagesIndex] = useState<string[]>([])
   const [deletedImagesIndex, setDeletedImagesIndex] = useState<string[]>([])
 
-
   const [error, setError] = useState<string | null>(null);
 
   const [permissionType, setPermissionType] = useState<string | null>(null);
+
+  const [isAIModalVisible, setIsAIModalVisible] = useState(false);
 
 
   console.log('images', images)
@@ -240,26 +241,28 @@ const ListItemDetails: React.FC = () => {
   };
 
   const handleRemoveImages = (index: number, imageToRemove: ImageData) => {
-    setDeletedImagesIndex(prev => [...prev, imageToRemove.index.toString()])
     const newImages = images.filter((image) => image.index !== index)
     setImages(newImages);
+    setDeletedImagesIndex(prev => [...prev, imageToRemove.index.toString()])
   }
 
   const handleRemoveItem = (index: number) => {
     const newItems = [...items];
     newItems.splice(index, 1);
     setItems(newItems);
-    images.forEach((image) => {
+    const imageToRemove = images.filter((image: ImageData) => image.index === index)
+    const updateImages = images.filter((image: ImageData) => image.index !== index)
+    if (imageToRemove && imageToRemove.length > 0) {
+      handleRemoveImages(index, imageToRemove[0])
+    }
+    updateImages.forEach((image) => {
       if (image.index > index) {
         const imgeIndex = image.index
         setUpdatedImagesIndex(prev => [...prev, imgeIndex.toString()])
         image.index--
       }
     })
-    const imageToRemove = images.filter((image: ImageData) => image.index === index)
-    if(imageToRemove && imageToRemove.length > 0){
-      handleRemoveImages(index, imageToRemove[0])
-    }
+    setImages(updateImages)
   };
 
 
@@ -466,6 +469,7 @@ const ListItemDetails: React.FC = () => {
   };
 
   const handleAddImage = async (index: number) => {
+    console.log('index', index)
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -486,7 +490,7 @@ const ListItemDetails: React.FC = () => {
   };
 
   const handleSaveImages = async (listItemId: number) => {
-
+    console.log({updatedImagesIndex, deletedImagesIndex})
     if (isUpdateMode && (deletedImagesIndex.length > 0 || updatedImagesIndex.length > 0)) {
       try {
         console.log({ deletedImagesIndex, updatedImagesIndex })
@@ -684,87 +688,67 @@ const ListItemDetails: React.FC = () => {
             keyExtractor={(_, index) => index.toString()} />
 
 
+          {/*  בדיקההה של אייקונים!lightbulb!!*/}
 
-          {/* <View style={styles.iconRowContainer}>
-            {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
-              <Ionicons name="share-outline" size={25} color="black" />
-              <Text style={styles.iconLabel}>Share</Text>
+
+
+          <View style={styles.iconRowContainer}>
+            {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={fetchRecommendations}>
+              <FontAwesome5 name="lightbulb" size={25} color="purple" />
+              
+              <Text style={styles.iconLabel}>AI</Text>
             </TouchableOpacity>}
 
-            {isModalVisible && (
+            {isAIModalVisible && (
               <View style={styles.overlay}>
-
                 <View style={styles.modalContainer}>
-                  <Text style={styles.modalTitle}>Select Permission</Text>
+                  <Text style={styles.modalTitle}>AI Recommendations:</Text>
 
-                  {/* Dropdown for permissions */}
-          {/* <View style={styles.pickerContainer}>
-                    <Picker
-                      selectedValue={permission}
-                      onValueChange={handlePermissionSelect}
-                      style={styles.picker}
-                    >
-                      <Picker.Item label="Read Only" value="read_only" />
-                      <Picker.Item label="Full Access" value="full_access" />
-                    </Picker>
-                  </View>
-                  <TextInput
-                    placeholder="Enter a email"
-                    value={shareValue}
-                    onChangeText={setShareValue}
-                    style={styles.input}
-                  />
-                  <TouchableOpacity style={styles.confirmButton} onPress={() => {
-                    handleConfirmShare();
-                    setShareValue('');
-                  }}>
-                    <Text style={styles.confirmButtonText}>Confirm Share</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.closeButtonShare} onPress={() => {
-                    setShareValue('');
-                    setIsModalVisible(false);
-                  }}>
+                  {loading ? (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  ) : (
+                    <View>
+                      <Text>Recommendations:</Text>
+                      <FlatList
+                        data={recommendations}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({ item }) => (
+                          <View>
+                            <Text>{item}</Text>
+                          </View>
+                        )}
+                      />
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setIsAIModalVisible(false)}
+                  >
                     <Text style={styles.closeButtonText}>Close</Text>
                   </TouchableOpacity>
                 </View>
               </View>
-            )}-
+            )}
 
+            {/* </View> */}
 
-            {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={() => handleDeleteItem(listItem.id)}>
-              <AntDesign name="delete" size={25} color="black" />
-              <Text style={styles.iconLabel}>Delete</Text>
-            </TouchableOpacity>}  */}
+            {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
 
+            {/* {isUpdateMode && <Button title="Get Recommendations" onPress={fetchRecommendations} />} */}
+            {/* <FontAwesome name="lightbulb-o" size={25} color="purple" /> */}
+            {/* <FontAwesome name="magic" size={25} color="purple" />  */}
 
-          <View style={styles.iconRowContainer}>
-
-          {isUpdateMode && <TouchableOpacity style={styles.iconContainer} onPress={fetchRecommendations}>
-              <FontAwesome5 name="lightbulb" size={25} color="purple" />
-              <Text style={styles.iconLabel}>AI</Text>
-            </TouchableOpacity>}
-          {/* </View> */}
-
-
-
-          {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
-
-
-
-          {/* {isUpdateMode && <Button title="Get Recommendations" onPress={fetchRecommendations} />} */}
-          {/* <FontAwesome name="lightbulb-o" size={25} color="purple" /> */}
-          {/* <FontAwesome name="magic" size={25} color="purple" />  */}
-
-          {/* {loading ? (
+            {/* {loading ? (
             <ActivityIndicator size="large" color="#0000ff" />
           ) : (
             <View>
               <Text>Recommendations:</Text>  */}
 
-          {/* הצגת ההמלצות */}
 
-          {/* <FlatList
+            {/* הצגת ההמלצות */}
+
+
+            {/* <FlatList
                 data={recommendations} // הצגת ההמלצות
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
@@ -775,6 +759,7 @@ const ListItemDetails: React.FC = () => {
               />
             </View>
           )}  */}
+
 
             {isUpdateMode && permissionType === 'full_access' && (
               <TouchableOpacity style={styles.iconContainer} onPress={handleSharePress}>
@@ -834,16 +819,10 @@ const ListItemDetails: React.FC = () => {
                 <Text style={styles.iconLabel}>Delete</Text>
               </TouchableOpacity>
             )}
-
-
-
-
-
-
           </View>
 
 
-        {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
+          {/* ai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
 
 
 

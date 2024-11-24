@@ -1,3 +1,5 @@
+
+
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useNavigation, RouteProp } from '@react-navigation/native';
@@ -21,6 +23,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
     const [emailError, setEmailError] = useState<string | null>(null);
     const navigation = useNavigation();
     const [userId, setUserId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true); // דגל טעינה
+
 
     useEffect(() => {
         const loadUserData = async () => {
@@ -46,6 +50,12 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
     }, [userId]);
 
     const allFieldsFilled = username && firstName && lastName && email;
+
+    useEffect(() => {
+        if (firstName && lastName && email) {
+            setIsLoading(false);
+        }
+    }, [firstName, lastName, email]);
 
     const isValidEmail = (email: string): boolean => {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -86,15 +96,22 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
             } catch (error) {
                 console.log('Error updating profile:', error);
                 if (axios.isAxiosError(error) && error.response?.status === 400) {
-                    setError(error.response.data.error);
+                    const errorMsg = error.response.data.error;
+                    if (errorMsg.includes('Username already exists')) {
+                        setError('The username is already in use. Please choose a different one.');
+                    } else if (errorMsg.includes('Email already in use')) {
+                        setError('The email is already in use. Please choose a different one.');
+                    } else {
+                        setError('An error occurred. Please try again.');
+                    }
                 } else {
                     setError('An error occurred. Please try again.');
                 }
-                setIsLoggedIn(false);
             }
         } else {
             setError('User ID not found.');
             setIsLoggedIn(false);
+
         }
     };
 
@@ -163,14 +180,18 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
                     style={styles.input}
                 />
             </View>
-
-            <Button title="Save Changes" onPress={handleSaveChanges} />
+            {isLoading ? (
+                <Text style={styles.loadingText}>Loading user data...</Text>
+            ) : (
+                <Button title="Save Changes" onPress={handleSaveChanges} />
+            )}
 
             {(error || emailError) && (
-                <Text style={styles.erroText}>
+                <Text style={styles.errorText}>
                     {error || emailError}
                 </Text>
             )}
+
         </ScrollView>
 
     );
@@ -188,7 +209,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
-    erroText: {
+    errorText: {
         fontSize: 16,
         color: 'red',
         textAlign: 'center',
@@ -196,11 +217,11 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         marginBottom: 15,
-        position: 'relative', 
+        position: 'relative',
     },
     input: {
         height: 50,
-        paddingLeft: 40, 
+        paddingLeft: 40,
         borderWidth: 1,
         borderRadius: 8,
         borderColor: '#ccc',
@@ -209,9 +230,15 @@ const styles = StyleSheet.create({
     },
     icon: {
         position: 'absolute',
-        left: 10, 
+        left: 10,
         top: '50%',
-        transform: [{ translateY: -16 }], 
+        transform: [{ translateY: -16 }],
+    },
+    loadingText: {
+        fontSize: 16,
+        color: 'gray',
+        textAlign: 'center',
+        marginTop: 20,
     },
 });
 

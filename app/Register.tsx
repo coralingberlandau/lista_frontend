@@ -36,22 +36,24 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
     return emailPattern.test(email);
   };
 
+
   const handleRegister = async () => {
-    console.log('Register button pressed'); 
-
+    console.log('Register button pressed');
+  
     setError(null);
-    setEmailError(null); 
-
+    setEmailError(null);
+  
     if (!allFieldsFilled) {
       setError('All fields must be filled in to complete the registration.');
-      console.log('All fields not filled'); 
+      console.log('All fields not filled');
       return;
     }
+  
     if (!isValidEmail(email)) {
-      setEmailError('The email is invalid. Please enter a valid email address.'); 
-      return; 
+      setEmailError('The email is invalid. Please enter a valid email address.');
+      return;
     }
-
+  
     if (username && firstName && lastName && email && password) {
       try {
         const response = await axios.post('http://127.0.0.1:8000/register/', {
@@ -61,36 +63,31 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
           email,
           password,
         });
-
-        console.log('====================================');
-        console.log(response.data, "thissss tokernn????", response.data.access);
-        console.log('====================================');
-
+  
         if (response.status === 201) {
           const accessToken = response.data.access;
-
+  
           const decodedToken: JwtPayload = jwtDecode(accessToken);
           console.log('Decoded token:', decodedToken);
-
-          const userId = decodedToken.user_id; 
-
+  
+          const userId = decodedToken.user_id;
+  
           if (userId === undefined) {
             throw new Error("User ID is undefined");
           }
-
+  
           await AsyncStorage.setItem('token', accessToken);
           await AsyncStorage.setItem('userId', userId.toString());
           await AsyncStorage.setItem('userName', username);
-
-          console.log('testtttt tokennnnn', accessToken);
+  
           Alert.alert('Registration Successful', 'You can now log in.');
           Toast.show({
             type: 'success',
             text1: 'The user has been saved successfully!',
           });
-
+  
           setIsLoggedIn(true);
-
+  
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
@@ -100,28 +97,26 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
         }
       } catch (error) {
         console.log('Error caught:', error);
-
+  
         if (axios.isAxiosError(error)) {
           console.log('Error caught:', error);
           console.log('Response data:', error.response?.data);
-
-          if (axios.isAxiosError(error)) {
-            if (error.response) {
-              if (error.response.status === 400) {
-                setError(error.response.data.error);
-              } else {
-                setError('Error 500 - Something went wrong. Please try again.');
-              }
+  
+          if (error.response) {
+            if (error.response.status === 400) {
+              setError(error.response.data.error); 
             } else {
-              setError('Unexpected error occurred. Please try again later.');
+              setError('Error 500 - Something went wrong. Please try again.');
             }
           } else {
             setError('Unexpected error occurred. Please try again later.');
           }
+        } else {
+          setError('Unexpected error occurred. Please try again later.');
         }
       }
-    };
-  }
+    }
+  };
 
   return (
 
