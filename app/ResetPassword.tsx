@@ -42,10 +42,8 @@ const ResetPassword: React.FC = () => {
         email,
       });
 
-      console.log('====================================');
       console.log(response);
-      console.log('====================================');
-
+      
       setMessage('A reset link has been sent to your email.');
     } catch (error: any) {
       console.error('Error:', error);
@@ -99,7 +97,6 @@ const ResetPassword: React.FC = () => {
         <Text style={styles.linkTo}>Click here to login</Text>
       </TouchableOpacity>
     </ScrollView>
-
   );
 };
 
@@ -170,4 +167,3 @@ const styles = StyleSheet.create({
 });
 
 export default ResetPassword;
-

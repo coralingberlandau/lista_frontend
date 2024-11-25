@@ -24,6 +24,8 @@ It combines real-time updates, customization options, and a user-friendly experi
 7. [Database Models](#database-models)  
 8. [Development Process](#development-process)  
 9. [Future Upgrades](#future-upgrades)  
+10. [API Endpoints](#api-endpoints)  
+11. [Contributing](#contributing)  
 
 ---
 
@@ -81,6 +83,10 @@ The idea for **Lista** arose from a daily need to organize, manage, and track li
    users make smarter decisions when organizing their lists and tasks.  
    - **Smart List Management**: By analyzing user behavior and preferences, the AI automatically organizes, categorizes, and suggests the most efficient ways to manage lists, 
    improving productivity and organization.
+
+8. **Device Compatibility**  
+   - The application is fully responsive, ensuring seamless adaptation to various screen sizes and devices.
+   - Optimized for desktop, tablet, and mobile devices.
 
 ---
 
@@ -204,8 +210,13 @@ python
 6. **Release and Feedback**  
    - Initial launch followed by user feedback for continuous improvement.  
 
----
+7. **Development Process**  
+    Responsive Design Implementation
+   - Developed a mobile-first approach using modern CSS techniques and frameworks.
+   - Ensured consistent layout and functionality across devices using media queries.
+   - Extensively tested on different screen sizes to guarantee a seamless user experience.
 
+---
 ## **Future Upgrades**  
 - Integration with external apps.  
 - Performance analytics and productivity tracking.  

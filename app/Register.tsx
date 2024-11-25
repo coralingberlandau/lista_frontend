@@ -11,7 +11,6 @@ import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 
-
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
 const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> }> = ({ setIsLoggedIn }) => {
@@ -38,14 +37,11 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
 
 
   const handleRegister = async () => {
-    console.log('Register button pressed');
-  
     setError(null);
     setEmailError(null);
   
     if (!allFieldsFilled) {
       setError('All fields must be filled in to complete the registration.');
-      console.log('All fields not filled');
       return;
     }
   
@@ -68,7 +64,6 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
           const accessToken = response.data.access;
   
           const decodedToken: JwtPayload = jwtDecode(accessToken);
-          console.log('Decoded token:', decodedToken);
   
           const userId = decodedToken.user_id;
   
@@ -273,4 +268,3 @@ const styles = StyleSheet.create({
 });
 
 export default Register;
-

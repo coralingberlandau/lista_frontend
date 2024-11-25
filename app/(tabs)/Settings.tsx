@@ -14,7 +14,6 @@ import _ from 'lodash';
 type SettingsProps = {
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean | null>>;
 };
-
 type EditProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'EditProfile'>;
 
 const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
@@ -23,13 +22,6 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
   const supportContact = "listaassistance@gmail.com";
   const navigation = useNavigation<EditProfileScreenNavigationProp>();
   const [selectedImage, setSelectedImage] = useState<number | null>(null); 
-
-  
-
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null); // אחסון התמונה שנבחרה
-  const [isBackgroundPickerVisible, setIsBackgroundPickerVisible] = useState(false); // מצב של תצוגת הבחירה
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
 
   const navigateToEditProfile = () => {
     navigation.navigate('EditProfile');
@@ -118,7 +110,6 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
     debounceSaveToServer(imageId); 
   };
 
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{appName}</Text>
@@ -160,7 +151,7 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
               />
             </TouchableOpacity>
           )}
-          keyExtractor={(item) => item.id.toString()} 
+          keyExtractor={(_, index) => index.toString()}
           numColumns={3} 
         />
       </View>
@@ -245,7 +236,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     zIndex: 1,
-
   },
   iconLabel: {
     color: 'black',
@@ -267,7 +257,6 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
   },
-
   backgroundPickerContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',

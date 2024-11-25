@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Input from '@/components/Input';
@@ -36,10 +36,8 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
         const accessToken = response.data.access;
 
         const decodedToken: JwtPayload = jwtDecode(accessToken);
-        console.log('Decoded token:', decodedToken);
 
         const userId = decodedToken.user_id;
-        console.log('User ID from token:', userId);
 
         if (userId === undefined) {
           throw new Error("User ID is undefined");

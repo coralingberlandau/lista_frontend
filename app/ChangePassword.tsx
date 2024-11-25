@@ -53,14 +53,12 @@ const ChangePassword: React.FC = () => {
         email,
         password,
       });
-
       console.log('====================================');
       console.log(response);
       console.log('====================================');
-
       setMessage('Password has been changed successfully!');
       setTimeout(() => {
-        navigation.navigate('Login'); // מעבר למסך Login
+        navigation.navigate('Login'); 
       }, 2000);
     } catch (error: any) {
       console.error('Error:', error);

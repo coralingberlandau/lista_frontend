@@ -1,8 +1,6 @@
-
-
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import { useNavigation, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Input from '@/components/Input';
 import axios from 'axios';
@@ -23,7 +21,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
     const [emailError, setEmailError] = useState<string | null>(null);
     const navigation = useNavigation();
     const [userId, setUserId] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true); // דגל טעינה
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
 
     useEffect(() => {
@@ -74,7 +72,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
             setEmailError('The email is invalid. Please enter a valid email address.');
             return;
         }
-
+        
         if (userId) {
             try {
                 const response = await axios.patch(`http://127.0.0.1:8000/user/${userId}/`, {
@@ -191,9 +189,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
                     {error || emailError}
                 </Text>
             )}
-
         </ScrollView>
-
     );
 };
 

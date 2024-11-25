@@ -11,10 +11,6 @@ export type RootStackParamList = {
   ChangePassword: { email: string };
 };
 
-export interface RouteParams {
-  email?: string;
-};
-
 export interface JwtPayload {
   exp: number;
   iat: number;
@@ -24,31 +20,12 @@ export interface JwtPayload {
   username: string;
 }
 
-export interface ListItemProps {
-  title: string;
-  items: string;
-  user_id: string;
-  is_active: boolean; 
-}
-
 export interface ListItem {
   id: number;
   title: string;
   items: string;
   date_created: string;
   is_active: boolean;
-}
-
-export interface GroupListResponse {
-  message: string;
-  data: {
-    id: number;
-    user: number;
-    list_item: number;
-    date_joined: string;
-    role: string;
-    permission_type: string;
-  };
 }
 
 export interface Image {
@@ -72,12 +49,12 @@ export interface ListItemImage {
 }
 
 export interface ImageData {
-  id: number;
+  id?: number;
   uri: string;
   fileName: string;
   mimeType: string;
   index: number;
-  largeImage: string;  
+  largeImage?: string;  
 }
 
 export interface BackgroundImage {

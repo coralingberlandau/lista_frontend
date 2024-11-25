@@ -31,8 +31,6 @@ const Home: React.FC = () => {
       const storedUserId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('token');
 
-      console.log(token);
-
       if (!token) {
         throw new Error('No token found');
       }
@@ -48,7 +46,6 @@ const Home: React.FC = () => {
         });
 
         const activeItems = response.data.filter((item: ListItem) => item.is_active);
-        console.log('response', response)
         setListItems(activeItems);
       }
     } catch (error) {
