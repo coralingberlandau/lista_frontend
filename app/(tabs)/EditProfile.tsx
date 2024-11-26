@@ -22,6 +22,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
     const navigation = useNavigation();
     const [userId, setUserId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const SERVER = "https://lista-backend-n3la.onrender.com"
+
 
 
     useEffect(() => {
@@ -34,7 +36,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
 
             if (userId) {
                 try {
-                    const response = await axios.get(`http://127.0.0.1:8000/user/${userId}/`);
+                    const response = await axios.get(`${SERVER}/user/${userId}/`);
                     setFirstName(response.data.first_name);
                     setLastName(response.data.last_name);
                     setEmail(response.data.email);
@@ -75,7 +77,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
         
         if (userId) {
             try {
-                const response = await axios.patch(`http://127.0.0.1:8000/user/${userId}/`, {
+                const response = await axios.patch(`${SERVER}/user/${userId}/`, {
                     username,
                     first_name: firstName,
                     last_name: lastName,
@@ -109,7 +111,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
         } else {
             setError('User ID not found.');
             setIsLoggedIn(false);
-
         }
     };
 

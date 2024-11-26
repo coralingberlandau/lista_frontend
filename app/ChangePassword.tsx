@@ -24,6 +24,8 @@ const ChangePassword: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
   const route = useRoute<ChangePasswordRouteProp>();
   const { email } = route.params;
+  const SERVER = "https://lista-backend-n3la.onrender.com"
+
 
   const validatePasswords = (): boolean => {
     if (password !== confirmPassword) {
@@ -49,13 +51,10 @@ const ChangePassword: React.FC = () => {
     setMessage('');
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/reset_password/', {
+      const response = await axios.post(`${SERVER}/reset_password/`, {
         email,
         password,
       });
-      console.log('====================================');
-      console.log(response);
-      console.log('====================================');
       setMessage('Password has been changed successfully!');
       setTimeout(() => {
         navigation.navigate('Login'); 

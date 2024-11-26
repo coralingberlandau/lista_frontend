@@ -15,6 +15,8 @@ const ResetPassword: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [errorText, setErrorText] = useState<string>('');
   const navigation = useNavigation<NavigationProps>(); 
+  const SERVER = "https://lista-backend-n3la.onrender.com"
+
 
   const isValidEmail = (email: string): boolean => {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -38,7 +40,7 @@ const ResetPassword: React.FC = () => {
     setMessage('');
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/reset_password_request/', {
+      const response = await axios.post(`${SERVER}/reset_password_request/`, {
         email,
       });
 

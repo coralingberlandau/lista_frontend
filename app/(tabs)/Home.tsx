@@ -15,6 +15,8 @@ const Home: React.FC = () => {
   const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation<NavigationProp>();
+  const SERVER = "https://lista-backend-n3la.onrender.com"
+
 
   useFocusEffect(
     useCallback(() => {
@@ -39,7 +41,7 @@ const Home: React.FC = () => {
       }
 
       if (storedUserId && token) {
-        const response = await axios.get(`http://127.0.0.1:8000/grouplists/by-user/${storedUserId}/`, {
+        const response = await axios.get(`${SERVER}/grouplists/by-user/${storedUserId}/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -67,8 +69,8 @@ const Home: React.FC = () => {
 
     <ScrollView contentContainerStyle={styles.container}>
       {loading ? (
-        <Text>Loading...</Text>
-      ) : (
+      <Text style={styles.loadingText}> ⏳ Loading...</Text>
+    ) : (
         <>
           <Text style={styles.greeting}>Hello, {username || 'Guest'}!</Text>
           <Text style={styles.title}>
@@ -138,6 +140,11 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#333',
     marginTop: 5,
+  },
+  loadingText: {
+    fontSize: 30, 
+    fontWeight: 'bold', 
+    color: '#5F9EA0', 
   },
 });
 

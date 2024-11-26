@@ -37,6 +37,8 @@ const ListItemDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [permissionType, setPermissionType] = useState<string | null>(null);
   const [isAIModalVisible, setIsAIModalVisible] = useState(false);
+  const SERVER = "https://lista-backend-n3la.onrender.com"
+
 
   useFocusEffect(
     useCallback(() => {
@@ -62,7 +64,7 @@ const ListItemDetails: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get('http://127.0.0.1:8000/grouplists/permission_type/', {
+      const response = await axios.get(`${SERVER}/grouplists/permission_type/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -105,7 +107,7 @@ const ListItemDetails: React.FC = () => {
 
   const getRecommendations = async (listItemId: number) => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/recommendations/${listItemId}/`)
+      const response = await axios.get(`${SERVER}/recommendations/${listItemId}/`)
       console.log('Server response:', response);  
       if (response.status !== 200) {
         throw new Error('Network response was not ok');
@@ -123,7 +125,7 @@ const ListItemDetails: React.FC = () => {
     if (storedUserId && token) {
       try {
         const itemsToString = items.join("|");
-        const response = await axios.post(`http://127.0.0.1:8000/listitem/`, {
+        const response = await axios.post(`${SERVER}/listitem/`, {
           title,
           items: itemsToString,
           user: storedUserId,
@@ -136,7 +138,7 @@ const ListItemDetails: React.FC = () => {
 
         const itemId = response.data.id;
 
-        await axios.post(`http://127.0.0.1:8000/grouplists/`, {
+        await axios.post(`${SERVER}/grouplists/`, {
           user: storedUserId,
           list_item: itemId,
           role: 'admin',
@@ -227,7 +229,7 @@ const ListItemDetails: React.FC = () => {
 
     if (storedUserId && token) {
       try {
-        const userResponse: { data: User } = await axios.get(`http://127.0.0.1:8000/get_user_info/${shareValue}/`,
+        const userResponse: { data: User } = await axios.get(`${SERVER}/get_user_info/${shareValue}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -236,7 +238,7 @@ const ListItemDetails: React.FC = () => {
           }
         );
         console.log(userResponse, userResponse.data.id)
-        await axios.post(`http://127.0.0.1:8000/grouplists/`, {
+        await axios.post(`${SERVER}/grouplists/`, {
           user: userResponse.data.id,
           list_item: listItem?.id,
           role: 'member',
@@ -283,15 +285,15 @@ const ListItemDetails: React.FC = () => {
     try {
       if (listItem?.id) {
         const response = await axios.get(
-          `http://127.0.0.1:8000/listitemimages/${listItem.id}/get_images_for_list_item/`
+          `${SERVER}/listitemimages/${listItem.id}/get_images_for_list_item/` ,{ 
+          }
         );
-
         if (response.status === 200 && Array.isArray(response.data.images)) {
           console.log('response', response.data.images)
           const formattedImages = response.data.images.map((image: any) => {
             const imageUrl = image.url.startsWith("http")
               ? image.url
-              : `http://127.0.0.1:8000${image.url}`;
+              : `${SERVER}${image.url}`;
             return {
               id: image.id || 0,
               uri: imageUrl || "",
@@ -327,8 +329,8 @@ const ListItemDetails: React.FC = () => {
         return;
       }
 
-      await axios.patch(
-        `http://127.0.0.1:8000/listitem/${listItem.id}/`,
+      listItem && await axios.patch(
+        `${SERVER}/listitem/${listItem.id}/`,
         { is_active: false },
         {
           headers: {
@@ -368,8 +370,8 @@ const ListItemDetails: React.FC = () => {
         return;
       }
 
-      await axios.patch(
-        `http://127.0.0.1:8000/listitem/${listItem.id}/`,
+      listItem && await axios.patch(
+        `${SERVER}/listitem/${listItem.id}/`,
         { title, items: itemsToString },
         {
           headers: {
@@ -424,7 +426,7 @@ const ListItemDetails: React.FC = () => {
     if (isUpdateMode && (deletedImagesIndex.length > 0 || updatedImagesIndex.length > 0)) {
       try {
         console.log({ deletedImagesIndex, updatedImagesIndex })
-        await axios.post('http://127.0.0.1:8000/listitemimages/update_images/',
+        await axios.post(`${SERVER}/listitemimages/update_images/`,
           {
             list_item_id: listItem.id,
             deletedImagesIndex: deletedImagesIndex,
@@ -457,7 +459,7 @@ const ListItemDetails: React.FC = () => {
     }
     if (formData.has('images')) {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/listitemimages/upload_images/', formData, {
+        const response = await axios.post(`${SERVER}/listitemimages/upload_images/`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

@@ -19,10 +19,6 @@ import ChangePassword from './ChangePassword';
 const Tab = createBottomTabNavigator<RootStackParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
-type EditProfileProps = StackScreenProps<RootStackParamList, 'EditProfile'> & {
-  setIsLoggedIn: Dispatch<SetStateAction<boolean | null>>;
-};
-
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
@@ -61,7 +57,6 @@ const App: React.FC = () => {
             }} />
           <Tab.Screen name="ListItemDetails" component={ListItemDetails}
             options={{ tabBarButton: () => null, headerShown: false, title: 'List Item Details' }} />
-
           <Tab.Screen
             name="Settings"
             children={(props) => <Settings {...props} setIsLoggedIn={setIsLoggedIn} />}
@@ -71,7 +66,6 @@ const App: React.FC = () => {
                 <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
               ), headerShown: false,
             }} />
-
           <Tab.Screen
             name="EditProfile"
             options={{

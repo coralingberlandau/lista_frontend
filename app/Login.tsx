@@ -17,6 +17,7 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
   const [password, setPassword] = useState<string>('');
   const [errorText, setErrorText] = useState('');
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const SERVER = "https://lista-backend-n3la.onrender.com"
 
   const handleLogin = async () => {
     setErrorText('');
@@ -28,22 +29,20 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
 
     if (username && password) {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/login/', {
+        const response = await axios.post(`${SERVER}/login/`, {
           username,
           password,
         });
 
         const accessToken = response.data.access;
-
         const decodedToken: JwtPayload = jwtDecode(accessToken);
-
         const userId = decodedToken.user_id;
 
         if (userId === undefined) {
           throw new Error("User ID is undefined");
         }
 
-        const customizations = await axios.get('http://127.0.0.1:8000/customizations/get_user_customization/', {
+        const customizations = await axios.get(`${SERVER}/customizations/get_user_customization/`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

@@ -22,6 +22,8 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
   const supportContact = "listaassistance@gmail.com";
   const navigation = useNavigation<EditProfileScreenNavigationProp>();
   const [selectedImage, setSelectedImage] = useState<number | null>(null); 
+  const SERVER = "https://lista-backend-n3la.onrender.com" 
+
 
   const navigateToEditProfile = () => {
     navigation.navigate('EditProfile');
@@ -70,14 +72,13 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
     { id: 23, url: require('../../assets/background/back23.jpg') },
     { id: 24, url: require('../../assets/background/back24.jpg') },
     { id: 25, url: require('../../assets/background/back25.jpg') },
-
   ];
 
   const debounceSaveToServer = _.debounce(async (imageId: number) => {
     try {
       const token = await AsyncStorage.getItem('token');
       const response = await axios.post(
-        `http://127.0.0.1:8000/customizations/`,
+        `${SERVER}/customizations/`,
         {
           background_image_id: imageId || 0, 
         },
@@ -289,7 +290,6 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 10,
   },
-
 });
 
 export default Settings;

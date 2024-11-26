@@ -22,6 +22,8 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   const navigation = useNavigation<RegisterScreenNavigationProp>();
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null); 
+  const SERVER = "https://lista-backend-n3la.onrender.com"
+
 
   const allFieldsFilled: boolean =
     username.trim() !== '' &&
@@ -52,7 +54,7 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   
     if (username && firstName && lastName && email && password) {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/register/', {
+        const response = await axios.post(`${SERVER}/register/`, {
           username,
           first_name: firstName,
           last_name: lastName,
