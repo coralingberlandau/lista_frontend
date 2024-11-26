@@ -1,7 +1,7 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator, StackScreenProps } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerRootComponent } from 'expo';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
@@ -37,7 +37,7 @@ const App: React.FC = () => {
   }, []);
 
   const linking = {
-    prefixes: ['http://localhost:8081/'],
+    prefixes: ['https://lista-project.netlify.app/'],
     config: {
       screens: {
         ChangePassword: 'change-password',
@@ -79,14 +79,11 @@ const App: React.FC = () => {
           <Stack.Screen name="Login" options={{ headerShown: false }}>
             {(props) => <Login {...props} setIsLoggedIn={setIsLoggedIn} />}
           </Stack.Screen>
-
           <Stack.Screen name="Register" options={{ headerShown: false }}>
             {(props) => <Register {...props} setIsLoggedIn={setIsLoggedIn} />}
           </Stack.Screen>
-
           <Stack.Screen name="ResetPassword" component={ResetPassword}
             options={{ headerShown: false, title: 'Reset Password' }} />
-
           <Stack.Screen name="ChangePassword" component={ChangePassword}
             options={{ headerShown: false, title: 'Change Password' }} />
         </Stack.Navigator>

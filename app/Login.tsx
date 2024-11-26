@@ -114,15 +114,12 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
       </View>
 
       <Button title="Login" onPress={handleLogin} />
-
       <Text style={styles.errorText}>{errorText}</Text>
       <View style={styles.registerContainer}>
-
         <Text style={styles.registerText}>Not registered?</Text>
         <TouchableOpacity onPress={navigateToRegister}>
           <Text style={styles.linkTo}>Click here to sign up</Text>
         </TouchableOpacity>
-
         <TouchableOpacity onPress={navigateToResetPassword}>
           <Text style={styles.linkTo}>Forgot password?</Text>
         </TouchableOpacity>

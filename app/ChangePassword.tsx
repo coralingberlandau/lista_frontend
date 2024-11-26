@@ -79,7 +79,6 @@ const ChangePassword: React.FC = () => {
           size={24}
           color="gray"
           style={styles.icon}/>
-
         <TextInput
           style={styles.input}
           placeholder="Enter new password"
@@ -94,7 +93,6 @@ const ChangePassword: React.FC = () => {
           size={24}
           color="gray"
           style={styles.icon} />
-
         <TextInput
           style={styles.input}
           placeholder="Confirm new password"

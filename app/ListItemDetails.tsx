@@ -601,10 +601,8 @@ const ListItemDetails: React.FC = () => {
                       ) : (
                         <View style={styles.emptyContainer}>
                           <ScrollView contentContainerStyle={styles.scrollViewContent}>
-
                             <Text style={styles.emptyText}>Temporary unavailable....</Text>
                           </ScrollView>
-
                         </View>
                       )}
                     </View>

@@ -180,7 +180,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ setIsLoggedIn }) => {
                 />
             </View>
             {isLoading ? (
-                <Text style={styles.loadingText}>Loading user data...</Text>
+                <Text style={styles.loadingText}> ⏳ Loading user data...</Text>
             ) : (
                 <Button title="Save Changes" onPress={handleSaveChanges} />
             )}
