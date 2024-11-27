@@ -514,7 +514,7 @@ const ListItemDetails: React.FC = () => {
   return (
     <View style={{ flex: 1 }}>
       <ImageBackground
-        source={backgroundImages[parseInt(backgroundImageId) - 1]}
+        source={backgroundImages[parseInt(backgroundImageId, 10) - 1]}
         style={[styles.background, { width, height }]}
         resizeMode="cover">
         <ScrollView contentContainerStyle={styles.container}>
