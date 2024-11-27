@@ -61,7 +61,8 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
     { id: 11, url: require('../../assets/background/back11.jpg') },
     { id: 12, url: require('../../assets/background/back12.jpg') },
     { id: 13, url: require('../../assets/background/back13.jpg') },
-    { id: 15, url: require('../../assets/background/back14.jpg') },
+    { id: 14, url: require('../../assets/background/back14.jpg') },
+    { id: 15, url: require('../../assets/background/back15.jpg') },
     { id: 16, url: require('../../assets/background/back16.jpg') },
     { id: 17, url: require('../../assets/background/back17.jpg') },
     { id: 18, url: require('../../assets/background/back18.jpg') },
@@ -71,7 +72,6 @@ const Settings: React.FC<SettingsProps> = ({ setIsLoggedIn }) => {
     { id: 22, url: require('../../assets/background/back22.jpg') },
     { id: 23, url: require('../../assets/background/back23.jpg') },
     { id: 24, url: require('../../assets/background/back24.jpg') },
-    { id: 25, url: require('../../assets/background/back25.jpg') },
   ];
 
   const debounceSaveToServer = _.debounce(async (imageId: number) => {

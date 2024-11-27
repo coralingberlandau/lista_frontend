@@ -54,6 +54,7 @@ const ListItemDetails: React.FC = () => {
     require('../assets/background/back12.jpg'),
     require('../assets/background/back13.jpg'),
     require('../assets/background/back14.jpg'),
+    require('../assets/background/back15.jpg'),
     require('../assets/background/back16.jpg'),
     require('../assets/background/back17.jpg'),
     require('../assets/background/back18.jpg'),
@@ -63,7 +64,6 @@ const ListItemDetails: React.FC = () => {
     require('../assets/background/back22.jpg'),
     require('../assets/background/back23.jpg'),
     require('../assets/background/back24.jpg'),
-    require('../assets/background/back25.jpg'),
   ];
 
   useFocusEffect(
