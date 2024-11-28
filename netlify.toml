@@ -3,7 +3,7 @@
   command = "npx expo export"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/change-password"
+  to = "/ChangePassword"
   status = 200
   force = true
