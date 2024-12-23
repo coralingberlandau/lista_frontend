@@ -35,9 +35,10 @@ const ListItemDetails: React.FC = () => {
   const [updatedImagesIndex, setUpdatedImagesIndex] = useState<string[]>([])
   const [deletedImagesIndex, setDeletedImagesIndex] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null);
-  const [permissionType, setPermissionType] = useState<string | null>(null);
+  const [permissionType, setPermissionType] = useState<string>('full_access');
   const [isAIModalVisible, setIsAIModalVisible] = useState(false);
   const SERVER = "https://lista-backend-n3la.onrender.com"
+
 
   const backgroundImages = [
     require('../assets/background/back1.jpg'),
@@ -82,10 +83,10 @@ const ListItemDetails: React.FC = () => {
     const storedUserId = await AsyncStorage.getItem('userId');
     const token = await AsyncStorage.getItem('token');
     if (!storedUserId || !listItem?.id) {
+      setPermissionType('full_access')
       setError('Missing user_id or list_item_id');
       return;
     }
-
     try {
       setLoading(true);
       setError(null);
@@ -134,7 +135,7 @@ const ListItemDetails: React.FC = () => {
   const getRecommendations = async (listItemId: number) => {
     try {
       const response = await axios.get(`${SERVER}/recommendations/${listItemId}/`)
-      console.log('Server response:', response);  
+      console.log('Server response:', response);
       if (response.status !== 200) {
         throw new Error('Network response was not ok');
       }
@@ -278,6 +279,7 @@ const ListItemDetails: React.FC = () => {
           type: 'success',
           text1: 'List shared successfully!',
         });
+        setShareValue('');
       } catch (error: any) {
         console.error('Error sharing list item:', error);
         if (error.response) {
@@ -295,7 +297,7 @@ const ListItemDetails: React.FC = () => {
             text1: 'Error sharing the list. Please try again later.',
           });
         }
-
+        setShareValue('');
       } finally {
         setIsModalVisible(false);
       }
@@ -311,8 +313,9 @@ const ListItemDetails: React.FC = () => {
     try {
       if (listItem?.id) {
         const response = await axios.get(
-          `${SERVER}/listitemimages/${listItem.id}/get_images_for_list_item/` ,{ 
-          }
+          `${SERVER}/listitemimages/${listItem.id}/get_images_for_list_item/`, {
+        }
+
         );
         if (response.status === 200 && Array.isArray(response.data.images)) {
           console.log('response', response.data.images)
@@ -465,7 +468,7 @@ const ListItemDetails: React.FC = () => {
       }
       catch { }
     }
-    
+
     const formData = new FormData();
     formData.append('list_item', listItemId.toString());
 
@@ -673,7 +676,6 @@ const ListItemDetails: React.FC = () => {
                     style={styles.confirmButton}
                     onPress={() => {
                       handleConfirmShare();
-                      setShareValue('');
                     }}
                   >
                     <Text style={styles.confirmButtonText}>Confirm Share</Text>
@@ -681,7 +683,6 @@ const ListItemDetails: React.FC = () => {
                   <TouchableOpacity
                     style={styles.closeButton}
                     onPress={() => {
-                      setShareValue('');
                       setIsModalVisible(false);
                     }}
                   >
@@ -697,12 +698,16 @@ const ListItemDetails: React.FC = () => {
               </TouchableOpacity>
             )}
           </View>
-          <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
-            <Text style={styles.addItemButtonText}>Add Item</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
-            <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
-          </TouchableOpacity>
+          {permissionType === 'full_access' && (
+            <TouchableOpacity style={styles.addItemButton} onPress={AddItemToList}>
+              <Text style={styles.addItemButtonText}>Add Item</Text>
+            </TouchableOpacity>
+          )}
+          {permissionType === 'full_access' && (
+            <TouchableOpacity style={styles.updateButton} onPress={isUpdateMode ? handleUpdateList : handleAddItem}>
+              <Text style={styles.updateButtonText}>{isUpdateMode ? 'Update List' : "Create List"}</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </ImageBackground>
     </View >
@@ -786,7 +791,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   iconRowContainer: {
-    width: '100%',
     flexDirection: 'row',
     justifyContent: 'flex-end',
     position: 'absolute',
@@ -891,8 +895,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ddd',
-    maxHeight: 150, 
-    flex: 1, 
+    maxHeight: 150,
+    flex: 1,
   },
   emptyText: {
     color: '#888',

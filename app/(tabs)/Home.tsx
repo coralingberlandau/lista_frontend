@@ -7,10 +7,15 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ListItem, RootStackParamList } from '../type';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { ScrollView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'ListItemDetails'>;
 
-const Home: React.FC = () => {
+type HomeProps = {
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean | null>>;
+};
+
+const Home: React.FC<HomeProps> = ({ setIsLoggedIn }) => {
   const [listItems, setListItems] = useState<ListItem[]>([]);
   const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -65,14 +70,32 @@ const Home: React.FC = () => {
     navigation.navigate('ListItemDetails', { listItem: item });
   };
 
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userToken');
+      setIsLoggedIn(false);
+    } catch (error) {
+      console.error('Error logging out:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error logging out',
+        text2: 'Please try again later',
+      });
+    }
+  };
+
   return (
 
     <ScrollView contentContainerStyle={styles.container}>
       {loading ? (
-      <Text style={styles.loadingText}> ⏳ Loading...</Text>
-    ) : (
+        <Text style={styles.loadingText}> ⏳ Loading...</Text>
+      ) : (
         <>
           <Text style={styles.greeting}>Hello, {username || 'Guest'}!</Text>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <AntDesign name="logout" size={20} color="red" />
+            <Text style={styles.iconLabelLogout}>Logout</Text>
+          </TouchableOpacity>
           <Text style={styles.title}>
             {listItems.length === 0 ? "Write your dreams here!" : `Your List: ${listItems.length} items`}
           </Text>
@@ -142,9 +165,26 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   loadingText: {
-    fontSize: 30, 
-    fontWeight: 'bold', 
-    color: '#5F9EA0', 
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#5F9EA0',
+  },
+
+  logoutButton: {
+    backgroundColor: 'whit',
+    padding: 10,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 1,
+  },
+  iconLabelLogout: {
+    color: 'black',
+    marginTop: 5,
+    fontSize: 14,
   },
 });
 

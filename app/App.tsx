@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerRootComponent } from 'expo';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
@@ -15,9 +14,9 @@ import { RootStackParamList } from './type';
 import ResetPassword from './ResetPassword';
 import EditProfile from './(tabs)/EditProfile';
 import ChangePassword from './ChangePassword';
+import Welcome from './Welcome';
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
-const Stack = createStackNavigator<RootStackParamList>();
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -49,12 +48,17 @@ const App: React.FC = () => {
     <NavigationContainer linking={linking}>
       {isLoggedIn ? (
         <Tab.Navigator>
-          <Tab.Screen name="Home" component={Home}
+          <Tab.Screen
+            name="Home"
             options={{
-              title: 'Home', tabBarIcon: ({ color, focused }) => (
-                <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />),
+              title: 'Home',
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+              ),
               headerShown: false,
-            }} />
+            }}>
+            {(props) => <Home {...props} setIsLoggedIn={setIsLoggedIn} />}
+          </Tab.Screen>
           <Tab.Screen name="ListItemDetails" component={ListItemDetails}
             options={{ tabBarButton: () => null, headerShown: false, title: 'List Item Details' }} />
           <Tab.Screen
@@ -75,20 +79,61 @@ const App: React.FC = () => {
           </Tab.Screen>
         </Tab.Navigator>
       ) : (
-        <Stack.Navigator>
-          <Stack.Screen name="Login" options={{ headerShown: false }}>
+        <Tab.Navigator>
+          <Tab.Screen
+            name="Welcome"
+            options={{
+              headerShown: false,
+              tabBarButton: () => null,
+              tabBarStyle: { display: 'none' },
+            }}
+          >
+            {(props) => <Welcome {...props} />}
+          </Tab.Screen>
+          <Tab.Screen
+            name="Login"
+            options={{
+              headerShown: false,
+              tabBarButton: () => null,
+              tabBarStyle: { display: 'none' },
+            }}
+          >
             {(props) => <Login {...props} setIsLoggedIn={setIsLoggedIn} />}
-          </Stack.Screen>
-          <Stack.Screen name="Register" options={{ headerShown: false }}>
+          </Tab.Screen>
+          <Tab.Screen
+            name="Register"
+            options={{
+              headerShown: false,
+              tabBarButton: () => null,
+              tabBarStyle: { display: 'none' },
+            }}
+          >
             {(props) => <Register {...props} setIsLoggedIn={setIsLoggedIn} />}
-          </Stack.Screen>
-          <Stack.Screen name="ResetPassword" component={ResetPassword}
-            options={{ headerShown: false, title: 'Reset Password' }} />
-          <Stack.Screen name="ChangePassword" component={ChangePassword}
-            options={{ headerShown: false, title: 'Change Password' }} />
-        </Stack.Navigator>
+          </Tab.Screen>
+
+          <Tab.Screen
+            name="ResetPassword"
+            component={ResetPassword}
+            options={{
+              headerShown: false,
+              title: 'Reset Password',
+              tabBarButton: () => null,
+              tabBarStyle: { display: 'none' },
+            }}
+          />
+          <Tab.Screen
+            name="ChangePassword"
+            component={ChangePassword}
+            options={{
+              headerShown: false,
+              title: 'Change Password',
+              tabBarButton: () => null,
+              tabBarStyle: { display: 'none' },
+            }}
+          />
+        </Tab.Navigator>
       )}
-      <Toast />
+      <Toast/>
     </NavigationContainer>
   );
 }

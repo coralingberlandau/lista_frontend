@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Button, TouchableOpacity, StyleSheet, Dimensions, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Input from '@/components/Input';
@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
+const { width } = Dimensions.get('window');
 
 const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> }> = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState<string>('');
@@ -77,8 +78,12 @@ const Login: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> 
   };
 
   return (
+    <ScrollView contentContainerStyle={styles.container}>
 
-    <ScrollView contentContainerStyle={styles.container}> 
+      <View style={styles.logoContainer}>
+        <Image source={require('../assets/images/lista.png')} style={styles.logo} />
+      </View>
+
       <Text style={styles.title}>Login</Text>
       <View style={styles.inputContainer}>
         <Ionicons
@@ -177,6 +182,15 @@ const styles = StyleSheet.create({
     left: 10,
     top: '50%',
     transform: [{ translateY: -16 }],
+  },
+  logoContainer: {
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginBottom: 20,
+  },
+  logo: {
+    width: width * 0.3,       
+    height: width * 0.3,    
   },
 });
 

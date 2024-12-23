@@ -1,17 +1,19 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, Button, TouchableOpacity, StyleSheet, Alert, Image, Dimensions } from 'react-native';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Input from '@/components/Input'; 
+import Input from '@/components/Input';
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { JwtPayload, RootStackParamList } from './type'; 
+import { JwtPayload, RootStackParamList } from './type';
 import { jwtDecode } from 'jwt-decode';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
+const { width} = Dimensions.get('window');
+
 
 const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null>> }> = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState<string>('');
@@ -21,7 +23,7 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   const [password, setPassword] = useState<string>('');
   const navigation = useNavigation<RegisterScreenNavigationProp>();
   const [error, setError] = useState<string | null>(null);
-  const [emailError, setEmailError] = useState<string | null>(null); 
+  const [emailError, setEmailError] = useState<string | null>(null);
   const SERVER = "https://lista-backend-n3la.onrender.com"
 
 
@@ -41,17 +43,17 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   const handleRegister = async () => {
     setError(null);
     setEmailError(null);
-  
+
     if (!allFieldsFilled) {
       setError('All fields must be filled in to complete the registration.');
       return;
     }
-  
+
     if (!isValidEmail(email)) {
       setEmailError('The email is invalid. Please enter a valid email address.');
       return;
     }
-  
+
     if (username && firstName && lastName && email && password) {
       try {
         const response = await axios.post(`${SERVER}/register/`, {
@@ -61,30 +63,30 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
           email,
           password,
         });
-  
+
         if (response.status === 201) {
           const accessToken = response.data.access;
-  
+
           const decodedToken: JwtPayload = jwtDecode(accessToken);
-  
+
           const userId = decodedToken.user_id;
-  
+
           if (userId === undefined) {
             throw new Error("User ID is undefined");
           }
-  
+
           await AsyncStorage.setItem('token', accessToken);
           await AsyncStorage.setItem('userId', userId.toString());
           await AsyncStorage.setItem('userName', username);
-  
+
           Alert.alert('Registration Successful', 'You can now log in.');
           Toast.show({
             type: 'success',
             text1: 'The user has been saved successfully!',
           });
-  
+
           setIsLoggedIn(true);
-  
+
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
@@ -94,14 +96,14 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
         }
       } catch (error) {
         console.log('Error caught:', error);
-  
+
         if (axios.isAxiosError(error)) {
           console.log('Error caught:', error);
           console.log('Response data:', error.response?.data);
-  
+
           if (error.response) {
             if (error.response.status === 400) {
-              setError(error.response.data.error); 
+              setError(error.response.data.error);
             } else {
               setError('Error 500 - Something went wrong. Please try again.');
             }
@@ -118,6 +120,12 @@ const Register: React.FC<{ setIsLoggedIn: Dispatch<SetStateAction<boolean | null
   return (
 
     <ScrollView contentContainerStyle={styles.container}>
+
+      <View style={styles.logoContainer}>
+        <Image source={require('../assets/images/lista.png')} style={styles.logo} />
+      </View>
+
+
       <Text style={styles.title}>Register</Text>
       <View style={styles.inputContainer}>
         <Ionicons
@@ -265,6 +273,15 @@ const styles = StyleSheet.create({
     left: 10,
     top: '50%',
     transform: [{ translateY: -16 }],
+  },
+  logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center', 
+    marginBottom: 20,
+  },
+  logo: {
+    width: width * 0.3,        
+    height: width * 0.3,       
   },
 
 });
