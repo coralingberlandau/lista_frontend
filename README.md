@@ -20,7 +20,7 @@ It combines real-time updates, customization options, and a user-friendly experi
 
 
 ### 🌐 **Frontend URL - Netlify **:  
-✨ [Access the frontend here!](https://lista-project.netlify.app/Login) ✨
+✨ [Access the frontend here!](https://lista-project.netlify.app/Welcome) ✨
 
 
 ---
